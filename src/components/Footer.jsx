@@ -10,15 +10,16 @@ import { fireFestiveConfetti } from '../utils/confetti';
 
 export const Footer = ({ setActiveTab }) => {
   return (
-    <footer className="relative mt-20 border-t border-white/10 bg-slate-950/80 backdrop-blur-xl text-slate-400 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="relative mt-8 sm:mt-16 border-t border-white/10 glass-nav text-slate-400 text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        {/* DESKTOP RICH 4-COLUMN FOOTER */}
+        <div className="hidden md:grid md:grid-cols-4 gap-8 mb-8">
           
           {/* Brand & Purpose */}
-          <div className="space-y-3 md:col-span-1">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 p-0.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5">
                 <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
                   <GraduationCap className="w-4 h-4 text-amber-400" />
                 </div>
@@ -52,7 +53,7 @@ export const Footer = ({ setActiveTab }) => {
               </li>
               <li>
                 <button onClick={() => { setActiveTab('register'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors flex items-center gap-1">
-                  <span>Contribute Your Part (₹50)</span>
+                  <span>Contribute (₹50)</span>
                 </button>
               </li>
               <li>
@@ -67,7 +68,7 @@ export const Footer = ({ setActiveTab }) => {
               </li>
               <li>
                 <button onClick={() => { setActiveTab('admin'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
-                  Admin Portal (PIN: 2026)
+                  Admin Portal
                 </button>
               </li>
             </ul>
@@ -75,9 +76,9 @@ export const Footer = ({ setActiveTab }) => {
 
           {/* Contribution */}
           <div className="space-y-2">
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Celebration Contribution</h4>
+            <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Contribution</h4>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Mandatory ₹50 contribution for all CSE 2nd, 3rd & 4th Year students across Sections A, B, C, and D for Teachers' Day 2026.
+              Official ₹50 contribution for all CSE 2nd, 3rd & 4th Year students across Sections A, B, C, and D for Teachers' Day 2026.
             </p>
             <div className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -87,11 +88,11 @@ export const Footer = ({ setActiveTab }) => {
 
           {/* Coordination Contacts */}
           <div className="space-y-2">
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Student Committee</h4>
+            <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Committee</h4>
             <div className="space-y-1.5 text-slate-300">
               <div className="flex items-center gap-2">
                 <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                <span>Teachers' Day Celebration • September 5, 2026</span>
+                <span>Teachers' Day • September 5, 2026</span>
               </div>
               <div className="flex items-center gap-2">
                 <Code className="w-3.5 h-3.5 text-purple-400" />
@@ -105,7 +106,28 @@ export const Footer = ({ setActiveTab }) => {
 
         </div>
 
-        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
+        {/* MOBILE COMPACT SLIM FOOTER (Clean & Minimal) */}
+        <div className="md:hidden flex flex-col items-center justify-center text-center space-y-2 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5">
+              <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
+                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+            </div>
+            <span className="text-sm font-black text-white font-display">
+              GURU<span className="gradient-text-festive">UTSAV</span> 2026
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-400">
+            GMRIT • CSE Department (2nd, 3rd & 4th Years)
+          </p>
+          <div className="text-[10px] text-slate-500 pt-1 border-t border-white/5 w-full">
+            © 2026 GMRIT CSE • Built with gratitude for our Teachers
+          </div>
+        </div>
+
+        {/* DESKTOP BOTTOM COPYRIGHT */}
+        <div className="hidden md:flex border-t border-white/10 pt-6 flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
           <div>
             © 2026 GMR Institute of Technology • Computer Science & Engineering Department.
           </div>
