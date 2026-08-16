@@ -252,24 +252,25 @@ app.get('/api/pay/config', (req, res) => {
   });
 });
 
-// POST /api/pay/razorpay-order - Create Razorpay Order (Enforces fixed ₹50 and Single-Payment)
+// POST /api/pay/razorpay-order - Create Razorpay Order (Minimum ₹50, allows higher custom contribution)
 app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
   try {
-    const { rollNumber, name } = req.body;
+    const { rollNumber, name, amount } = req.body;
     const sanitizedRoll = sanitizeString(rollNumber, 30).toUpperCase() || 'CSE';
     const sanitizedName = sanitizeString(name, 80) || 'Student';
 
-    // Strict Single-Payment Enforcement: Block if already paid
+    // Strict Single-Registration Enforcement: Check by JNTU Roll Number
     const existing = db.getSubmissionByRoll(sanitizedRoll);
-    if (existing && existing.payment?.status === 'verified') {
+    if (existing) {
       return res.status(400).json({
         success: false,
-        error: `Roll Number ${sanitizedRoll} has already registered and completed payment for Teachers' Day 2026.`
+        error: `Student with JNTU Roll Number ${sanitizedRoll} has already registered (${existing.name}, Ticket: ${existing.ticketNumber}). Duplicate registration is not permitted.`
       });
     }
 
-    // SERVER-ENFORCED AMOUNT: Always ₹50.00 (5000 paise)
-    const amountInPaise = 5000;
+    // Dynamic Contribution Amount: Minimum ₹50.00
+    const parsedAmount = Math.max(50, Math.floor(Number(amount) || 50));
+    const amountInPaise = parsedAmount * 100;
     const cleanRoll = sanitizedRoll.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
     const receiptId = `rc_${cleanRoll}_${Date.now()}`.slice(0, 38);
 
@@ -282,7 +283,8 @@ app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
           notes: {
             department: 'CSE',
             studentName: sanitizedName,
-            rollNumber: sanitizedRoll
+            rollNumber: sanitizedRoll,
+            contributionAmount: parsedAmount
           }
         });
         return res.json({
@@ -358,7 +360,9 @@ app.post('/api/submit', submitLimiter, (req, res) => {
       anecdote,
       paymentMethod,
       transactionId,
-      paymentStatus
+      paymentStatus,
+      paymentAmount,
+      amount
     } = req.body;
 
     const sanitizedName = sanitizeString(name, 80);
@@ -375,11 +379,22 @@ app.post('/api/submit', submitLimiter, (req, res) => {
     const sanitizedMethod = sanitizeString(paymentMethod, 30) || 'RAZORPAY';
     const sanitizedTxn = sanitizeString(transactionId, 80) || `TXN_${Date.now()}`;
     const sanitizedStatus = paymentStatus === 'verified' ? 'verified' : 'pending';
+    const finalAmount = Math.max(50, Math.floor(Number(paymentAmount) || Number(amount) || 50));
 
     if (!sanitizedName || !sanitizedRoll || !sanitizedYear || !sanitizedSection) {
       return res.status(400).json({
         success: false,
-        error: 'Please fill in Name, Roll Number, Year (2nd, 3rd, 4th), and Section (A, B, C, D).'
+        error: 'Please fill in Name, JNTU Roll Number, Year (2nd, 3rd, 4th), and Section (A, B, C, D).'
+      });
+    }
+
+    // Strict JNTU Roll Number Duplicate Check
+    const existing = db.getSubmissionByRoll(sanitizedRoll);
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        error: `Student with JNTU Roll Number ${sanitizedRoll} has already registered (${existing.name}). Duplicate registration is not permitted.`,
+        isDuplicate: true
       });
     }
 
@@ -398,25 +413,21 @@ app.post('/api/submit', submitLimiter, (req, res) => {
       anecdote: sanitizedAnecdote,
       paymentMethod: sanitizedMethod,
       transactionId: sanitizedTxn,
-      paymentStatus: sanitizedStatus
+      paymentStatus: sanitizedStatus,
+      amount: finalAmount
     });
 
-    if (!result.success && result.isDuplicate) {
-      return res.status(400).json({
-        success: false,
-        error: result.error,
-        isDuplicate: true,
-        data: result.submission
-      });
+    if (!result || result.success === false) {
+      return res.status(400).json(result || { success: false, error: 'Registration failed.' });
     }
 
     res.status(201).json({
       success: true,
-      message: 'Registration & ₹50 contribution successfully recorded!',
+      message: `Registration & ₹${finalAmount} contribution successfully recorded!`,
       data: result.submission
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: 'Registration error.' });
+    res.status(500).json({ success: false, error: 'Could not record registration.' });
   }
 });
 

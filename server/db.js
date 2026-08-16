@@ -300,16 +300,18 @@ class Database {
   getSubmissionByRoll(rollNumber) {
     if (!rollNumber) return null;
     const roll = (rollNumber || '').trim().toUpperCase();
-    return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll);
+    return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll) || null;
   }
 
   addSubmission(payload) {
     const roll = (payload.rollNumber || '').trim().toUpperCase();
-    const existing = this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll && s.payment?.status === 'verified');
+    
+    // Strict JNTU Roll Number Uniqueness Check
+    const existing = this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll);
     if (existing) {
       return { 
         success: false, 
-        error: `Student with Roll Number ${roll} has already registered and completed payment for Teachers' Day 2026.`, 
+        error: `Student with JNTU Roll Number ${roll} has already registered (${existing.name}, Ticket: ${existing.ticketNumber}). Duplicate registration is not permitted.`, 
         isDuplicate: true,
         submission: existing 
       };
@@ -343,11 +345,13 @@ class Database {
       });
     }
 
+    const contributionAmount = Math.max(50, Math.floor(Number(payload.amount) || Number(payload.paymentAmount) || 50));
+
     const newSubmission = {
       id: submissionId,
       ticketNumber,
       name: payload.name,
-      rollNumber: payload.rollNumber,
+      rollNumber: roll,
       department: "Computer Science & Engineering (CSE)",
       year: payload.year,
       section: payload.section,
@@ -359,7 +363,7 @@ class Database {
       favoriteTeacher: payload.favoriteTeacher || 'CSE Faculty',
       anecdoteId: anecdoteEntry ? anecdoteEntry.id : null,
       payment: {
-        amount: 50,
+        amount: contributionAmount,
         currency: 'INR',
         status: payload.paymentStatus || 'verified',
         transactionId: payload.transactionId || `TXN_CSE_${Date.now()}`,

@@ -35,11 +35,17 @@ const loadRazorpayScript = () => {
 export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
+  const [contributionAmount, setContributionAmount] = useState(50);
+  const [isCustomInput, setIsCustomInput] = useState(false);
+
+  const presetAmounts = [50, 100, 150, 200, 500];
 
   // RAZORPAY CHECKOUT TRIGGER
   const handleLaunchRazorpay = async () => {
     setIsProcessing(true);
     setPaymentError(null);
+
+    const effectiveAmount = Math.max(50, Math.floor(Number(contributionAmount) || 50));
 
     try {
       // 1. Ensure Razorpay SDK is loaded
@@ -50,7 +56,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
 
       // 2. Create order on server
       const orderRes = await api.createRazorpayOrder({
-        amount: 50,
+        amount: effectiveAmount,
         rollNumber: studentData?.rollNumber || 'CSE',
         name: studentData?.name || 'Student'
       });
@@ -64,10 +70,10 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
       // 3. Prepare Razorpay Options
       const options = {
         key: keyId || 'rzp_live_TQ7vgo4Ec0Z9hX',
-        amount: amountInPaise || 5000,
+        amount: amountInPaise || (effectiveAmount * 100),
         currency: 'INR',
         name: "GMRIT CSE Teachers' Day 2026",
-        description: `₹50 Celebration Contribution (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
+        description: `₹${effectiveAmount} Celebration Contribution (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
         image: "https://gmrit.edu.in/images/logo.jpg",
         order_id: (isRealOrder && orderId && orderId.startsWith('order_')) ? orderId : undefined,
         prefill: {
@@ -79,7 +85,8 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
           rollNumber: studentData?.rollNumber || '',
           department: 'CSE',
           section: studentData?.section || '',
-          year: studentData?.year || ''
+          year: studentData?.year || '',
+          contributionAmount: effectiveAmount
         },
         theme: {
           color: "#9333ea"
@@ -97,6 +104,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             if (verifyRes.success) {
               onPaymentSuccess({
                 status: 'verified',
+                amount: effectiveAmount,
                 paymentMethod: 'RAZORPAY_LIVE',
                 transactionId: response.razorpay_payment_id || `RZP_${Date.now()}`
               });
@@ -107,6 +115,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             setPaymentError('Payment recorded: ' + vErr.message);
             onPaymentSuccess({
               status: 'verified',
+              amount: effectiveAmount,
               paymentMethod: 'RAZORPAY_LIVE',
               transactionId: response.razorpay_payment_id || `RZP_${Date.now()}`
             });
@@ -254,18 +263,65 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             </div>
           </div>
 
-          {/* Amount Due Box */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 to-slate-900 border border-purple-500/30">
-            <div>
-              <span className="text-[11px] uppercase tracking-wider font-bold text-purple-300 block">
-                Celebration Contribution
-              </span>
-              <span className="text-xs text-slate-400">
-                Mandatory for CSE 2nd, 3rd & 4th Year Celebration
-              </span>
+          {/* Contribution Amount Selector (Min ₹50 with optional custom higher contribution) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] uppercase tracking-wider font-bold text-purple-300 block flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Celebration Contribution
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Minimum: ₹50 • Feel free to contribute more for our teachers! 🎉
+                </span>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="font-black text-amber-400 text-2xl font-display">₹{contributionAmount}</span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="font-black text-amber-400 text-2xl">₹50.00</span>
+
+            {/* Quick Presets */}
+            <div className="grid grid-cols-5 gap-1.5">
+              {presetAmounts.map((amt) => {
+                const isSelected = contributionAmount === amt && !isCustomInput;
+                return (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => {
+                      setContributionAmount(amt);
+                      setIsCustomInput(false);
+                    }}
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30 scale-[1.02] border border-purple-400'
+                        : 'bg-slate-950/80 hover:bg-white/10 text-slate-300 border border-white/10'
+                    }`}
+                  >
+                    ₹{amt}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom Amount Input */}
+            <div className="pt-1 flex items-center gap-2">
+              <span className="text-[11px] text-slate-400 shrink-0 font-medium">Custom Amount:</span>
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">₹</span>
+                <input
+                  type="number"
+                  min="50"
+                  step="10"
+                  value={contributionAmount}
+                  onChange={(e) => {
+                    const raw = Number(e.target.value);
+                    setContributionAmount(raw < 50 ? 50 : raw);
+                    setIsCustomInput(true);
+                  }}
+                  className="w-full pl-7 pr-3 py-1.5 rounded-xl bg-slate-950 border border-white/20 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                  placeholder="Enter amount (Min ₹50)"
+                />
+              </div>
             </div>
           </div>
 
@@ -284,7 +340,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
               ) : (
                 <>
                   <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>Pay ₹50 (Google Pay / PhonePe / Cards / UPI)</span>
+                  <span>Pay ₹{contributionAmount} (Google Pay / PhonePe / Cards / UPI)</span>
                   <ArrowRight className="w-5 h-5 ml-1" />
                 </>
               )}
@@ -292,7 +348,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
               <Lock className="w-3.5 h-3.5 text-emerald-400" />
-              <span>100% Secure Instant Payment</span>
+              <span>100% Secure Instant Razorpay Payment</span>
             </div>
           </div>
 

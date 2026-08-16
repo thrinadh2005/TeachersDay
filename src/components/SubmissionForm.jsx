@@ -104,7 +104,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
   const handleProceedToVoting = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.rollNumber.trim()) {
-      setError('Please fill in your Full Name and CSE Roll Number.');
+      setError('Please fill in your Full Name and JNTU Roll Number.');
       return;
     }
 
@@ -114,7 +114,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
     try {
       const checkRes = await api.checkRegistration(formData.rollNumber.trim());
       if (checkRes.alreadyRegistered) {
-        setError(`Student with Roll Number ${formData.rollNumber.trim().toUpperCase()} has already registered and completed payment for Teachers' Day 2026.`);
+        setError(`Student with JNTU Roll Number "${formData.rollNumber.trim().toUpperCase()}" has already registered for Teachers' Day 2026. Duplication is not permitted.`);
         setLoading(false);
         return;
       }
@@ -165,7 +165,9 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
         anecdote: formData.anecdote,
         paymentStatus: paymentDetails.status || 'verified',
         paymentMethod: paymentDetails.paymentMethod || 'RAZORPAY',
-        transactionId: paymentDetails.transactionId || `TXN_${Date.now()}`
+        transactionId: paymentDetails.transactionId || `TXN_${Date.now()}`,
+        paymentAmount: paymentDetails.amount || 50,
+        amount: paymentDetails.amount || 50
       };
 
       const response = await api.submitStudentIdea(payload);
@@ -307,13 +309,13 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                    CSE Roll Number / Student ID <span className="text-rose-400">*</span>
+                    JNTU Roll Number (Unique ID) <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
                     name="rollNumber"
                     required
-                    placeholder="e.g. 22BCSE108"
+                    placeholder="e.g. 24341A0502"
                     value={formData.rollNumber}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500 transition-colors uppercase font-mono"
@@ -724,14 +726,14 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               Thank You, {completedRecord.name}!
             </h3>
             <p className="text-slate-300 text-sm max-w-md mx-auto mt-2">
-              Your registration and <span className="text-amber-400 font-bold">₹50 contribution</span> for Teachers' Day 2026 have been successfully recorded.
+              Your registration and <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || 50} contribution</span> for Teachers' Day 2026 have been successfully recorded.
             </p>
           </div>
 
           {/* Summary Details Card */}
           <div className="p-5 rounded-2xl bg-slate-950/80 border border-white/10 text-left space-y-3 text-xs">
             <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Student Roll Number</span>
+              <span className="text-slate-400">JNTU Roll Number</span>
               <span className="text-white font-mono font-bold">{completedRecord.rollNumber}</span>
             </div>
 
@@ -742,7 +744,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
 
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-slate-400">Contribution Amount</span>
-              <span className="text-amber-400 font-black text-sm">₹50.00 (Verified)</span>
+              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || 50}.00 (Verified)</span>
             </div>
 
             {completedRecord.interestedInSpeaking === 'Yes' && (
