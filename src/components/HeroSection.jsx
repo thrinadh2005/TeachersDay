@@ -50,7 +50,7 @@ export const HeroSection = ({ setActiveTab }) => {
             Honouring Our <span className="gradient-text-gold">CSE Teachers</span> & Mentors
           </h1>
           <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed px-2">
-            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd, 3rd & 4th Year Students (Sections A, B, C, D)</span>: Vote for your favorite faculty, share classroom memories, and get your <span className="text-amber-400 font-bold">₹50 Event Delegate Pass</span>!
+            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd, 3rd & 4th Year Students (Sections A, B, C, D)</span>: Vote for your favorite faculty, share classroom memories, and complete your <span className="text-amber-400 font-bold">₹50 celebration contribution</span>!
           </p>
         </div>
 
@@ -66,10 +66,10 @@ export const HeroSection = ({ setActiveTab }) => {
             </div>
             <div className="text-left">
               <div className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900/80">
-                Official Event Registration
+                Click to Contribute
               </div>
               <div className="text-sm sm:text-lg font-black tracking-tight leading-tight">
-                GET YOUR EVENT PASS (₹50)
+                CONTRIBUTE YOUR PART (₹50)
               </div>
             </div>
             <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 group-hover:translate-x-1.5 transition-transform" />
@@ -148,14 +148,14 @@ export const HeroSection = ({ setActiveTab }) => {
                 3
               </span>
               <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
-                ₹50 Pass
+                ₹50 Pay
               </span>
             </div>
             <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-              Step 3: ₹50 Event Pass & Entry
+              Step 3: ₹50 Contribution & Done
             </h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Complete official ₹50 delegate pass registration securely via Razorpay (GPay, PhonePe, Cards, UPI).
+              Complete your ₹50 contribution securely via Instant UPI (GPay, PhonePe, Paytm, QR Code).
             </p>
           </div>
 

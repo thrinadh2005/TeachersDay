@@ -535,11 +535,8 @@
   "revealVotingResults": false,
   "adminPin": "2026",
   "paymentConfig": {
-    "upiId": "cseteachersday2026@okaxis",
-    "payeeName": "GMRIT CSE Teachers Day 2026",
-    "razorpayButtonId": "pl_test123",
-    "razorpayPageUrl": "https://pages.razorpay.com/test",
-    "enableUpi": true,
-    "enableRazorpayButton": true
+    "upiId": "9663355000@ybl",
+    "payeeName": "CSE Teachers Day 2026",
+    "enableUpi": true
   }
 }

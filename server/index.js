@@ -267,15 +267,11 @@ app.get('/api/pay/config', (req, res) => {
   const pConfig = db.getPaymentConfig();
   res.json({
     success: true,
-    keyId: RAZORPAY_KEY_ID,
     amount: 50,
     currency: 'INR',
-    upiId: pConfig.upiId || 'cseteachersday2026@upi',
+    upiId: pConfig.upiId || '9663355000@ybl',
     payeeName: pConfig.payeeName || 'CSE Teachers Day 2026',
-    razorpayButtonId: pConfig.razorpayButtonId || '',
-    razorpayPageUrl: pConfig.razorpayPageUrl || '',
-    enableUpi: pConfig.enableUpi !== false,
-    enableRazorpayButton: pConfig.enableRazorpayButton !== false
+    enableUpi: true
   });
 });
 
@@ -450,7 +446,7 @@ app.post('/api/submit', submitLimiter, (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Registration & ₹${finalAmount} Event Delegate Pass successfully recorded!`,
+      message: `Registration & ₹${finalAmount} celebration contribution successfully recorded!`,
       data: result.submission
     });
   } catch (err) {
@@ -698,22 +694,19 @@ app.get('/api/admin/payment-config', checkAdminAuth, (req, res) => {
   }
 });
 
-// POST /api/admin/payment-config - Update UPI & Razorpay Button Settings
+// POST /api/admin/payment-config - Update UPI Settings
 app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
   try {
-    const { upiId, payeeName, razorpayButtonId, razorpayPageUrl, enableUpi, enableRazorpayButton } = req.body;
+    const { upiId, payeeName } = req.body;
     const updated = db.updatePaymentConfig({
-      upiId: sanitizeString(upiId, 100),
-      payeeName: sanitizeString(payeeName, 100),
-      razorpayButtonId: sanitizeString(razorpayButtonId, 100),
-      razorpayPageUrl: sanitizeString(razorpayPageUrl, 300),
-      enableUpi: enableUpi !== false,
-      enableRazorpayButton: enableRazorpayButton !== false
+      upiId: sanitizeString(upiId, 100) || '9663355000@ybl',
+      payeeName: sanitizeString(payeeName, 100) || 'CSE Teachers Day 2026',
+      enableUpi: true
     });
     res.json({
       success: true,
       data: updated,
-      message: 'Payment and UPI settings updated successfully!'
+      message: 'UPI settings updated successfully!'
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

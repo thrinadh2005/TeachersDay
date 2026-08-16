@@ -18,12 +18,9 @@ class Database {
       revealVotingResults: false,
       adminPin: process.env.ADMIN_PIN || '',
       paymentConfig: {
-        upiId: process.env.UPI_ID || 'cseteachersday2026@upi',
+        upiId: process.env.UPI_ID || '9663355000@ybl',
         payeeName: process.env.PAYEE_NAME || 'CSE Teachers Day 2026',
-        razorpayButtonId: process.env.RAZORPAY_BUTTON_ID || '',
-        razorpayPageUrl: process.env.RAZORPAY_PAGE_URL || '',
-        enableUpi: true,
-        enableRazorpayButton: true
+        enableUpi: true
       }
     };
     this.mongoConnected = false;
@@ -616,12 +613,9 @@ class Database {
 
   getPaymentConfig() {
     return this.data.paymentConfig || {
-      upiId: 'cseteachersday2026@upi',
+      upiId: '9663355000@ybl',
       payeeName: 'CSE Teachers Day 2026',
-      razorpayButtonId: '',
-      razorpayPageUrl: '',
-      enableUpi: true,
-      enableRazorpayButton: true
+      enableUpi: true
     };
   }
 

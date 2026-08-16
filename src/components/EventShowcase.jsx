@@ -36,7 +36,7 @@ export const EventShowcase = ({ showcaseData, setActiveTab }) => {
     {
       time: '12:30 PM - 02:00 PM',
       title: 'Grand Faculty High-Tea & Refreshments',
-      desc: 'Celebratory refreshments, photo sessions, and distribution of commemorative gifts included with student delegate passes.'
+      desc: 'Celebratory refreshments, photo sessions, and distribution of commemorative gifts funded by student contributions.'
     }
   ];
 
@@ -141,15 +141,15 @@ export const EventShowcase = ({ showcaseData, setActiveTab }) => {
               </div>
               <div>
                 <h4 className="text-base font-bold text-white">Get Your Official Entry Pass</h4>
-                <p className="text-xs text-slate-400">₹50 official delegate pass covers student entry badge, mementos & refreshments.</p>
+                <p className="text-xs text-slate-400">₹50 mandatory contribution covers student badge, mementos & refreshments.</p>
               </div>
             </div>
 
             <button
-              onClick={() => { setActiveTab('submit'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              onClick={() => { setActiveTab('register'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl hover:scale-105 transition-all"
             >
-              <span>Register Now (₹50 Pass)</span>
+              <span>Contribute Now (₹50)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

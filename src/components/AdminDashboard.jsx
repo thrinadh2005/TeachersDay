@@ -595,14 +595,14 @@ export const AdminDashboard = () => {
 
         <div className="glass-card p-5 rounded-2xl border border-white/10">
           <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">Event Passes (₹)</span>
+            <span className="text-xs font-bold uppercase">Funds Raised (₹)</span>
             <Coins className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-display">
             ₹{overview?.totalFundsCollected || 0}
           </div>
           <span className="text-[11px] text-emerald-300">
-            {overview?.verifiedPayments || 0} Verified Event Passes
+            {overview?.verifiedPayments || 0} Verified Contributions
           </span>
         </div>
 
@@ -684,8 +684,8 @@ export const AdminDashboard = () => {
               : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
         >
-          <CreditCard className="w-4 h-4" />
-          <span>UPI & Payment Gateway</span>
+          <Smartphone className="w-4 h-4" />
+          <span>UPI Settings</span>
         </button>
       </div>
 
@@ -1492,192 +1492,113 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* TAB: UPI & PAYMENT GATEWAY SETTINGS */}
+      {/* TAB: UPI SETTINGS */}
       {activeTab === 'paymentSettings' && (
         <div className="space-y-6 animate-fadeIn">
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-emerald-400" />
-                <span>UPI & Payment Gateway Configuration</span>
+                <Smartphone className="w-5 h-5 text-emerald-400" />
+                <span>UPI Configuration & Live QR Verification</span>
               </h3>
               <p className="text-xs text-slate-400">
-                Configure your recipient UPI ID for zero-fee instant payments, or connect a Razorpay Payment Button / Hosted Page.
+                Direct instant payments with 0% gateway fees. Funds are credited directly to your bank account.
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleSavePaymentSettings} className="space-y-6">
+          <form onSubmit={handleSavePaymentSettings} className="space-y-6 max-w-3xl">
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* SECTION 1: DIRECT DYNAMIC UPI CONFIGURATION */}
-              <div className="glass-card rounded-3xl p-6 border border-emerald-500/30 space-y-5 bg-gradient-to-b from-slate-900 to-slate-950">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
-                      <Smartphone className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm">Direct UPI Settings (GPay / PhonePe)</h4>
-                      <span className="text-[10px] text-emerald-400 font-semibold">0% Gateway Fees • Instant Bank Deposit</span>
-                    </div>
+            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-emerald-500/30 space-y-6 bg-gradient-to-b from-slate-900 to-slate-950">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                    <Smartphone className="w-5 h-5" />
                   </div>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={paymentSettings.enableUpi !== false}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, enableUpi: e.target.checked })}
-                      className="rounded bg-slate-900 border-white/20 text-emerald-500 focus:ring-emerald-400"
-                    />
-                    <span className="text-xs text-slate-300 font-bold">Enabled</span>
-                  </label>
+                  <div>
+                    <h4 className="font-bold text-white text-base">Recipient UPI Details</h4>
+                    <span className="text-xs text-emerald-400 font-semibold">Google Pay • PhonePe • Paytm • BHIM</span>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-200">
-                      Receiver UPI ID <span className="text-rose-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. 9876543210@ybl or yourname@okaxis"
-                      value={paymentSettings.upiId || ''}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, upiId: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
-                    />
-                    <p className="text-[10px] text-slate-400">
-                      Money sent by students will be deposited directly to this UPI ID.
+                <div className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
+                  Active (0% Fees)
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-200 block">
+                    Receiver UPI ID <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 9663355000@ybl"
+                    value={paymentSettings.upiId || ''}
+                    onChange={(e) => setPaymentSettings({ ...paymentSettings, upiId: e.target.value })}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-white/15 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    All student contributions will be sent directly to this UPI address.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-200 block">
+                    Payee Display Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. CSE Teachers Day 2026"
+                    value={paymentSettings.payeeName || ''}
+                    onChange={(e) => setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-white/15 text-white text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+
+                {/* Live Dynamic QR Code Preview */}
+                <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 flex flex-col sm:flex-row items-center gap-5">
+                  <div className="p-2.5 bg-white rounded-2xl shadow-xl shrink-0">
+                    {adminQrPreview ? (
+                      <img src={adminQrPreview} alt="Live UPI QR" className="w-32 h-32 rounded-lg object-contain" />
+                    ) : (
+                      <div className="w-32 h-32 flex items-center justify-center text-slate-800 text-xs">Loading...</div>
+                    )}
+                  </div>
+                  <div className="space-y-2 text-center sm:text-left">
+                    <div className="text-sm font-bold text-white">Live QR Code Test Preview</div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Scan this QR with your GPay, PhonePe, or Paytm app to verify that payments route correctly to your bank account before student registrations begin.
                     </p>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-200">
-                      Payee Display Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. CSE Teachers Day 2026"
-                      value={paymentSettings.payeeName || ''}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white text-xs focus:outline-none focus:border-emerald-400"
-                    />
-                  </div>
-
-                  {/* Live Dynamic QR Code Preview */}
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 flex flex-col sm:flex-row items-center gap-4">
-                    <div className="p-2 bg-white rounded-xl shadow-lg shrink-0">
-                      {adminQrPreview ? (
-                        <img src={adminQrPreview} alt="Live UPI QR" className="w-28 h-28 rounded object-contain" />
-                      ) : (
-                        <div className="w-28 h-28 flex items-center justify-center text-slate-800 text-xs">Loading...</div>
-                      )}
-                    </div>
-                    <div className="space-y-1 text-center sm:text-left">
-                      <div className="text-xs font-bold text-white">Live QR Code Test Preview</div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Scan this QR with your GPay, PhonePe, or Paytm app to verify that payments route correctly to your bank account.
-                      </p>
-                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 inline-block mt-1">
-                        upi://pay?pa={paymentSettings.upiId || '...'}
-                      </span>
-                    </div>
+                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block">
+                      upi://pay?pa={paymentSettings.upiId || '9663355000@ybl'}&am=50
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 2: RAZORPAY PAYMENT BUTTON & PAGE CONFIGURATION */}
-              <div className="glass-card rounded-3xl p-6 border border-purple-500/30 space-y-5 bg-gradient-to-b from-slate-900 to-slate-950">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center">
-                      <CreditCard className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm">Razorpay Button / Hosted Page</h4>
-                      <span className="text-[10px] text-purple-300 font-semibold">Hosted Payment Link / Embed Code</span>
-                    </div>
-                  </div>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={paymentSettings.enableRazorpayButton !== false}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, enableRazorpayButton: e.target.checked })}
-                      className="rounded bg-slate-900 border-white/20 text-purple-500 focus:ring-purple-400"
-                    />
-                    <span className="text-xs text-slate-300 font-bold">Enabled</span>
-                  </label>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-200">
-                      Razorpay Payment Button ID (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. pl_P123456789abc"
-                      value={paymentSettings.razorpayButtonId || ''}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, razorpayButtonId: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
-                    />
-                    <p className="text-[10px] text-slate-400">
-                      Create a Payment Button in your Razorpay Dashboard $\rightarrow$ Payment Buttons and paste the Button ID here.
-                    </p>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-200">
-                      Razorpay Hosted Payment Page URL (Optional)
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="e.g. https://pages.razorpay.com/cse-teachers-day-2026"
-                      value={paymentSettings.razorpayPageUrl || ''}
-                      onChange={(e) => setPaymentSettings({ ...paymentSettings, razorpayPageUrl: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
-                    />
-                    <p className="text-[10px] text-slate-400">
-                      Create a Payment Page on Razorpay and paste the link here.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-slate-300 space-y-1.5">
-                    <div className="font-bold text-purple-200 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>How Hosted Pages Avoid Website Rejections:</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Because Razorpay hosts Payment Pages directly on <span className="text-purple-300 font-mono">pages.razorpay.com</span>, their automated reviewer does not audit your custom website domain.
-                    </p>
-                  </div>
-                </div>
+              <div className="flex items-center justify-end pt-3 border-t border-white/10">
+                <button
+                  type="submit"
+                  disabled={isSavingPaymentSettings}
+                  className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center gap-2 transition-all"
+                >
+                  {isSavingPaymentSettings ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>Saving UPI ID...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Save UPI Settings</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
-              <button
-                type="submit"
-                disabled={isSavingPaymentSettings}
-                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center gap-2 transition-all"
-              >
-                {isSavingPaymentSettings ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                    <span>Saving Settings...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Save Payment & UPI Settings</span>
-                  </>
-                )}
-              </button>
             </div>
 
           </form>
