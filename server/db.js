@@ -19,7 +19,7 @@ class Database {
       adminPin: process.env.ADMIN_PIN || '',
       paymentConfig: {
         upiId: process.env.UPI_ID || '9663355000@ybl',
-        payeeName: process.env.PAYEE_NAME || 'CSE Teachers Day 2026',
+        payeeName: process.env.PAYEE_NAME || 'ADABALA VENKATA THRINADH',
         enableUpi: true
       }
     };

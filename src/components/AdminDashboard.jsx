@@ -1715,7 +1715,7 @@ export const AdminDashboard = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-white text-base">Recipient UPI Details</h4>
-                    <span className="text-xs text-emerald-400 font-semibold">Google Pay • PhonePe • Paytm • BHIM</span>
+                    <span className="text-xs text-emerald-400 font-semibold">Universal UPI Link & Dynamic QR</span>
                   </div>
                 </div>
 
@@ -1748,7 +1748,7 @@ export const AdminDashboard = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. CSE Teachers Day 2026"
+                    placeholder="e.g. ADABALA VENKATA THRINADH"
                     value={paymentSettings.payeeName || ''}
                     onChange={(e) => setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })}
                     className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-white/15 text-white text-sm focus:outline-none focus:border-emerald-400"
@@ -1767,7 +1767,7 @@ export const AdminDashboard = () => {
                   <div className="space-y-2 text-center sm:text-left">
                     <div className="text-sm font-bold text-white">Live QR Code Test Preview</div>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Scan this QR with your GPay, PhonePe, or Paytm app to verify that payments route correctly to your bank account before student registrations begin.
+                      Scan this QR code with any UPI app to verify that payments route correctly to your bank account before student registrations begin.
                     </p>
                     <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block">
                       upi://pay?pa={paymentSettings.upiId || '9663355000@ybl'}&am=50

@@ -27,10 +27,10 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   
-  // Payment Config from Server (Defaults to 9663355000@ybl)
+  // Payment Config from Server (Defaults to ADABALA VENKATA THRINADH / 9663355000@ybl)
   const [paymentConfig, setPaymentConfig] = useState({
     upiId: '9663355000@ybl',
-    payeeName: 'CSE Teachers Day 2026',
+    payeeName: 'ADABALA VENKATA THRINADH',
     enableUpi: true
   });
 
@@ -45,6 +45,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [showUtrHelp, setShowUtrHelp] = useState(false);
 
   // Determine current effective amount (Minimum ₹50)
@@ -52,6 +53,12 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const effectiveAmount = isCustom
     ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
     : (selectedPreset || 50);
+
+  // Generate UPI URI
+  const upiId = paymentConfig.upiId || '9663355000@ybl';
+  const payeeName = paymentConfig.payeeName || 'ADABALA VENKATA THRINADH';
+  const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
+  const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
   // Load Payment Config from backend
   useEffect(() => {
@@ -70,13 +77,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
   // Generate Dynamic UPI QR Code whenever amount or UPI ID changes
   useEffect(() => {
-    const upiId = paymentConfig.upiId || '9663355000@ybl';
-    const payeeName = paymentConfig.payeeName || 'CSE Teachers Day 2026';
-    const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
-    
-    // Standard UPI URI format: upi://pay?pa=ID&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
-    const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
-
     QRCode.toDataURL(upiUri, {
       width: 240,
       margin: 1.5,
@@ -87,33 +87,25 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     })
       .then(url => setQrCodeUrl(url))
       .catch(err => console.error('Error generating UPI QR code:', err));
-  }, [paymentConfig, effectiveAmount, studentData]);
+  }, [upiUri]);
 
   // Copy UPI ID helper with feedback
   const handleCopyUpiId = () => {
-    const upi = paymentConfig.upiId || '9663355000@ybl';
-    navigator.clipboard.writeText(upi);
+    navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2200);
   };
 
-  // 1-Tap UPI Launchers for Mobile
-  const handleLaunchUpiApp = (appScheme) => {
-    const upiId = paymentConfig.upiId || '9663355000@ybl';
-    const payeeName = paymentConfig.payeeName || 'CSE Teachers Day 2026';
-    const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
-    const baseParams = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
-    
-    let targetUrl = `upi://pay?${baseParams}`;
-    if (appScheme === 'gpay') {
-      targetUrl = `gpay://upi/pay?${baseParams}`;
-    } else if (appScheme === 'phonepe') {
-      targetUrl = `phonepe://pay?${baseParams}`;
-    } else if (appScheme === 'paytm') {
-      targetUrl = `paytmmp://pay?${baseParams}`;
-    }
+  // Copy Direct Payment Link helper with feedback
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(upiUri);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2200);
+  };
 
-    window.location.href = targetUrl;
+  // Direct 1-Tap UPI Link Trigger
+  const handleLaunchPaymentLink = () => {
+    window.location.href = upiUri;
   };
 
   // SUBMIT UPI UTR VERIFICATION
@@ -123,7 +115,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
     const cleanUtr = utrNumber.trim().replace(/\s+/g, '');
     if (!cleanUtr) {
-      setPaymentError('Please enter the 12-digit UPI Reference Number / UTR from your payment screen (GPay, PhonePe, Paytm).');
+      setPaymentError('Please enter the 12-digit UPI Reference Number / UTR from your completed payment receipt.');
       return;
     }
 
@@ -174,7 +166,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Direct to Coordinator Bank Account • GPay, PhonePe, Paytm & BHIM
+                Direct to Coordinator Bank Account • Instant Universal UPI
               </p>
             </div>
           </div>
@@ -301,17 +293,26 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* Dynamic QR Code & 1-Tap Launch Banner */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 text-center space-y-4 shadow-xl neon-pulse-emerald relative overflow-hidden">
+          {/* Dynamic QR Code & Universal 1-Tap Payment Link */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 space-y-4 shadow-xl neon-pulse-emerald relative overflow-hidden">
             
+            {/* Step 1 Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                  Step 1: Make Payment (₹{effectiveAmount})
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-400">Scan QR or Tap Payment Link</span>
+            </div>
+
+            {/* QR Code + Payment Link Details */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               
               {/* Dynamic QR Code with Laser Scanner Animation */}
               <div className="relative p-2.5 bg-white rounded-2xl shadow-2xl border-2 border-emerald-400 shrink-0 overflow-hidden group">
-                
-                {/* Laser Scanner Line */}
                 <div className="laser-scanner-line"></div>
-                
                 {qrCodeUrl ? (
                   <img 
                     src={qrCodeUrl} 
@@ -323,7 +324,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                     <Loader2 className="w-6 h-6 animate-spin text-slate-800" />
                   </div>
                 )}
-
                 {/* Cyber Corner Brackets */}
                 <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-emerald-600 pointer-events-none"></div>
                 <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-emerald-600 pointer-events-none"></div>
@@ -331,118 +331,105 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                 <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-emerald-600 pointer-events-none"></div>
               </div>
 
-              {/* QR Details & Copy Box */}
+              {/* Payment Link Launch Actions */}
               <div className="text-left space-y-3 flex-1 w-full">
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">
-                      Live Dynamic QR Code
-                    </span>
-                  </div>
-                  <h4 className="text-lg sm:text-xl font-black text-white font-display mt-0.5">
-                    Scan & Pay ₹{effectiveAmount}.00
+                  <h4 className="text-base sm:text-lg font-black text-white font-display leading-snug">
+                    Scan QR or Tap Direct Payment Link
                   </h4>
-                  <p className="text-[11px] text-slate-300 leading-tight">
-                    Pre-configured note: <span className="font-mono text-amber-300 font-semibold">CSE_{studentData?.rollNumber || 'TeachersDay'}</span>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Payee: <strong className="text-white">{payeeName}</strong>
+                  </p>
+                  <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                    Note: <span className="font-mono text-amber-300 font-semibold">{note}</span>
                   </p>
                 </div>
 
-                {/* High-Tech Copy UPI ID Box */}
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-emerald-500/30 flex items-center justify-between gap-2 shadow-inner">
-                  <div className="truncate">
-                    <span className="text-[10px] text-slate-400 block leading-none mb-0.5">Official Recipient UPI:</span>
-                    <span className="text-xs sm:text-sm font-mono font-bold text-emerald-300 select-all truncate block">
-                      {paymentConfig.upiId || '9663355000@ybl'}
-                    </span>
-                  </div>
+                {/* Primary 1-Tap Payment Link Action */}
+                <a
+                  href={upiUri}
+                  onClick={handleLaunchPaymentLink}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 group active:scale-95 text-center"
+                >
+                  <Zap className="w-4 h-4 fill-current text-slate-950 group-hover:scale-125 transition-transform" />
+                  <span>Tap to Open Payment App (₹{effectiveAmount})</span>
+                  <ExternalLink className="w-4 h-4 ml-1" />
+                </a>
+
+                {/* Secondary Action: Copy UPI ID & Copy Link Buttons */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
+                      copiedLink 
+                        ? 'bg-teal-500 text-slate-950' 
+                        : 'bg-slate-950 hover:bg-white/10 text-teal-300 border border-teal-500/30'
+                    }`}
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={handleCopyUpiId}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 shadow-md ${
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
                       copiedUpi 
                         ? 'bg-emerald-500 text-slate-950' 
-                        : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-slate-950 hover:bg-white/10 text-emerald-300 border border-emerald-500/30'
                     }`}
                   >
                     {copiedUpi ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedUpi ? 'Copied!' : 'Copy UPI'}</span>
+                    <span>{copiedUpi ? 'UPI ID Copied!' : 'Copy UPI ID'}</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 1-Tap Mobile Launch Buttons */}
-            <div className="pt-3 border-t border-white/10">
-              <span className="text-[11px] text-slate-300 block mb-2 font-medium">
-                📲 Or Tap to Open Your UPI App Instantly (Mobile):
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleLaunchUpiApp('gpay')}
-                  className="py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-blue-950/40 border border-blue-500/30 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:border-blue-400 hover:scale-[1.02] active:scale-95"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-                  <span>Google Pay</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLaunchUpiApp('phonepe')}
-                  className="py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-purple-950/40 border border-purple-500/30 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:border-purple-400 hover:scale-[1.02] active:scale-95"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-                  <span>PhonePe</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLaunchUpiApp('paytm')}
-                  className="py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-cyan-950/40 border border-cyan-500/30 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:border-cyan-400 hover:scale-[1.02] active:scale-95"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-                  <span>Paytm</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLaunchUpiApp('upi')}
-                  className="py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-amber-950/40 border border-amber-500/30 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:border-amber-400 hover:scale-[1.02] active:scale-95"
-                >
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Any App</span>
-                </button>
-              </div>
+            {/* Instruction Callout */}
+            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-left">
+              <p className="text-[11px] text-emerald-200 leading-relaxed">
+                👉 <strong>How it works:</strong> Tap the payment button or scan the QR code to complete ₹{effectiveAmount} in your payment app. Once done, <strong>return back to this page</strong> and enter the 12-digit UTR / Reference ID below to confirm.
+              </p>
             </div>
 
           </div>
 
           {/* Step 2: 12-Digit UTR Submission Form */}
           <form onSubmit={handleConfirmUpiPayment} className="p-4 rounded-2xl bg-slate-950/90 border border-white/10 space-y-3">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>Enter 12-Digit UPI Reference (UTR) *</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowUtrHelp(!showUtrHelp)}
-                  className="text-[11px] text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1"
-                >
-                  <HelpCircle className="w-3 h-3" />
-                  <span>Where to find UTR?</span>
-                </button>
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                  Step 2: Return Here & Confirm UTR
+                </span>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowUtrHelp(!showUtrHelp)}
+                className="text-[11px] text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1"
+              >
+                <HelpCircle className="w-3 h-3" />
+                <span>Where to find UTR?</span>
+              </button>
+            </div>
 
-              {showUtrHelp && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 space-y-1 animate-fadeIn">
-                  <p className="font-bold">Where to find your 12-digit UTR / Reference ID:</p>
-                  <ul className="list-disc list-inside space-y-0.5 text-slate-300">
-                    <li><strong className="text-blue-300">Google Pay:</strong> Tap on the completed payment $\rightarrow$ "UPI transaction ID"</li>
-                    <li><strong className="text-purple-300">PhonePe:</strong> Tap on payment details $\rightarrow$ "UTR Number" (12 digits)</li>
-                    <li><strong className="text-cyan-300">Paytm:</strong> Tap on the transaction receipt $\rightarrow$ "UPI Ref No."</li>
-                  </ul>
-                </div>
-              )}
+            {showUtrHelp && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 space-y-1 animate-fadeIn">
+                <p className="font-bold">Where to find your 12-digit UTR / Reference ID:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-slate-300">
+                  <li>Open your completed payment receipt / transaction details in your payment app</li>
+                  <li>Locate the 12-digit number labeled as <strong>UTR</strong>, <strong>UPI Reference ID</strong>, or <strong>UPI Ref No.</strong></li>
+                  <li>Copy and paste that 12-digit number in the box below</li>
+                </ul>
+              </div>
+            )}
 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-white block">
+                Enter 12-Digit UPI Reference (UTR) Number *
+              </label>
               <input
                 type="text"
                 required

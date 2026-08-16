@@ -155,7 +155,7 @@ export const HeroSection = ({ setActiveTab }) => {
               Step 3: ₹50 Contribution & Done
             </h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Complete your ₹50 contribution securely via Instant UPI (GPay, PhonePe, Paytm, QR Code).
+              Complete your ₹50 contribution securely via Instant Universal UPI Link & QR Code.
             </p>
           </div>
 

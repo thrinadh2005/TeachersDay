@@ -259,7 +259,7 @@ app.get('/api/pay/config', (req, res) => {
     amount: 50,
     currency: 'INR',
     upiId: pConfig.upiId || '9663355000@ybl',
-    payeeName: pConfig.payeeName || 'CSE Teachers Day 2026',
+    payeeName: pConfig.payeeName || 'ADABALA VENKATA THRINADH',
     enableUpi: true
   });
 });
