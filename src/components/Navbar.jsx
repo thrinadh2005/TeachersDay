@@ -34,7 +34,6 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     { id: 'register', label: 'Contribute (₹50)', icon: CreditCard, isHighlight: true },
     { id: 'vote', label: 'Grand Awards', icon: Trophy },
     { id: 'memories', label: 'Crazy Things', icon: MessageSquare },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck },
   ];
 
   const handleNavClick = (id) => {
@@ -46,6 +45,41 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Secret Admin Triggers: Double-click / double-tap tracking & Keyboard shortcut (Ctrl+Shift+A)
+  const [logoClickCount, setLogoClickCount] = useState(0);
+
+  const handleSecretAdminTrigger = () => {
+    fireFestiveConfetti();
+    setActiveTab('admin');
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogoClick = () => {
+    setLogoClickCount((prev) => {
+      const next = prev + 1;
+      if (next >= 2) {
+        handleSecretAdminTrigger();
+        return 0;
+      }
+      setTimeout(() => setLogoClickCount(0), 500);
+      return next;
+    });
+    handleNavClick('home');
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Secret combo: Ctrl + Shift + A (or Cmd + Shift + A)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        handleSecretAdminTrigger();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setActiveTab]);
+
   return (
     <>
       {/* TOP DESKTOP & MOBILE HEADER */}
@@ -53,10 +87,12 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             
-            {/* Logo & Title */}
+            {/* Logo & Title with Secret Double-Click / Double-Tap for Admin */}
             <div 
-              onClick={() => handleNavClick('home')}
+              onClick={handleLogoClick}
+              onDoubleClick={handleSecretAdminTrigger}
               className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
+              title="GURU UTSAV 2026 (Double-click logo for Admin Portal)"
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 p-0.5 shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
                 <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
@@ -215,7 +251,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               >
                 <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-amber-400' : ''}`} />
                 <span className="text-[10px] font-bold mt-0.5 leading-none">
-                  {item.id === 'home' ? 'Home' : item.id === 'register' ? 'Contribute' : item.id === 'vote' ? 'Awards' : item.id === 'memories' ? 'Stories' : 'Admin'}
+                  {item.id === 'home' ? 'Home' : item.id === 'register' ? 'Contribute' : item.id === 'vote' ? 'Awards' : 'Stories'}
                 </span>
               </button>
             );

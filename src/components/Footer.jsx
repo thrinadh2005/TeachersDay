@@ -66,11 +66,6 @@ export const Footer = ({ setActiveTab }) => {
                   Crazy Things About Faculty
                 </button>
               </li>
-              <li>
-                <button onClick={() => { setActiveTab('admin'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
-                  Admin Portal
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -78,7 +73,7 @@ export const Footer = ({ setActiveTab }) => {
           <div className="space-y-2">
             <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Contribution</h4>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Official ₹50 contribution for all CSE 2nd, 3rd & 4th Year students across Sections A, B, C, and D for Teachers' Day 2026.
+              Official celebration contribution for all CSE 2nd, 3rd & 4th Year students across Sections A, B, C, and D for Teachers' Day 2026.
             </p>
             <div className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -108,7 +103,14 @@ export const Footer = ({ setActiveTab }) => {
 
         {/* MOBILE COMPACT SLIM FOOTER (Clean & Minimal) */}
         <div className="md:hidden flex flex-col items-center justify-center text-center space-y-2 pb-2">
-          <div className="flex items-center gap-2">
+          <div 
+            onDoubleClick={() => {
+              fireFestiveConfetti();
+              setActiveTab('admin');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
             <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5">
               <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
                 <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
@@ -121,14 +123,28 @@ export const Footer = ({ setActiveTab }) => {
           <p className="text-[11px] text-slate-400">
             GMRIT • CSE Department (2nd, 3rd & 4th Years)
           </p>
-          <div className="text-[10px] text-slate-500 pt-1 border-t border-white/5 w-full">
+          <div 
+            onDoubleClick={() => {
+              fireFestiveConfetti();
+              setActiveTab('admin');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="text-[10px] text-slate-500 pt-1 border-t border-white/5 w-full cursor-pointer select-none"
+          >
             © 2026 GMRIT CSE • Built with gratitude for our Teachers
           </div>
         </div>
 
         {/* DESKTOP BOTTOM COPYRIGHT */}
         <div className="hidden md:flex border-t border-white/10 pt-6 flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
-          <div>
+          <div 
+            onDoubleClick={() => {
+              fireFestiveConfetti();
+              setActiveTab('admin');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="cursor-pointer select-none"
+          >
             © 2026 GMR Institute of Technology • Computer Science & Engineering Department.
           </div>
           <div className="flex items-center gap-1 text-slate-400">
