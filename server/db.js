@@ -16,7 +16,7 @@ class Database {
       submissions: initialSubmissions,
       voters: {}, // voterRoll -> { categoryId: teacherId }
       revealVotingResults: false,
-      adminPin: '2026'
+      adminPin: process.env.ADMIN_PIN || ''
     };
     this.mongoConnected = false;
     this.db = null;

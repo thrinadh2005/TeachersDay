@@ -72,7 +72,7 @@ An exclusive, high-performance web platform designed for the **Computer Science 
    Open `.env` and configure:
    - `PORT=5000`
    - `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET` (from your Razorpay dashboard)
-   - `ADMIN_PIN=2026`
+   - `ADMIN_PIN` (set your secret admin access PIN)
    - `MONGODB_URI` (optional cloud database connection string)
 
 4. **Launch the Application**:

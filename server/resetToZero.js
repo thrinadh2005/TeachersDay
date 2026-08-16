@@ -40,7 +40,7 @@ async function resetAllToZero() {
     anecdotes: [],
     voters: {},
     revealVotingResults: false,
-    adminPin: '2026'
+    adminPin: process.env.ADMIN_PIN || ''
   };
 
   fs.writeFileSync(dbPath, JSON.stringify(localDbData, null, 2), 'utf-8');
