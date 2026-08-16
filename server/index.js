@@ -394,21 +394,30 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
       });
     }
 
-    // Fetch the 15 latest captured payments on Razorpay
-    const paymentList = await razorpayClient.payments.all({ count: 15 });
+    // Fetch the 20 latest captured payments on Razorpay
+    const paymentList = await razorpayClient.payments.all({ count: 20 });
 
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPhone = (phone || '').trim().replace(/\D/g, '').slice(-10);
     const cleanRoll = (rollNumber || '').trim().toUpperCase();
+    const allSubs = db.getSubmissions() || [];
 
-    // Look for a captured payment in the last 2 hours matching amount
+    // Filter available captured payments matching expected amount
     const matchingPayment = (paymentList.items || []).find(p => {
       if (p.status !== 'captured') return false;
       
       // Amount in paise
       if (p.amount !== expectedAmount * 100) return false;
 
-      // Check recent timeframe (last 2 hours)
+      // Ensure this transaction was not already claimed by a different roll number
+      const alreadyClaimed = allSubs.some(s => 
+        s.payment && 
+        s.payment.transactionId === p.id && 
+        (s.rollNumber || '').toUpperCase() !== cleanRoll
+      );
+      if (alreadyClaimed) return false;
+
+      // Check timeframe (last 2 hours)
       const paymentTime = p.created_at * 1000;
       const now = Date.now();
       const isRecent = (now - paymentTime) < (2 * 60 * 60 * 1000);
@@ -423,7 +432,7 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
       if (cleanPhone && pPhone && pPhone === cleanPhone) return true;
       if (cleanRoll && pNotes.includes(cleanRoll)) return true;
 
-      // Also match if payment occurred in the last 10 minutes
+      // Match recent transaction in last 10 minutes
       const isVeryRecent = (now - paymentTime) < (10 * 60 * 1000);
       return isVeryRecent;
     });
