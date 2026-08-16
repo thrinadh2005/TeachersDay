@@ -16,7 +16,15 @@ class Database {
       submissions: initialSubmissions,
       voters: {}, // voterRoll -> { categoryId: teacherId }
       revealVotingResults: false,
-      adminPin: process.env.ADMIN_PIN || ''
+      adminPin: process.env.ADMIN_PIN || '',
+      paymentConfig: {
+        upiId: process.env.UPI_ID || 'cseteachersday2026@upi',
+        payeeName: process.env.PAYEE_NAME || 'CSE Teachers Day 2026',
+        razorpayButtonId: process.env.RAZORPAY_BUTTON_ID || '',
+        razorpayPageUrl: process.env.RAZORPAY_PAGE_URL || '',
+        enableUpi: true,
+        enableRazorpayButton: true
+      }
     };
     this.mongoConnected = false;
     this.db = null;
@@ -35,6 +43,7 @@ class Database {
         if (parsed.voters) this.data.voters = parsed.voters;
         if (typeof parsed.revealVotingResults === 'boolean') this.data.revealVotingResults = parsed.revealVotingResults;
         if (parsed.adminPin) this.data.adminPin = parsed.adminPin;
+        if (parsed.paymentConfig) this.data.paymentConfig = { ...this.data.paymentConfig, ...parsed.paymentConfig };
       } else {
         this.saveLocal();
       }
@@ -603,6 +612,38 @@ class Database {
     });
 
     return { success: true, teacher };
+  }
+
+  getPaymentConfig() {
+    return this.data.paymentConfig || {
+      upiId: 'cseteachersday2026@upi',
+      payeeName: 'CSE Teachers Day 2026',
+      razorpayButtonId: '',
+      razorpayPageUrl: '',
+      enableUpi: true,
+      enableRazorpayButton: true
+    };
+  }
+
+  updatePaymentConfig(newConfig) {
+    if (!this.data.paymentConfig) this.data.paymentConfig = {};
+    this.data.paymentConfig = {
+      ...this.data.paymentConfig,
+      ...newConfig
+    };
+    this.save();
+
+    this.getMongoDb().then(mongoDb => {
+      if (mongoDb) {
+        mongoDb.collection('settings').updateOne(
+          { key: 'paymentConfig' },
+          { $set: { key: 'paymentConfig', value: this.data.paymentConfig } },
+          { upsert: true }
+        ).catch(console.error);
+      }
+    });
+
+    return this.data.paymentConfig;
   }
 }
 

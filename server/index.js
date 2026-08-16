@@ -262,13 +262,20 @@ app.get('/api/check-registration/:roll', (req, res) => {
   }
 });
 
-// GET /api/pay/config - Return Razorpay Public Key ID
+// GET /api/pay/config - Return Public Payment & UPI Config
 app.get('/api/pay/config', (req, res) => {
+  const pConfig = db.getPaymentConfig();
   res.json({
     success: true,
     keyId: RAZORPAY_KEY_ID,
     amount: 50,
-    currency: 'INR'
+    currency: 'INR',
+    upiId: pConfig.upiId || 'cseteachersday2026@upi',
+    payeeName: pConfig.payeeName || 'CSE Teachers Day 2026',
+    razorpayButtonId: pConfig.razorpayButtonId || '',
+    razorpayPageUrl: pConfig.razorpayPageUrl || '',
+    enableUpi: pConfig.enableUpi !== false,
+    enableRazorpayButton: pConfig.enableRazorpayButton !== false
   });
 });
 
@@ -674,6 +681,40 @@ app.delete('/api/admin/anecdotes/:id', checkAdminAuth, (req, res) => {
       return res.status(404).json(result);
     }
     res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/payment-config - Get full payment settings
+app.get('/api/admin/payment-config', checkAdminAuth, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: db.getPaymentConfig()
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/payment-config - Update UPI & Razorpay Button Settings
+app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
+  try {
+    const { upiId, payeeName, razorpayButtonId, razorpayPageUrl, enableUpi, enableRazorpayButton } = req.body;
+    const updated = db.updatePaymentConfig({
+      upiId: sanitizeString(upiId, 100),
+      payeeName: sanitizeString(payeeName, 100),
+      razorpayButtonId: sanitizeString(razorpayButtonId, 100),
+      razorpayPageUrl: sanitizeString(razorpayPageUrl, 300),
+      enableUpi: enableUpi !== false,
+      enableRazorpayButton: enableRazorpayButton !== false
+    });
+    res.json({
+      success: true,
+      data: updated,
+      message: 'Payment and UPI settings updated successfully!'
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

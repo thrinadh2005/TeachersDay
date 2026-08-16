@@ -259,6 +259,29 @@ export const api = {
     return data;
   },
 
+  async getAdminPaymentConfig(pin) {
+    const res = await fetch(`${API_BASE}/admin/payment-config`, {
+      headers: { 'x-admin-pin': pin }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch payment config');
+    return data;
+  },
+
+  async updateAdminPaymentConfig(pin, config) {
+    const res = await fetch(`${API_BASE}/admin/payment-config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': pin
+      },
+      body: JSON.stringify(config)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update payment config');
+    return data;
+  },
+
   getExportCsvUrl(pin) {
     return `${API_BASE}/admin/export-csv?pin=${pin}`;
   }
