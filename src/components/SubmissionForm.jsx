@@ -20,7 +20,10 @@ import {
   Lock,
   Search,
   FileText,
-  Printer
+  Printer,
+  Star,
+  Lightbulb,
+  Cpu
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { PaymentModal } from './PaymentModal';
