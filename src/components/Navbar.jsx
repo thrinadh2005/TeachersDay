@@ -31,7 +31,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'register', label: 'Contribute (₹50)', icon: CreditCard, isHighlight: true },
+    { id: 'register', label: 'Event Pass (₹50)', icon: CreditCard, isHighlight: true },
     { id: 'vote', label: 'Grand Awards', icon: Trophy },
     { id: 'memories', label: 'Crazy Things', icon: MessageSquare },
   ];
@@ -251,7 +251,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               >
                 <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-amber-400' : ''}`} />
                 <span className="text-[10px] font-bold mt-0.5 leading-none">
-                  {item.id === 'home' ? 'Home' : item.id === 'register' ? 'Contribute' : item.id === 'vote' ? 'Awards' : 'Stories'}
+                  {item.id === 'home' ? 'Home' : item.id === 'register' ? 'Event Pass' : item.id === 'vote' ? 'Awards' : 'Stories'}
                 </span>
               </button>
             );

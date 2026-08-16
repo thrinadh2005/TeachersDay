@@ -304,7 +304,7 @@ app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
             department: 'CSE',
             studentName: sanitizedName,
             rollNumber: sanitizedRoll,
-            contributionAmount: parsedAmount
+            eventPassAmount: parsedAmount
           }
         });
         return res.json({
@@ -443,7 +443,7 @@ app.post('/api/submit', submitLimiter, (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Registration & ₹${finalAmount} contribution successfully recorded!`,
+      message: `Registration & ₹${finalAmount} Event Delegate Pass successfully recorded!`,
       data: result.submission
     });
   } catch (err) {

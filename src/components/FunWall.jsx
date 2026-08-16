@@ -70,7 +70,7 @@ export const FunWall = ({ setActiveTab }) => {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-amber-500 hover:from-pink-500 hover:to-purple-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-pink-500/25 transition-all hover:scale-105"
           >
             <CreditCard className="w-4 h-4" />
-            <span>Share a Story & Contribute Your Part (₹50)</span>
+            <span>Share a Story & Book Event Pass (₹50)</span>
           </button>
 
           <div className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
@@ -115,7 +115,7 @@ export const FunWall = ({ setActiveTab }) => {
             }}
             className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md transition-all"
           >
-            Contribute a Story (₹50)
+            Share a Story & Register (₹50)
           </button>
         </div>
       ) : (

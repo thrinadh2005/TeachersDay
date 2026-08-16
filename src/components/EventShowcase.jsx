@@ -36,7 +36,7 @@ export const EventShowcase = ({ showcaseData, setActiveTab }) => {
     {
       time: '12:30 PM - 02:00 PM',
       title: 'Grand Faculty High-Tea & Refreshments',
-      desc: 'Celebratory refreshments, photo sessions, and distribution of commemorative gifts funded by student contributions.'
+      desc: 'Celebratory refreshments, photo sessions, and distribution of commemorative gifts included with student delegate passes.'
     }
   ];
 
@@ -141,7 +141,7 @@ export const EventShowcase = ({ showcaseData, setActiveTab }) => {
               </div>
               <div>
                 <h4 className="text-base font-bold text-white">Get Your Official Entry Pass</h4>
-                <p className="text-xs text-slate-400">₹50 mandatory contribution covers student badge, mementos & refreshments.</p>
+                <p className="text-xs text-slate-400">₹50 official delegate pass covers student entry badge, mementos & refreshments.</p>
               </div>
             </div>
 

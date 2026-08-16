@@ -695,8 +695,11 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
                 <div>
                   <span className="text-xs uppercase tracking-wider font-bold text-purple-300 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Celebration Contribution</span>
+                    <span>Event Delegate Pass & Entry Fee</span>
                   </span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Includes stage entry badge, celebration mementos, kit & refreshment coupons.
+                  </p>
                 </div>
                 <div className="text-left sm:text-right shrink-0">
                   <span className="font-black text-amber-400 text-2xl font-display">₹{effectiveContributionAmount}</span>
@@ -714,7 +717,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               className="w-full px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
             >
               <CreditCard className="w-4 h-4" />
-              <span>Confirm & Pay ₹{effectiveContributionAmount}</span>
+              <span>Confirm & Book Event Pass (₹{effectiveContributionAmount})</span>
             </button>
           </div>
         </div>
@@ -732,10 +735,10 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
 
           <div>
             <h3 className="text-2xl sm:text-3xl font-black text-white font-display mt-3">
-              Thank You, {completedRecord.name}!
+              Registration Confirmed, {completedRecord.name}!
             </h3>
             <p className="text-slate-300 text-sm max-w-md mx-auto mt-2">
-              Your registration and <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50} contribution</span> have been recorded.
+              Your official <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50} Event Delegate Pass</span> has been secured.
             </p>
           </div>
 
@@ -745,8 +748,12 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               <span className="text-white font-mono font-bold">{completedRecord.rollNumber}</span>
             </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Contribution Amount</span>
-              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (Verified)</span>
+              <span className="text-slate-400">Delegate Pass Fee</span>
+              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (Verified via Razorpay)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Event Date & Venue</span>
+              <span className="text-slate-200 font-medium">Sept 5, 2026 • CSE Quadrangle Stage</span>
             </div>
           </div>
 

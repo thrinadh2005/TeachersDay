@@ -82,7 +82,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         amount: amountInPaise || (finalAmountToPay * 100),
         currency: 'INR',
         name: "GMRIT CSE Teachers' Day 2026",
-        description: `₹${finalAmountToPay} Celebration Contribution (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
+        description: `₹${finalAmountToPay} Event Delegate Pass (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
         image: "https://gmrit.edu.in/images/logo.jpg",
         order_id: (isRealOrder && orderId && orderId.startsWith('order_')) ? orderId : undefined,
         prefill: {
@@ -95,7 +95,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
           department: 'CSE',
           section: studentData?.section || '',
           year: studentData?.year || '',
-          contributionAmount: finalAmountToPay
+          eventPassFee: finalAmountToPay
         },
         theme: {
           color: "#9333ea"
@@ -272,15 +272,15 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* Contribution Amount Selector (Min ₹50 with optional custom higher contribution) */}
+          {/* Event Delegate Pass Fee Selector (₹50 Standard Pass) */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/30 space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-[11px] uppercase tracking-wider font-bold text-purple-300 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Celebration Contribution
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Event Delegate Pass Fee
                 </span>
                 <span className="text-[11px] text-slate-400">
-                  Select an amount or enter any custom contribution (Min ₹50) 🎉
+                  Includes student entry badge, celebration kit & refreshments (₹50) 🎉
                 </span>
               </div>
               <div className="text-right shrink-0">
@@ -347,7 +347,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
             {isCustom && customInputText && Number(customInputText) < 50 && (
               <p className="text-[10px] text-amber-400 font-medium">
-                Note: Minimum contribution pass is ₹50. It will automatically adjust to ₹50 at checkout.
+                Note: Standard Event Delegate Pass is ₹50. It will automatically adjust to ₹50 at checkout.
               </p>
             )}
           </div>

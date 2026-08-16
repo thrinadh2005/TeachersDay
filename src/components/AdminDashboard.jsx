@@ -548,14 +548,14 @@ export const AdminDashboard = () => {
 
         <div className="glass-card p-5 rounded-2xl border border-white/10">
           <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">Funds Raised</span>
+            <span className="text-xs font-bold uppercase">Event Passes (₹)</span>
             <Coins className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-display">
             ₹{overview?.totalFundsCollected || 0}
           </div>
           <span className="text-[11px] text-emerald-300">
-            {overview?.verifiedPayments || 0} Verified Contributions
+            {overview?.verifiedPayments || 0} Verified Event Passes
           </span>
         </div>
 
