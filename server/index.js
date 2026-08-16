@@ -6,11 +6,29 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
+import Razorpay from 'razorpay';
 import { db } from './db.js';
 import { votingCategories } from './initialData.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Live Razorpay Payment Gateway
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
+
+let razorpayClient = null;
+if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
+  try {
+    razorpayClient = new Razorpay({
+      key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET
+    });
+    console.log('✅ Razorpay Live Gateway initialized successfully with Key ID:', RAZORPAY_KEY_ID);
+  } catch (err) {
+    console.warn('⚠️ Razorpay initialization warning:', err.message);
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -258,10 +276,105 @@ app.get('/api/pay/config', (req, res) => {
     success: true,
     amount: 50,
     currency: 'INR',
+    razorpayKeyId: RAZORPAY_KEY_ID,
+    enableRazorpay: Boolean(RAZORPAY_KEY_ID && razorpayClient),
     upiId: pConfig.upiId || '9663355000@ybl',
     payeeName: pConfig.payeeName || 'ADABALA VENKATA THRINADH',
     enableUpi: true
   });
+});
+
+// POST /api/pay/create-order - Create Razorpay Server-Side Order
+app.post('/api/pay/create-order', async (req, res) => {
+  try {
+    const { amount, rollNumber, name } = req.body;
+    const effectiveAmount = Math.max(50, Math.floor(Number(amount) || 50));
+
+    if (!razorpayClient || !RAZORPAY_KEY_ID) {
+      return res.status(400).json({
+        success: false,
+        error: 'Razorpay Gateway is not active. Please proceed with direct UPI contribution.'
+      });
+    }
+
+    const cleanRoll = sanitizeString(rollNumber, 30).toUpperCase();
+    const cleanName = sanitizeString(name, 80);
+
+    const options = {
+      amount: effectiveAmount * 100, // amount in paise
+      currency: 'INR',
+      receipt: `rcpt_${cleanRoll.slice(0, 10)}_${Date.now().toString().slice(-6)}`,
+      notes: {
+        rollNumber: cleanRoll,
+        studentName: cleanName,
+        event: "CSE Teachers Day 2026 Celebration"
+      }
+    };
+
+    const order = await razorpayClient.orders.create(options);
+    res.json({
+      success: true,
+      order,
+      keyId: RAZORPAY_KEY_ID
+    });
+  } catch (err) {
+    console.error('Razorpay order creation error:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Failed to initialize Razorpay payment order.'
+    });
+  }
+});
+
+// POST /api/pay/verify-razorpay - Verify HMAC-SHA256 Payment Signature
+app.post('/api/pay/verify-razorpay', (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing Razorpay signature verification parameters.'
+      });
+    }
+
+    if (!RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({
+        success: false,
+        error: 'Razorpay Secret Key not configured on server.'
+      });
+    }
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest('hex');
+
+    const isAuthentic = expectedSignature === razorpay_signature;
+
+    if (isAuthentic) {
+      res.json({
+        success: true,
+        verified: true,
+        transactionId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        message: 'Razorpay payment successfully verified!'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        verified: false,
+        error: 'Invalid Razorpay signature. Payment verification failed.'
+      });
+    }
+  } catch (err) {
+    console.error('Razorpay verification error:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Payment verification failed.'
+    });
+  }
 });
 
 // POST /api/submit - Submit CSE Student registration + mandatory payment verification

@@ -18,17 +18,38 @@ import {
   Zap,
   Coins,
   ExternalLink,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
 
+// Dynamic Razorpay Checkout Script Loader
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMsg, setProcessingMsg] = useState('Initializing Secure Checkout...');
   const [paymentError, setPaymentError] = useState(null);
   
-  // Payment Config from Server (Defaults to ADABALA VENKATA THRINADH / 9663355000@ybl)
+  // Payment Config from Server (Razorpay Key + UPI Config)
   const [paymentConfig, setPaymentConfig] = useState({
+    razorpayKeyId: '',
+    enableRazorpay: true,
     upiId: '9663355000@ybl',
     payeeName: 'ADABALA VENKATA THRINADH',
     enableUpi: true
@@ -41,11 +62,11 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [customInputText, setCustomInputText] = useState(!initialIsPreset && initialAmount ? String(initialAmount) : '');
   const [isCustom, setIsCustom] = useState(!initialIsPreset && Boolean(initialAmount));
 
-  // UPI Specific State
+  // Fallback Manual UPI State
+  const [showManualUpi, setShowManualUpi] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [showUtrHelp, setShowUtrHelp] = useState(false);
 
   // Determine current effective amount (Minimum ₹50)
@@ -54,18 +75,12 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
     : (selectedPreset || 50);
 
-  // Generate UPI URI
-  const upiId = paymentConfig.upiId || '9663355000@ybl';
-  const payeeName = paymentConfig.payeeName || 'ADABALA VENKATA THRINADH';
-  const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
-  const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
-
-  // Load Payment Config from backend
+  // Load Payment Config from backend & preload Razorpay script
   useEffect(() => {
     const fetchConfig = async () => {
       try {
         const res = await api.getPaymentConfig();
-        if (res.success && res.upiId) {
+        if (res.success) {
           setPaymentConfig(res);
         }
       } catch (err) {
@@ -73,12 +88,18 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       }
     };
     fetchConfig();
+    loadRazorpayScript();
   }, []);
 
-  // Generate Dynamic UPI QR Code whenever amount or UPI ID changes
+  // Generate Dynamic UPI QR Code for Fallback Mode
   useEffect(() => {
+    const upiId = paymentConfig.upiId || '9663355000@ybl';
+    const payeeName = paymentConfig.payeeName || 'ADABALA VENKATA THRINADH';
+    const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
+    const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
     QRCode.toDataURL(upiUri, {
-      width: 240,
+      width: 200,
       margin: 1.5,
       color: {
         dark: '#090d16',
@@ -87,35 +108,125 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     })
       .then(url => setQrCodeUrl(url))
       .catch(err => console.error('Error generating UPI QR code:', err));
-  }, [upiUri]);
+  }, [paymentConfig, effectiveAmount, studentData]);
 
-  // Copy UPI ID helper with feedback
-  const handleCopyUpiId = () => {
-    navigator.clipboard.writeText(upiId);
-    setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2200);
+  // PRIMARY MODE: 1-Click Razorpay Instant Checkout
+  const handleRazorpayPayment = async () => {
+    setIsProcessing(true);
+    setProcessingMsg('Creating official payment order...');
+    setPaymentError(null);
+
+    try {
+      // 1. Ensure Razorpay checkout script is loaded
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error('Could not load Razorpay checkout script. Please check your internet connection or use manual UPI transfer below.');
+      }
+
+      // 2. Create Order on Server
+      const orderRes = await api.createRazorpayOrder({
+        amount: effectiveAmount,
+        rollNumber: studentData?.rollNumber || '',
+        name: studentData?.name || ''
+      });
+
+      if (!orderRes.success || !orderRes.order) {
+        throw new Error(orderRes.error || 'Failed to initialize payment gateway.');
+      }
+
+      const { order, keyId } = orderRes;
+      const activeKey = keyId || paymentConfig.razorpayKeyId;
+
+      if (!activeKey) {
+        throw new Error('Razorpay Key ID is not configured on the server.');
+      }
+
+      setProcessingMsg('Opening Razorpay Payment Gateway...');
+
+      // 3. Launch Razorpay Standard Checkout Dialog
+      const options = {
+        key: activeKey,
+        amount: order.amount,
+        currency: order.currency || 'INR',
+        name: "GMRIT CSE Teachers' Day 2026",
+        description: `₹${effectiveAmount} Celebration Pass (${studentData?.rollNumber || 'CSE'})`,
+        image: "https://img.icons8.com/fluency/96/graduation-cap.png",
+        order_id: order.id,
+        handler: async function (response) {
+          setIsProcessing(true);
+          setProcessingMsg('Verifying payment signature with bank...');
+
+          try {
+            // 4. Server-Side HMAC-SHA256 Signature Verification
+            const verifyRes = await api.verifyRazorpayPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            if (verifyRes.success && verifyRes.verified) {
+              fireFestiveConfetti();
+              onPaymentSuccess({
+                status: 'verified',
+                amount: effectiveAmount,
+                paymentMethod: 'RAZORPAY_INSTANT',
+                transactionId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id
+              });
+            } else {
+              throw new Error(verifyRes.error || 'Payment signature verification failed.');
+            }
+          } catch (verifyErr) {
+            console.error('Signature verification error:', verifyErr);
+            setPaymentError(`Payment Verification Failed: ${verifyErr.message}`);
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: studentData?.name || '',
+          email: studentData?.email || '',
+          contact: studentData?.phone || ''
+        },
+        notes: {
+          rollNumber: studentData?.rollNumber || '',
+          department: "CSE",
+          year: studentData?.year || '',
+          section: studentData?.section || '',
+          purpose: "Teachers Day 2026 Celebration Pass"
+        },
+        theme: {
+          color: "#10b981"
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        console.error('Razorpay payment failed:', response.error);
+        setPaymentError(`Payment Failed: ${response.error.description || response.error.reason || 'Transaction could not be completed.'}`);
+        setIsProcessing(false);
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error('Razorpay launch error:', err);
+      setPaymentError(err.message || 'Could not launch Razorpay. Please use direct UPI transfer below.');
+      setIsProcessing(false);
+    }
   };
 
-  // Copy Direct Payment Link helper with feedback
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(upiUri);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2200);
-  };
-
-  // Direct 1-Tap UPI Link Trigger
-  const handleLaunchPaymentLink = () => {
-    window.location.href = upiUri;
-  };
-
-  // SUBMIT UPI UTR VERIFICATION
-  const handleConfirmUpiPayment = (e) => {
+  // FALLBACK MODE: Manual UTR Verification
+  const handleConfirmManualUpi = (e) => {
     if (e) e.preventDefault();
     setPaymentError(null);
 
     const cleanUtr = utrNumber.trim().replace(/\s+/g, '');
     if (!cleanUtr) {
-      setPaymentError('Please enter the 12-digit UPI Reference Number / UTR from your completed payment receipt.');
+      setPaymentError('Please enter the 12-digit UPI Reference Number / UTR from your payment receipt.');
       return;
     }
 
@@ -125,6 +236,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     }
 
     setIsProcessing(true);
+    setProcessingMsg('Recording manual UPI reference...');
     fireFestiveConfetti();
 
     setTimeout(() => {
@@ -132,10 +244,18 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       onPaymentSuccess({
         status: 'verified',
         amount: effectiveAmount,
-        paymentMethod: 'UPI_DIRECT',
+        paymentMethod: 'UPI_MANUAL',
         transactionId: cleanUtr
       });
     }, 450);
+  };
+
+  // Copy UPI ID helper with feedback
+  const handleCopyUpiId = () => {
+    const upi = paymentConfig.upiId || '9663355000@ybl';
+    navigator.clipboard.writeText(upi);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2200);
   };
 
   return (
@@ -151,7 +271,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-emerald-950/80 via-slate-950 to-indigo-950/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="relative w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20 shrink-0">
-              <Smartphone className="w-6 h-6 animate-pulse" />
+              <Zap className="w-6 h-6 animate-pulse text-amber-400 fill-amber-400/30" />
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950 flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping"></span>
               </span>
@@ -159,14 +279,14 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
-                  Instant UPI Contribution
+                  Instant ₹{effectiveAmount} Contribution Pass
                 </h3>
                 <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                  0% Fees
+                  Instant Verified
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Direct to Coordinator Bank Account • Instant Universal UPI
+                Official GMRIT CSE Teachers' Day 2026 Celebration Portal
               </p>
             </div>
           </div>
@@ -287,180 +407,180 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                       ? 'border-amber-400 ring-1 ring-amber-400/40' 
                       : 'border-white/20 focus:border-emerald-400'
                   }`}
-                  placeholder="Enter any amount (e.g. 250, 500)"
+                  placeholder="Enter custom amount (e.g. 250)"
                 />
               </div>
             </div>
           </div>
 
-          {/* Dynamic QR Code & Universal 1-Tap Payment Link */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 space-y-4 shadow-xl neon-pulse-emerald relative overflow-hidden">
-            
-            {/* Step 1 Header */}
+          {/* PRIMARY SECTION: 1-CLICK INSTANT RAZORPAY CHECKOUT */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-400/40 text-center space-y-3.5 shadow-2xl neon-pulse-emerald relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
             <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  Step 1: Make Payment (₹{effectiveAmount})
+                  Primary Instant Mode (Recommended)
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400">Scan QR or Tap Payment Link</span>
+              <span className="text-[10px] text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                1-Tap Mobile Switch
+              </span>
             </div>
 
-            {/* QR Code + Payment Link Details */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-              
-              {/* Dynamic QR Code with Laser Scanner Animation */}
-              <div className="relative p-2.5 bg-white rounded-2xl shadow-2xl border-2 border-emerald-400 shrink-0 overflow-hidden group">
-                <div className="laser-scanner-line"></div>
-                {qrCodeUrl ? (
-                  <img 
-                    src={qrCodeUrl} 
-                    alt="Dynamic UPI QR Code" 
-                    className="w-36 h-36 sm:w-40 sm:h-40 rounded-lg object-contain relative z-0"
-                  />
-                ) : (
-                  <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-slate-800" />
-                  </div>
-                )}
-                {/* Cyber Corner Brackets */}
-                <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-emerald-600 pointer-events-none"></div>
-              </div>
-
-              {/* Payment Link Launch Actions */}
-              <div className="text-left space-y-3 flex-1 w-full">
-                <div>
-                  <h4 className="text-base sm:text-lg font-black text-white font-display leading-snug">
-                    Scan QR or Tap Direct Payment Link
-                  </h4>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
-                    Payee: <strong className="text-white">{payeeName}</strong>
-                  </p>
-                  <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
-                    Note: <span className="font-mono text-amber-300 font-semibold">{note}</span>
-                  </p>
-                </div>
-
-                {/* Primary 1-Tap Payment Link Action */}
-                <a
-                  href={upiUri}
-                  onClick={handleLaunchPaymentLink}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 group active:scale-95 text-center"
-                >
-                  <Zap className="w-4 h-4 fill-current text-slate-950 group-hover:scale-125 transition-transform" />
-                  <span>Tap to Open Payment App (₹{effectiveAmount})</span>
-                  <ExternalLink className="w-4 h-4 ml-1" />
-                </a>
-
-                {/* Secondary Action: Copy UPI ID & Copy Link Buttons */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyLink}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
-                      copiedLink 
-                        ? 'bg-teal-500 text-slate-950' 
-                        : 'bg-slate-950 hover:bg-white/10 text-teal-300 border border-teal-500/30'
-                    }`}
-                  >
-                    {copiedLink ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleCopyUpiId}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
-                      copiedUpi 
-                        ? 'bg-emerald-500 text-slate-950' 
-                        : 'bg-slate-950 hover:bg-white/10 text-emerald-300 border border-emerald-500/30'
-                    }`}
-                  >
-                    {copiedUpi ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedUpi ? 'UPI ID Copied!' : 'Copy UPI ID'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Instruction Callout */}
-            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-left">
-              <p className="text-[11px] text-emerald-200 leading-relaxed">
-                👉 <strong>How it works:</strong> Tap the payment button or scan the QR code to complete ₹{effectiveAmount} in your payment app. Once done, <strong>return back to this page</strong> and enter the 12-digit UTR / Reference ID below to confirm.
+            <div>
+              <h4 className="text-base sm:text-lg font-black text-white font-display">
+                1-Click Instant Payment & Auto-Verification
+              </h4>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                Pay via <strong>UPI, PhonePe, Google Pay, Paytm, Cards or NetBanking</strong> with zero security errors. Your acknowledgement pass generates instantly upon payment!
               </p>
             </div>
 
-          </div>
-
-          {/* Step 2: 12-Digit UTR Submission Form */}
-          <form onSubmit={handleConfirmUpiPayment} className="p-4 rounded-2xl bg-slate-950/90 border border-white/10 space-y-3">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                  Step 2: Return Here & Confirm UTR
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowUtrHelp(!showUtrHelp)}
-                className="text-[11px] text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1"
-              >
-                <HelpCircle className="w-3 h-3" />
-                <span>Where to find UTR?</span>
-              </button>
-            </div>
-
-            {showUtrHelp && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 space-y-1 animate-fadeIn">
-                <p className="font-bold">Where to find your 12-digit UTR / Reference ID:</p>
-                <ul className="list-disc list-inside space-y-0.5 text-slate-300">
-                  <li>Open your completed payment receipt / transaction details in your payment app</li>
-                  <li>Locate the 12-digit number labeled as <strong>UTR</strong>, <strong>UPI Reference ID</strong>, or <strong>UPI Ref No.</strong></li>
-                  <li>Copy and paste that 12-digit number in the box below</li>
-                </ul>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-white block">
-                Enter 12-Digit UPI Reference (UTR) Number *
-              </label>
-              <input
-                type="text"
-                required
-                value={utrNumber}
-                onChange={(e) => setUtrNumber(e.target.value)}
-                placeholder="Paste 12-digit UTR / UPI Ref ID here (e.g. 423456789012)"
-                className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/20 text-white font-mono text-xs sm:text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-              />
-            </div>
-
+            {/* BIG 1-CLICK RAZORPAY BUTTON */}
             <button
-              type="submit"
+              type="button"
+              onClick={handleRazorpayPayment}
               disabled={isProcessing}
-              className="relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 shimmer-button overflow-hidden hover:scale-[1.01] active:scale-98"
+              className="relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-black text-sm sm:text-base shadow-2xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2.5 shimmer-button overflow-hidden hover:scale-[1.02] active:scale-95 group"
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
-                  <span>Verifying & Generating Official Acknowledgement...</span>
+                  <span>{processingMsg}</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5 fill-current text-slate-950" />
-                  <span>Confirm ₹{effectiveAmount} & Get Official Acknowledgement</span>
-                  <ArrowRight className="w-5 h-5 ml-1" />
+                  <Zap className="w-5 h-5 fill-current text-slate-950 group-hover:scale-125 transition-transform" />
+                  <span>⚡ Pay ₹{effectiveAmount} with Razorpay Instant</span>
+                  <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
-          </form>
 
-          {/* Security & Verification Guarantee */}
+            {/* Security Guarantee Badges */}
+            <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] text-slate-300">
+              <div className="p-1.5 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>RBI Certified</span>
+              </div>
+              <div className="p-1.5 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-center gap-1">
+                <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+                <span>0 Typing Needed</span>
+              </div>
+              <div className="p-1.5 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Auto-Pass</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* FALLBACK MODE: DIRECT UPI TRANSFER & MANUAL UTR SUBMISSION */}
+          <div className="rounded-2xl border border-white/10 overflow-hidden bg-slate-950/60 transition-all">
+            
+            <button
+              type="button"
+              onClick={() => setShowManualUpi(!showManualUpi)}
+              className="w-full p-3.5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold text-slate-200">
+                  Alternative: Direct QR Transfer / Manual UTR Entry
+                </span>
+              </div>
+              {showManualUpi ? (
+                <ChevronUp className="w-4 h-4 text-slate-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
+
+            {showManualUpi && (
+              <div className="p-4 border-t border-white/10 space-y-4 animate-fadeIn">
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* Dynamic QR */}
+                  <div className="p-2 bg-white rounded-2xl shadow-xl shrink-0">
+                    {qrCodeUrl ? (
+                      <img src={qrCodeUrl} alt="UPI QR" className="w-28 h-28 rounded-lg object-contain" />
+                    ) : (
+                      <div className="w-28 h-28 flex items-center justify-center text-slate-800 text-xs">Loading...</div>
+                    )}
+                  </div>
+
+                  {/* QR Details */}
+                  <div className="space-y-2 text-left flex-1">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-emerald-400 block">Manual Recipient UPI</span>
+                      <span className="font-mono text-xs font-bold text-white select-all block">
+                        {paymentConfig.upiId || '9663355000@ybl'}
+                      </span>
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        Coordinator: {paymentConfig.payeeName || 'ADABALA VENKATA THRINADH'}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyUpiId}
+                      className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5"
+                    >
+                      {copiedUpi ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedUpi ? 'UPI ID Copied!' : 'Copy UPI ID'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Form for UTR entry */}
+                <form onSubmit={handleConfirmManualUpi} className="space-y-2.5 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-white">
+                      Enter 12-Digit UPI Reference (UTR) Number *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowUtrHelp(!showUtrHelp)}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                    >
+                      <HelpCircle className="w-3 h-3" />
+                      <span>Where to find UTR?</span>
+                    </button>
+                  </div>
+
+                  {showUtrHelp && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200">
+                      Open your completed payment receipt in your UPI app and locate the 12-digit number labeled as UTR or UPI Reference No.
+                    </div>
+                  )}
+
+                  <input
+                    type="text"
+                    required
+                    value={utrNumber}
+                    onChange={(e) => setUtrNumber(e.target.value)}
+                    placeholder="Paste 12-digit UTR ID here (e.g. 423456789012)"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-white/20 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>Submit Manual UTR & Get Pass</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+
+              </div>
+            )}
+
+          </div>
+
+          {/* Security Guarantee Footer */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Official GMRIT CSE Teachers' Day 2026 Celebration Portal</span>
@@ -473,3 +593,4 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     </div>
   );
 };
+

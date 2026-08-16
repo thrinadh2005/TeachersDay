@@ -63,6 +63,28 @@ export const api = {
     return res.json();
   },
 
+  async createRazorpayOrder(payload) {
+    const res = await fetch(`${API_BASE}/pay/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to initialize Razorpay order');
+    return data;
+  },
+
+  async verifyRazorpayPayment(payload) {
+    const res = await fetch(`${API_BASE}/pay/verify-razorpay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to verify payment signature');
+    return data;
+  },
+
   async submitStudentIdea(payload) {
     const res = await fetch(`${API_BASE}/submit`, {
       method: 'POST',
