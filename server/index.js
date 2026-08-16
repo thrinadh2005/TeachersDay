@@ -278,8 +278,9 @@ app.get('/api/pay/config', (req, res) => {
     currency: 'INR',
     razorpayKeyId: RAZORPAY_KEY_ID,
     enableRazorpay: Boolean(RAZORPAY_KEY_ID && razorpayClient),
-    upiId: pConfig.upiId || 'venkatathrinadh958301.rzp@rxairtel',
+    upiId: pConfig.upiId || '9663355000@ybl',
     payeeName: pConfig.payeeName || 'ADABALA VENKATA THRINADH',
+    mobileNumber: '9663355000',
     enableUpi: true
   });
 });
@@ -712,7 +713,7 @@ app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
   try {
     const { upiId, payeeName } = req.body;
     const updated = db.updatePaymentConfig({
-      upiId: sanitizeString(upiId, 100) || 'venkatathrinadh958301.rzp@rxairtel',
+      upiId: sanitizeString(upiId, 100) || '9663355000@ybl',
       payeeName: sanitizeString(payeeName, 100) || 'ADABALA VENKATA THRINADH',
       enableUpi: true
     });

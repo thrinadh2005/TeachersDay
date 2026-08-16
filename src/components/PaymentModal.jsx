@@ -14,7 +14,8 @@ import {
   Zap,
   ExternalLink,
   HelpCircle,
-  Download
+  Download,
+  PhoneCall
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
@@ -23,10 +24,11 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   
-  // Payment Config from Server (Razorpay Merchant VPA + Payee Name)
+  // Payment Config from Server (Defaults to 9663355000 / ADABALA VENKATA THRINADH)
   const [paymentConfig, setPaymentConfig] = useState({
-    upiId: 'venkatathrinadh958301.rzp@rxairtel',
+    upiId: '9663355000@ybl',
     payeeName: 'ADABALA VENKATA THRINADH',
+    mobileNumber: '9663355000',
     enableUpi: true
   });
 
@@ -40,6 +42,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   // QR Code & UTR State
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
+  const [copiedMobile, setCopiedMobile] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [showUtrHelp, setShowUtrHelp] = useState(false);
 
@@ -54,7 +57,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     const fetchConfig = async () => {
       try {
         const res = await api.getPaymentConfig();
-        if (res.success && res.upiId) {
+        if (res.success) {
           setPaymentConfig(res);
         }
       } catch (err) {
@@ -64,15 +67,16 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     fetchConfig();
   }, []);
 
-  // Generate Dynamic UPI QR Code & URI using Razorpay Verified Merchant VPA
-  const upiId = paymentConfig.upiId || 'venkatathrinadh958301.rzp@rxairtel';
+  // Generate Dynamic UPI QR Code & URI
+  const upiId = paymentConfig.upiId || '9663355000@ybl';
   const payeeName = paymentConfig.payeeName || 'ADABALA VENKATA THRINADH';
+  const mobileNumber = paymentConfig.mobileNumber || '9663355000';
   const note = `CSE_${studentData?.rollNumber || 'TeachersDay'}`;
   const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${effectiveAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
   useEffect(() => {
     QRCode.toDataURL(upiUri, {
-      width: 260,
+      width: 220,
       margin: 1.5,
       color: {
         dark: '#090d16',
@@ -83,7 +87,14 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       .catch(err => console.error('Error generating UPI QR code:', err));
   }, [upiUri]);
 
-  // Copy Merchant UPI ID helper with feedback
+  // Copy Mobile Number helper
+  const handleCopyMobile = () => {
+    navigator.clipboard.writeText(mobileNumber);
+    setCopiedMobile(true);
+    setTimeout(() => setCopiedMobile(false), 2200);
+  };
+
+  // Copy UPI ID helper
   const handleCopyUpiId = () => {
     navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
@@ -130,7 +141,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       onPaymentSuccess({
         status: 'verified',
         amount: effectiveAmount,
-        paymentMethod: 'RAZORPAY_MERCHANT_UPI',
+        paymentMethod: 'PHONEPE_MOBILE_UPI',
         transactionId: cleanUtr
       });
     }, 450);
@@ -149,7 +160,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-emerald-950/80 via-slate-950 to-indigo-950/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="relative w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20 shrink-0">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+              <Smartphone className="w-6 h-6 text-emerald-400 animate-pulse" />
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950 flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping"></span>
               </span>
@@ -157,14 +168,14 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
-                  Instant ₹{effectiveAmount} Contribution Pass
+                  Pay ₹{effectiveAmount} Contribution Pass
                 </h3>
                 <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                  Verified VPA
+                  0% Fees
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Official Razorpay Verified Merchant UPI • 0% Fees
+                Official GMRIT CSE Teachers' Day 2026 Celebration Portal
               </p>
             </div>
           </div>
@@ -291,7 +302,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* PRIMARY SECTION: RAZORPAY VERIFIED MERCHANT DYNAMIC QR & 1-TAP ACTION */}
+          {/* STEP 1: PAY TO MOBILE NUMBER / UPI */}
           <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald relative overflow-hidden">
             
             {/* Step 1 Header */}
@@ -299,96 +310,115 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  Step 1: Scan QR or Pay via Verified UPI (₹{effectiveAmount})
+                  Step 1: Pay ₹{effectiveAmount} to Coordinator Mobile
                 </span>
               </div>
               <span className="text-[10px] text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                0% Fees • No Declines
+                Direct Bank Transfer
               </span>
             </div>
 
-            {/* QR Code + Verified Merchant Details */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+            {/* Mobile Number Highlight Banner */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/80 border border-emerald-400/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+              <div className="text-center sm:text-left space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+                  Send ₹{effectiveAmount} to Mobile Number (PhonePe / GPay / Paytm)
+                </span>
+                <div className="font-mono text-xl sm:text-2xl font-black text-amber-300 tracking-wider flex items-center justify-center sm:justify-start gap-2">
+                  <span>{mobileNumber}</span>
+                </div>
+                <span className="text-[11px] text-slate-300 block">
+                  Coordinator: <strong className="text-white">{payeeName}</strong>
+                </span>
+              </div>
+
+              {/* 1-Tap Copy Mobile Button */}
+              <button
+                type="button"
+                onClick={handleCopyMobile}
+                className={`py-3 px-5 rounded-2xl font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 ${
+                  copiedMobile
+                    ? 'bg-emerald-400 text-slate-950 ring-2 ring-emerald-300'
+                    : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 hover:scale-[1.03]'
+                }`}
+              >
+                {copiedMobile ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Number Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Mobile Number</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* QR Code + Direct App Launch Options */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-1">
               
-              {/* Dynamic QR Code with Laser Scanner Animation */}
-              <div className="relative p-2.5 bg-white rounded-2xl shadow-2xl border-2 border-emerald-400 shrink-0 overflow-hidden group">
+              {/* Dynamic QR Code */}
+              <div className="relative p-2 bg-white rounded-2xl shadow-2xl border-2 border-emerald-400 shrink-0 overflow-hidden group">
                 <div className="laser-scanner-line"></div>
                 {qrCodeUrl ? (
                   <img 
                     src={qrCodeUrl} 
-                    alt="Razorpay Merchant UPI QR Code" 
-                    className="w-36 h-36 sm:w-40 sm:h-40 rounded-lg object-contain relative z-0"
+                    alt="Direct UPI QR Code" 
+                    className="w-32 h-32 sm:w-36 sm:h-36 rounded-lg object-contain relative z-0"
                   />
                 ) : (
-                  <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
+                  <div className="w-32 h-32 flex items-center justify-center">
                     <Loader2 className="w-6 h-6 animate-spin text-slate-800" />
                   </div>
                 )}
-                {/* Cyber Corner Brackets */}
-                <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-emerald-600 pointer-events-none"></div>
-                <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-emerald-600 pointer-events-none"></div>
               </div>
 
-              {/* Verified Merchant Details & Actions */}
-              <div className="text-left space-y-3 flex-1 w-full">
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Razorpay Verified Merchant VPA</span>
-                  </div>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-amber-300 select-all block bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-white/10 mt-1">
-                    {upiId}
-                  </span>
-                  <p className="text-[11px] text-slate-300 mt-1">
-                    Payee: <strong className="text-white">{payeeName}</strong>
-                  </p>
-                </div>
-
-                {/* Primary 1-Tap Action: Open UPI App */}
+              {/* Actions & Instructions */}
+              <div className="text-left space-y-2.5 flex-1 w-full">
+                
+                {/* 1-Tap App Trigger */}
                 <a
                   href={upiUri}
                   onClick={handleLaunchPaymentLink}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 group active:scale-95 text-center"
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-white/10 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all flex items-center justify-center gap-2 text-center"
                 >
-                  <Zap className="w-4 h-4 fill-current text-slate-950 group-hover:scale-125 transition-transform" />
-                  <span>Tap to Pay ₹{effectiveAmount} in UPI App</span>
-                  <ExternalLink className="w-4 h-4 ml-1" />
+                  <Zap className="w-3.5 h-3.5 fill-current text-amber-400" />
+                  <span>Tap to Open UPI App Directly</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
 
-                {/* Secondary Action: Copy UPI ID & Download QR Buttons */}
+                {/* Secondary buttons */}
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={handleCopyUpiId}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
+                    className={`py-2 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all ${
                       copiedUpi 
                         ? 'bg-emerald-500 text-slate-950' 
-                        : 'bg-slate-950 hover:bg-white/10 text-emerald-300 border border-emerald-500/30'
+                        : 'bg-slate-950 hover:bg-white/10 text-slate-300 border border-white/10'
                     }`}
                   >
-                    {copiedUpi ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedUpi ? <Check className="w-3 h-3 stroke-[3]" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedUpi ? 'UPI Copied!' : 'Copy UPI ID'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleDownloadQr}
-                    className="py-2 px-3 rounded-xl text-xs font-bold bg-slate-950 hover:bg-white/10 text-teal-300 border border-teal-500/30 flex items-center justify-center gap-1.5 transition-all shadow-md"
+                    className="py-2 px-2.5 rounded-xl text-[11px] font-bold bg-slate-950 hover:bg-white/10 text-teal-300 border border-teal-500/30 flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-3 h-3" />
                     <span>Save QR</span>
                   </button>
                 </div>
-              </div>
-            </div>
 
-            {/* Instruction Callout */}
-            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-left">
-              <p className="text-[11px] text-emerald-200 leading-relaxed">
-                👉 <strong>How it works:</strong> Scan the QR code or pay ₹{effectiveAmount} to <span className="font-mono font-bold text-white">{upiId}</span> via <strong>PhonePe, Google Pay, Paytm, or BHIM</strong>. Then paste your 12-digit UTR number below!
-              </p>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  👉 <strong>How to Pay:</strong> Open <strong>PhonePe, Google Pay, or Paytm</strong>, tap <em>"To Mobile Number"</em>, send <strong>₹{effectiveAmount}</strong> to <strong className="text-white font-mono">{mobileNumber}</strong>, then enter the 12-digit UTR below.
+                </p>
+
+              </div>
             </div>
 
           </div>
@@ -416,7 +446,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 space-y-1 animate-fadeIn">
                 <p className="font-bold">How to find your 12-digit UTR / Reference ID:</p>
                 <ul className="list-disc list-inside space-y-0.5 text-slate-300">
-                  <li>Open your completed ₹{effectiveAmount} payment receipt in your UPI app</li>
+                  <li>Open your completed ₹{effectiveAmount} payment receipt in PhonePe / Google Pay / Paytm</li>
                   <li>Look for the 12-digit number labeled as <strong>UTR</strong>, <strong>UPI Ref ID</strong>, or <strong>UPI Reference Number</strong></li>
                   <li>Copy and paste that 12-digit number in the box below</li>
                 </ul>
@@ -432,7 +462,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                 required
                 value={utrNumber}
                 onChange={(e) => setUtrNumber(e.target.value)}
-                placeholder="Paste 12-digit UTR ID here (e.g. 423456789012)"
+                placeholder="Paste 12-digit UTR ID here (e.g. 362780526849)"
                 className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/20 text-white font-mono text-xs sm:text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
               />
             </div>
