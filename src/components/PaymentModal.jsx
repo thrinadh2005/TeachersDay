@@ -7,7 +7,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   Info,
-  Lock
+  Lock,
+  RefreshCw
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
@@ -16,6 +17,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(true);
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
 
   // Automatically lock the exact amount chosen in the previous screen (Min ₹50)
   const lockedAmount = Math.max(50, Math.floor(Number(initialAmount) || 50));
@@ -47,21 +49,60 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     razorpayButtonRef.current.appendChild(form);
   }, []);
 
-  // 2. Automatic Detection when Payment Completes on Razorpay
+  // 2. Strict Live Verification against Razorpay Live Servers
+  const verifyWithLiveServer = async (explicitUserClick = false) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    setPaymentError(null);
+
+    try {
+      const res = await api.verifyRazorpayLiveStatus({
+        email: studentData?.email || '',
+        phone: studentData?.phone || '',
+        rollNumber: studentData?.rollNumber || '',
+        name: studentData?.name || '',
+        amount: lockedAmount
+      });
+
+      if (res.success && res.verified && res.transactionId) {
+        // STRICT SUCCESS: Money is really captured on Razorpay!
+        fireFestiveConfetti();
+        setTimeout(() => {
+          setIsProcessing(false);
+          onPaymentSuccess({
+            status: 'verified',
+            amount: lockedAmount,
+            paymentMethod: 'RAZORPAY_OFFICIAL',
+            transactionId: res.transactionId
+          });
+        }, 400);
+      } else {
+        throw new Error(res.error || `No captured ₹${lockedAmount} payment found on Razorpay.`);
+      }
+    } catch (err) {
+      setIsProcessing(false);
+      if (explicitUserClick) {
+        setPaymentError(`Payment not confirmed on Razorpay yet. Please complete the ₹${lockedAmount} payment in your UPI / Bank app first.`);
+      }
+    }
+  };
+
+  // 3. Auto-listener for Razorpay Window Events
   useEffect(() => {
     const handleRazorpayMessage = (event) => {
       if (event.data && typeof event.data === 'object') {
         const pId = event.data.razorpay_payment_id || event.data.payment_id;
         if (pId) {
-          handleAutoSuccess(pId);
+          setPaymentInitiated(true);
+          verifyWithLiveServer(false);
         }
       }
     };
 
-    // Auto-check when student returns to tab after paying
+    // Auto-check when student comes back to the tab
     const handleWindowFocus = () => {
-      if (!isProcessing) {
-        checkBackendStatusSilently();
+      if (paymentInitiated && !isProcessing) {
+        verifyWithLiveServer(false);
       }
     };
 
@@ -72,44 +113,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       window.removeEventListener('message', handleRazorpayMessage);
       window.removeEventListener('focus', handleWindowFocus);
     };
-  }, [isProcessing, studentData, lockedAmount]);
-
-  // Silent automatic check when student finishes payment on Razorpay
-  const checkBackendStatusSilently = async () => {
-    try {
-      const res = await api.verifyRazorpayLiveStatus({
-        email: studentData?.email || '',
-        phone: studentData?.phone || '',
-        rollNumber: studentData?.rollNumber || '',
-        name: studentData?.name || '',
-        amount: lockedAmount
-      });
-
-      if (res.success && res.verified) {
-        handleAutoSuccess(res.transactionId);
-      }
-    } catch (err) {
-      // Keep waiting for student to complete payment
-    }
-  };
-
-  // Instant Automatic Save & Pass Issuance
-  const handleAutoSuccess = (txnId) => {
-    setIsProcessing(true);
-    fireFestiveConfetti();
-
-    const finalId = txnId || `RZP_${Date.now().toString().slice(-8)}`;
-
-    setTimeout(() => {
-      setIsProcessing(false);
-      onPaymentSuccess({
-        status: 'verified',
-        amount: lockedAmount,
-        paymentMethod: 'RAZORPAY_OFFICIAL',
-        transactionId: finalId
-      });
-    }, 400);
-  };
+  }, [paymentInitiated, isProcessing, studentData, lockedAmount]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-lg animate-fadeIn">
@@ -195,25 +199,28 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* FINAL RAZORPAY PAYMENT BUTTON (SINGLE ACTION) */}
+          {/* FINAL RAZORPAY PAYMENT BUTTON (STRICT VERIFICATION) */}
           <div className="p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald text-center relative overflow-hidden">
             
             <div className="space-y-1">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-black uppercase tracking-wider">
                 <Sparkles className="w-3 h-3 text-amber-400" />
-                Final Step • Instant Pass
+                Live Razorpay Checkout
               </span>
-              <p className="text-xs text-slate-300 pt-1">
-                Click the official Razorpay button below to complete payment. Once paid, your details will be <strong>saved automatically and your Official Celebration Pass will be issued immediately!</strong>
+              <p className="text-xs text-slate-300 pt-1 leading-relaxed">
+                Click the official Razorpay button below to pay ₹{lockedAmount}. Your Celebration Pass is <strong>strictly activated only after the payment is successfully captured by Razorpay.</strong>
               </p>
             </div>
 
             {/* Official Razorpay Pay Button Embed */}
-            <div className="py-4 flex flex-col items-center justify-center min-h-[64px]">
+            <div 
+              onClick={() => setPaymentInitiated(true)} 
+              className="py-4 flex flex-col items-center justify-center min-h-[64px]"
+            >
               {isProcessing ? (
                 <div className="flex flex-col items-center gap-2 text-emerald-300 py-2">
                   <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-                  <span className="text-xs font-bold animate-pulse">Payment completed! Saving registration & generating pass...</span>
+                  <span className="text-xs font-bold animate-pulse">Connecting to Razorpay live servers to verify real payment...</span>
                 </div>
               ) : (
                 <>
@@ -228,6 +235,20 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                 </>
               )}
             </div>
+
+            {/* Auto-check / Re-verify button if student already completed on app */}
+            {paymentInitiated && !isProcessing && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => verifyWithLiveServer(true)}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 mx-auto transition-all"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Paid on Razorpay? Click to Verify & Get Pass</span>
+                </button>
+              </div>
+            )}
 
             <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-center">
               <p className="text-[11px] text-emerald-200 flex items-center justify-center gap-1.5">

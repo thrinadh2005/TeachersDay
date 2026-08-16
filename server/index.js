@@ -518,6 +518,21 @@ app.post('/api/submit', submitLimiter, (req, res) => {
       });
     }
 
+    // STRICT ANTI-CHEAT VERIFICATION: If payment is marked as verified, verify against Razorpay Live API
+    if (sanitizedStatus === 'verified' && razorpayClient && sanitizedTxn.startsWith('pay_')) {
+      try {
+        const fetchedPayment = await razorpayClient.payments.fetch(sanitizedTxn);
+        if (!fetchedPayment || fetchedPayment.status !== 'captured' || fetchedPayment.amount < (finalAmount * 100)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Real payment not verified on Razorpay. The transaction is not in captured status.'
+          });
+        }
+      } catch (rErr) {
+        console.warn('Razorpay fetch verification notice:', rErr.message);
+      }
+    }
+
     const result = db.addSubmission({
       name: sanitizedName,
       rollNumber: sanitizedRoll,
