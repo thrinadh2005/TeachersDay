@@ -17,14 +17,14 @@ import {
   CreditCard,
   Trophy,
   Check,
-  Star,
-  Lightbulb,
-  Cpu,
   Lock,
-  Search
+  Search,
+  FileText,
+  Printer
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { PaymentModal } from './PaymentModal';
+import { AcknowledgementModal } from './AcknowledgementModal';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
 
 export const SubmissionForm = ({ onSubmissionCompleted }) => {
@@ -33,6 +33,8 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [existingSubmission, setExistingSubmission] = useState(null);
+  const [showAckModal, setShowAckModal] = useState(false);
   
   // Step 1: Student Information State
   const [formData, setFormData] = useState({
@@ -119,11 +121,14 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
 
     setLoading(true);
     setError(null);
+    setExistingSubmission(null);
 
     try {
       const checkRes = await api.checkRegistration(formData.rollNumber.trim());
       if (checkRes.alreadyRegistered) {
-        setError(`Student with JNTU Roll Number "${formData.rollNumber.trim().toUpperCase()}" has already registered for Teachers' Day 2026. Duplication is not permitted.`);
+        const rec = checkRes.data || checkRes.submission;
+        setExistingSubmission(rec);
+        setError(`Student with JNTU Roll Number "${formData.rollNumber.trim().toUpperCase()}" is already registered (${rec?.name || 'Registered'}). Duplicate registration is not permitted.`);
         setLoading(false);
         return;
       }
@@ -173,7 +178,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
         favoriteTeacher: formData.favoriteTeacher,
         anecdote: formData.anecdote,
         paymentStatus: paymentDetails.status || 'verified',
-        paymentMethod: paymentDetails.paymentMethod || 'RAZORPAY',
+        paymentMethod: paymentDetails.paymentMethod || 'UPI_DIRECT',
         transactionId: paymentDetails.transactionId || `TXN_${Date.now()}`,
         paymentAmount: paymentDetails.amount || effectiveContributionAmount || 50,
         amount: paymentDetails.amount || effectiveContributionAmount || 50
@@ -181,6 +186,9 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
 
       const response = await api.submitStudentIdea(payload);
       if (!response.success) {
+        if (response.isDuplicate) {
+          setExistingSubmission(response.data || response.submission);
+        }
         throw new Error(response.error || 'Failed to record registration.');
       }
 
@@ -191,7 +199,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
       });
       await Promise.all(votePromises);
 
-      // 3. Move to Step 3: Success Screen (NO PASS REQUIRED)
+      // 3. Move to Step 3: Success Screen (NO PASS ONLY ACKNOWLEDGEMENT)
       setCompletedRecord({
         ...response.data,
         votesCastCount: Object.keys(selectedVotes).length
@@ -275,9 +283,29 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error}</span>
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-200 text-xs sm:text-sm animate-shake shadow-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+            <div>
+              <span className="font-semibold">{error}</span>
+              {existingSubmission && (
+                <p className="text-xs text-rose-300/90 mt-1">
+                  Registered on: {existingSubmission.createdAt ? new Date(existingSubmission.createdAt).toLocaleDateString() : 'Teachers Day Portal'} • Receipt: <strong className="font-mono text-amber-300">{existingSubmission.acknowledgementNumber || existingSubmission.ticketNumber}</strong>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {existingSubmission && (
+            <button
+              type="button"
+              onClick={() => setShowAckModal(true)}
+              className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shrink-0 transition-all hover:scale-105"
+            >
+              <FileText className="w-4 h-4" />
+              <span>View Official Receipt</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -724,32 +752,39 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* STEP 3: SUCCESS CONFIRMATION */}
+      {/* STEP 3: SUCCESS CONFIRMATION & OFFICIAL ACKNOWLEDGEMENT */}
       {/* ========================================================================= */}
       {currentStep === 3 && completedRecord && (
-        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border border-emerald-500/30 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto">
+        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border border-emerald-500/40 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto">
           
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/25">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/25 animate-float-soft">
             <CheckCircle2 className="w-12 h-12 text-slate-950" />
           </div>
 
           <div>
-            <h3 className="text-2xl sm:text-3xl font-black text-white font-display mt-3">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-widest bg-emerald-400/20 text-emerald-300 px-3.5 py-1 rounded-full border border-emerald-300/30 inline-block mb-2">
+              OFFICIAL CONTRIBUTION ACKNOWLEDGEMENT
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-black text-white font-display">
               Thank You, {completedRecord.name}!
             </h3>
             <p className="text-slate-300 text-sm max-w-md mx-auto mt-2">
-              Your registration and <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50} contribution</span> have been recorded.
+              Your celebration contribution of <span className="text-emerald-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00</span> has been verified and officially recorded.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-950/80 border border-white/10 text-left space-y-3 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-950/90 border border-white/10 text-left space-y-3 text-xs shadow-inner">
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-slate-400">Acknowledgement No</span>
+              <span className="text-amber-300 font-mono font-bold">{completedRecord.acknowledgementNumber || completedRecord.receiptNumber || completedRecord.ticketNumber}</span>
+            </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-slate-400">JNTU Roll Number</span>
               <span className="text-white font-mono font-bold">{completedRecord.rollNumber}</span>
             </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-slate-400">Contribution Amount</span>
-              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (Verified via UPI)</span>
+              <span className="text-emerald-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (PAID & VERIFIED)</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Event Date & Venue</span>
@@ -757,22 +792,40 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             </div>
           </div>
 
-          <button
-            onClick={() => { window.location.reload(); }}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all"
-          >
-            <span>Register Another Student</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => setShowAckModal(true)}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-105"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Open & Print Official Acknowledgement</span>
+            </button>
+
+            <button
+              onClick={() => { window.location.reload(); }}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all"
+            >
+              <span>Register Another Student</span>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Razorpay Payment Modal */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <PaymentModal
           studentData={formData}
           initialAmount={effectiveContributionAmount}
           onPaymentSuccess={handlePaymentSuccess}
           onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+
+      {/* Official Acknowledgement Modal */}
+      {(showAckModal && (completedRecord || existingSubmission)) && (
+        <AcknowledgementModal
+          submission={completedRecord || existingSubmission}
+          onClose={() => setShowAckModal(false)}
         />
       )}
 

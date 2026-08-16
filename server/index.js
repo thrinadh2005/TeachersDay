@@ -238,22 +238,30 @@ app.post('/api/anecdotes/:id/react', (req, res) => {
   }
 });
 
-// GET /api/check-registration/:roll - Check if roll has already registered & paid
-app.get('/api/check-registration/:roll', (req, res) => {
+// GET /api/check-registration/:roll - Check if roll number has already registered & contributed
+app.get(['/api/check-registration/:roll', '/api/check-roll/:roll'], (req, res) => {
   try {
-    const sanitizedRoll = sanitizeString(req.params.roll, 30).toUpperCase();
+    const sanitizedRoll = sanitizeString(req.params.roll, 30).toUpperCase().replace(/\s+/g, '');
     const existing = db.getSubmissionByRoll(sanitizedRoll);
-    if (existing && existing.payment?.status === 'verified') {
+    if (existing) {
       return res.json({
         success: true,
         alreadyRegistered: true,
         data: {
+          id: existing.id,
           name: existing.name,
           rollNumber: existing.rollNumber,
           year: existing.year,
           section: existing.section,
-          ticketNumber: existing.ticketNumber
-        }
+          acknowledgementNumber: existing.acknowledgementNumber || existing.ticketNumber,
+          receiptNumber: existing.receiptNumber || existing.acknowledgementNumber || existing.ticketNumber,
+          ticketNumber: existing.ticketNumber,
+          amount: existing.payment?.amount || 50,
+          paymentStatus: existing.payment?.status || 'verified',
+          transactionId: existing.payment?.transactionId || 'N/A',
+          createdAt: existing.createdAt
+        },
+        submission: existing
       });
     }
     res.json({ success: true, alreadyRegistered: false });
@@ -414,10 +422,12 @@ app.post('/api/submit', submitLimiter, (req, res) => {
     // Strict JNTU Roll Number Duplicate Check
     const existing = db.getSubmissionByRoll(sanitizedRoll);
     if (existing) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
-        error: `Student with JNTU Roll Number ${sanitizedRoll} has already registered (${existing.name}). Duplicate registration is not permitted.`,
-        isDuplicate: true
+        error: `Student with JNTU Roll Number ${sanitizedRoll} is already registered (${existing.name}, Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Duplicate registration is not permitted.`,
+        isDuplicate: true,
+        data: existing,
+        submission: existing
       });
     }
 

@@ -304,26 +304,28 @@ class Database {
 
   getSubmissionByRoll(rollNumber) {
     if (!rollNumber) return null;
-    const roll = (rollNumber || '').trim().toUpperCase();
-    return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll) || null;
+    const roll = (rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '') === roll) || null;
   }
 
   addSubmission(payload) {
-    const roll = (payload.rollNumber || '').trim().toUpperCase();
+    const roll = (payload.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
     
     // Strict JNTU Roll Number Uniqueness Check
-    const existing = this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase() === roll);
+    const existing = this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '') === roll);
     if (existing) {
       return { 
         success: false, 
-        error: `Student with JNTU Roll Number ${roll} has already registered (${existing.name}, Ticket: ${existing.ticketNumber}). Duplicate registration is not permitted.`, 
+        error: `Student with JNTU Roll Number ${roll} is already registered (${existing.name}, Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Duplicate registration is not permitted.`, 
         isDuplicate: true,
         submission: existing 
       };
     }
 
     const secCode = (payload.section || 'A').replace(/Section /i, '').trim();
-    const ticketNumber = `TD26-CSE${secCode}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const randNum = Math.floor(1000 + Math.random() * 9000);
+    const acknowledgementNumber = `GMRIT-CSE-ACK-${secCode}${randNum}`;
+    const ticketNumber = `TD26-CSE${secCode}-${randNum}`;
     const submissionId = `sub-${Date.now()}`;
     const anecdoteId = `a-${Date.now()}`;
 
@@ -355,6 +357,8 @@ class Database {
     const newSubmission = {
       id: submissionId,
       ticketNumber,
+      acknowledgementNumber,
+      receiptNumber: acknowledgementNumber,
       name: payload.name,
       rollNumber: roll,
       department: "Computer Science & Engineering (CSE)",

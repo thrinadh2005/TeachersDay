@@ -652,7 +652,7 @@ export const AdminDashboard = () => {
             }`}
         >
           <Users className="w-4 h-4" />
-          <span>Student Passes ({submissions.length})</span>
+          <span>Student Contributions ({submissions.length})</span>
         </button>
 
         <button
@@ -1071,11 +1071,11 @@ export const AdminDashboard = () => {
                         <td className="p-3.5 text-right flex items-center justify-end gap-2">
                           <button
                             onClick={() => setViewingPass(sub)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-amber-500/30"
-                            title="View & Print Official QR Pass"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
+                            title="View & Print Official Acknowledgement Slip"
                           >
-                            <Ticket className="w-3.5 h-3.5" />
-                            <span>Pass</span>
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Slip</span>
                           </button>
 
                           <button
@@ -1690,13 +1690,13 @@ export const AdminDashboard = () => {
               {/* Payment Details */}
               <div className="p-3 rounded-2xl bg-slate-950/90 border border-emerald-500/30 flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-400">Event Pass & Payment</div>
+                  <div className="text-[11px] text-slate-400">Celebration Contribution</div>
                   <div className="text-emerald-400 font-bold flex items-center gap-1">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>₹{selectedStudent.payment?.amount || 50} • {selectedStudent.payment?.status === 'verified' ? 'Verified' : 'Pending'}</span>
                   </div>
                   <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                    TXN / UTR: {selectedStudent.payment?.transactionId || 'N/A'} ({selectedStudent.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 Direct UPI' : selectedStudent.payment?.paymentMethod || 'Razorpay'})
+                    TXN / UTR: {selectedStudent.payment?.transactionId || 'N/A'} ({selectedStudent.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 Direct UPI' : selectedStudent.payment?.paymentMethod || 'UPI'})
                   </div>
                 </div>
 
@@ -1709,11 +1709,11 @@ export const AdminDashboard = () => {
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
               <button
                 onClick={() => setViewingPass(selectedStudent)}
-                className="w-full sm:flex-1 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-                title="View & Print Official QR Pass"
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                title="View & Print Official Acknowledgement Slip"
               >
-                <Ticket className="w-4 h-4" />
-                <span>Open & Print Pass (QR)</span>
+                <FileText className="w-4 h-4" />
+                <span>Open Acknowledgement Slip</span>
               </button>
 
               <button
