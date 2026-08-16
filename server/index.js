@@ -593,6 +593,20 @@ app.delete('/api/admin/teachers/:id', checkAdminAuth, (req, res) => {
   }
 });
 
+// DELETE /api/admin/submissions/:id - Delete a student registration submission
+app.delete('/api/admin/submissions/:id', checkAdminAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = db.deleteSubmission(sanitizeString(id, 50));
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // CSV Export (Protected against CSV Formula Injection)
 app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
   try {

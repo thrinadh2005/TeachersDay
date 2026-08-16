@@ -445,6 +445,48 @@ class Database {
     return { success: true, submission: sub };
   }
 
+  deleteSubmission(submissionId) {
+    const index = this.data.submissions.findIndex(s => s.id === submissionId || s.ticketNumber === submissionId);
+    if (index === -1) {
+      return { success: false, error: 'Submission record not found.' };
+    }
+
+    const removed = this.data.submissions.splice(index, 1)[0];
+
+    // If there was an associated anecdote, also delete it
+    if (removed.anecdoteId) {
+      const aIdx = this.data.anecdotes.findIndex(a => a.id === removed.anecdoteId);
+      if (aIdx !== -1) {
+        const removedAnecdote = this.data.anecdotes.splice(aIdx, 1)[0];
+        this.getMongoDb().then(mongoDb => {
+          if (mongoDb) {
+            mongoDb.collection('anecdotes').deleteOne({ id: removedAnecdote.id }).catch(console.error);
+          }
+        });
+      }
+    }
+
+    // Clean up voter registration history for this roll
+    if (removed.rollNumber && this.data.voters[removed.rollNumber]) {
+      delete this.data.voters[removed.rollNumber];
+      this.getMongoDb().then(mongoDb => {
+        if (mongoDb) {
+          mongoDb.collection('voters').deleteOne({ rollNumber: removed.rollNumber }).catch(console.error);
+        }
+      });
+    }
+
+    this.save();
+
+    this.getMongoDb().then(mongoDb => {
+      if (mongoDb) {
+        mongoDb.collection('submissions').deleteOne({ id: removed.id }).catch(console.error);
+      }
+    });
+
+    return { success: true, message: 'Submission deleted successfully.', id: removed.id };
+  }
+
   getSubmissions() {
     return this.data.submissions;
   }

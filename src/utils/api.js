@@ -192,6 +192,16 @@ export const api = {
     return data;
   },
 
+  async deleteSubmission(pin, submissionId) {
+    const res = await fetch(`${API_BASE}/admin/submissions/${encodeURIComponent(submissionId)}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-pin': pin }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete submission');
+    return data;
+  },
+
   async addTeacher(pin, teacherData) {
     const res = await fetch(`${API_BASE}/admin/teachers`, {
       method: 'POST',

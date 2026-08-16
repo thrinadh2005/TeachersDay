@@ -173,6 +173,25 @@ export const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteSubmission = async (id, studentName, ticketNumber) => {
+    if (!window.confirm(`Are you sure you want to permanently delete registration for "${studentName}" (${ticketNumber || id})? This will remove their event ticket and voting record.`)) {
+      return;
+    }
+
+    try {
+      const res = await api.deleteSubmission(adminPin, id);
+      if (res.success) {
+        setNotification({ type: 'success', message: `Registration for ${studentName} successfully deleted.` });
+        if (selectedStudent && (selectedStudent.id === id || selectedStudent.ticketNumber === id)) {
+          setSelectedStudent(null);
+        }
+        loadData(adminPin);
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message });
+    }
+  };
+
   const handleSaveTeacher = async (e) => {
     e.preventDefault();
     if (!teacherFormData.name.trim()) return;
@@ -818,7 +837,7 @@ export const AdminDashboard = () => {
                         <td className="p-3.5 text-right flex items-center justify-end gap-2">
                           <button
                             onClick={() => setSelectedStudent(sub)}
-                            className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
                             title="View Full Registration Details"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -827,12 +846,22 @@ export const AdminDashboard = () => {
 
                           <button
                             onClick={() => handleTogglePayment(sub.id, sub.payment?.status)}
-                            className={`px-3 py-1 rounded-lg font-bold text-[11px] transition-all ${isVerified
-                                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all border ${isVerified
+                                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-white/10'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500/40'
                               }`}
+                            title={isVerified ? 'Mark as Pending' : 'Verify ₹50 Payment'}
                           >
                             {isVerified ? 'Mark Pending' : 'Verify ₹50'}
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteSubmission(sub.id, sub.name, sub.ticketNumber)}
+                            className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-rose-500/30"
+                            title="Delete Student Registration"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
                           </button>
                         </td>
                       </tr>
@@ -1092,10 +1121,19 @@ export const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={() => handleDeleteSubmission(selectedStudent.id, selectedStudent.name, selectedStudent.ticketNumber)}
+                className="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                title="Permanently Delete This Registration"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete Registration</span>
+              </button>
+
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
               >
                 Close Details
               </button>
