@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { fireFestiveConfetti } from '../utils/confetti';
 
-export const EntryPassModal = ({ submission, onClose }) => {
+export const EntryPassModal = ({ submission, onClose, onDelete }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const passRef = useRef(null);
 
@@ -32,6 +32,7 @@ export const EntryPassModal = ({ submission, onClose }) => {
         section: submission.section,
         speaker: submission.interestedInSpeaking === 'Yes' ? 'YES' : 'NO',
         status: submission.payment?.status || 'verified',
+        amount: submission.payment?.amount || 50,
         event: 'TeachersDay2026_CSE'
       });
 
@@ -89,7 +90,7 @@ export const EntryPassModal = ({ submission, onClose }) => {
             <div className="flex justify-between items-start border-b border-white/10 pb-4">
               <div>
                 <span className="text-[10px] uppercase font-extrabold tracking-widest text-amber-400">
-                  CSE DEPARTMENT PASS • ₹50 PAID
+                  CSE DEPARTMENT PASS • ₹{submission.payment?.amount || 50} PAID
                 </span>
                 <h3 className="text-lg font-black text-white font-display flex items-center gap-2">
                   <Code className="w-5 h-5 text-amber-400" />
@@ -111,7 +112,7 @@ export const EntryPassModal = ({ submission, onClose }) => {
                 <span className="font-bold text-white text-base">{submission.name}</span>
               </div>
               <div>
-                <span className="text-xs text-slate-400 block">CSE Roll Number</span>
+                <span className="text-xs text-slate-400 block">JNTU Roll Number</span>
                 <span className="font-bold text-purple-300 font-mono">{submission.rollNumber}</span>
               </div>
               <div>
@@ -185,6 +186,20 @@ export const EntryPassModal = ({ submission, onClose }) => {
               <Printer className="w-4 h-4" />
               <span>Print / Save Pass</span>
             </button>
+
+            {onDelete && (
+              <button
+                onClick={() => {
+                  onDelete(submission.id, submission.name, submission.ticketNumber);
+                  onClose();
+                }}
+                className="py-3 px-4 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 font-bold text-sm flex items-center justify-center gap-1.5 transition-colors"
+                title="Delete this pass"
+              >
+                <span>Delete Pass</span>
+              </button>
+            )}
+
             <button
               onClick={onClose}
               className="py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm text-slate-300 transition-colors"

@@ -498,7 +498,9 @@ class Database {
   getAdminOverview() {
     const totalSubmissions = this.data.submissions.length;
     const verifiedPayments = this.data.submissions.filter(s => s.payment && s.payment.status === 'verified').length;
-    const totalFundsCollected = verifiedPayments * 50;
+    const totalFundsCollected = this.data.submissions
+      .filter(s => s.payment && s.payment.status === 'verified')
+      .reduce((sum, s) => sum + (Number(s.payment?.amount) || 50), 0);
     const pendingAnecdotes = this.data.anecdotes.filter(a => a.status === 'pending').length;
     const totalVotes = this.data.teachers.reduce((acc, t) => acc + (t.totalVotes || 0), 0);
     const speakersCount = this.data.submissions.filter(s => s.interestedInSpeaking === 'Yes').length;
@@ -531,6 +533,21 @@ class Database {
       mongoConnected: this.mongoConnected,
       topTeachers: [...this.data.teachers].sort((a, b) => (b.totalVotes || 0) - (a.totalVotes || 0)).slice(0, 3)
     };
+  }
+
+  deleteAnecdote(anecdoteId) {
+    const index = this.data.anecdotes.findIndex(a => a.id === anecdoteId);
+    if (index === -1) return { success: false, error: 'Anecdote not found' };
+    const removed = this.data.anecdotes.splice(index, 1)[0];
+    this.save();
+
+    this.getMongoDb().then(mongoDb => {
+      if (mongoDb) {
+        mongoDb.collection('anecdotes').deleteOne({ id: anecdoteId }).catch(console.error);
+      }
+    });
+
+    return { success: true, message: 'Anecdote deleted successfully.', anecdote: removed };
   }
 
   addTeacher(teacherData) {

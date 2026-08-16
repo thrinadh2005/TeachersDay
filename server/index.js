@@ -453,7 +453,9 @@ app.get('/api/showcase', (req, res) => {
       success: true,
       data: {
         totalParticipants: submissions.length,
-        fundsCollected: submissions.filter(s => s.payment?.status === 'verified').length * 50,
+        fundsCollected: submissions
+          .filter(s => s.payment?.status === 'verified')
+          .reduce((sum, s) => sum + (Number(s.payment?.amount) || 50), 0),
         speakers,
         featuredAnecdotes: approvedAnecdotes.slice(0, 3)
       }
@@ -609,6 +611,20 @@ app.delete('/api/admin/submissions/:id', checkAdminAuth, (req, res) => {
   try {
     const { id } = req.params;
     const result = db.deleteSubmission(sanitizeString(id, 50));
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/admin/anecdotes/:id - Delete an anecdote entry
+app.delete('/api/admin/anecdotes/:id', checkAdminAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = db.deleteAnecdote(sanitizeString(id, 50));
     if (!result.success) {
       return res.status(404).json(result);
     }

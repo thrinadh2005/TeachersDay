@@ -202,6 +202,16 @@ export const api = {
     return data;
   },
 
+  async deleteAnecdote(pin, anecdoteId) {
+    const res = await fetch(`${API_BASE}/admin/anecdotes/${encodeURIComponent(anecdoteId)}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-pin': pin }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete anecdote');
+    return data;
+  },
+
   async addTeacher(pin, teacherData) {
     const res = await fetch(`${API_BASE}/admin/teachers`, {
       method: 'POST',

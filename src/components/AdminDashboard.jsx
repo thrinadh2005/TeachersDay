@@ -25,9 +25,12 @@ import {
   EyeOff,
   Trophy,
   Star,
-  Check
+  Check,
+  Ticket,
+  Printer
 } from 'lucide-react';
 import { api } from '../utils/api';
+import { EntryPassModal } from './EntryPassModal';
 
 export const AdminDashboard = () => {
   const [adminPin, setAdminPin] = useState(localStorage.getItem('td_admin_pin') || '');
@@ -46,6 +49,7 @@ export const AdminDashboard = () => {
   const [isRevealed, setIsRevealed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [viewingPass, setViewingPass] = useState(null);
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -185,6 +189,22 @@ export const AdminDashboard = () => {
         if (selectedStudent && (selectedStudent.id === id || selectedStudent.ticketNumber === id)) {
           setSelectedStudent(null);
         }
+        loadData(adminPin);
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleDeleteAnecdote = async (id, teacherName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete this memory story about "${teacherName}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await api.deleteAnecdote(adminPin, id);
+      if (res.success) {
+        setNotification({ type: 'success', message: `Memory story deleted successfully.` });
         loadData(adminPin);
       }
     } catch (err) {
@@ -411,7 +431,7 @@ export const AdminDashboard = () => {
             ₹{overview?.totalFundsCollected || 0}
           </div>
           <span className="text-[11px] text-emerald-300">
-            {overview?.verifiedPayments || 0} Verified (₹50 each)
+            {overview?.verifiedPayments || 0} Verified Contributions
           </span>
         </div>
 
@@ -642,9 +662,26 @@ export const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                    <span>Contact: {sp.phone || sp.email || 'N/A'}</span>
-                    <span className="text-emerald-400 font-bold">✓ Pass ₹50 Verified</span>
+                  <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-white/5">
+                    <span className="font-semibold text-emerald-400">✓ ₹{sp.payment?.amount || 50} Verified</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedStudent(sp)}
+                        className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
+                        title="View Full Pass Details"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Pass</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSubmission(sp.id, sp.name, sp.ticketNumber)}
+                        className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-rose-500/30"
+                        title="Delete Speaker Registration"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -722,6 +759,15 @@ export const AdminDashboard = () => {
                         Reset
                       </button>
                     )}
+
+                    <button
+                      onClick={() => handleDeleteAnecdote(item.id, item.teacherName)}
+                      className="py-1.5 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 border border-rose-500/30"
+                      title="Permanently Delete Memory"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -831,10 +877,19 @@ export const AdminDashboard = () => {
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                               : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                             }`}>
-                            {isVerified ? '✓ ₹50 Paid (Razorpay)' : '⏳ Pending'}
+                            {isVerified ? `✓ ₹${sub.payment?.amount || 50} Paid (Razorpay)` : '⏳ Pending'}
                           </span>
                         </td>
                         <td className="p-3.5 text-right flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setViewingPass(sub)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-amber-500/30"
+                            title="View & Print Official QR Pass"
+                          >
+                            <Ticket className="w-3.5 h-3.5" />
+                            <span>Pass</span>
+                          </button>
+
                           <button
                             onClick={() => setSelectedStudent(sub)}
                             className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
@@ -850,9 +905,9 @@ export const AdminDashboard = () => {
                                 ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-white/10'
                                 : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500/40'
                               }`}
-                            title={isVerified ? 'Mark as Pending' : 'Verify ₹50 Payment'}
+                            title={isVerified ? 'Mark as Pending' : `Verify ₹${sub.payment?.amount || 50} Payment`}
                           >
-                            {isVerified ? 'Mark Pending' : 'Verify ₹50'}
+                            {isVerified ? 'Mark Pending' : `Verify ₹${sub.payment?.amount || 50}`}
                           </button>
 
                           <button
@@ -1121,10 +1176,19 @@ export const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center gap-2">
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+              <button
+                onClick={() => setViewingPass(selectedStudent)}
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                title="View & Print Official QR Pass"
+              >
+                <Ticket className="w-4 h-4" />
+                <span>Open & Print Pass (QR)</span>
+              </button>
+
               <button
                 onClick={() => handleDeleteSubmission(selectedStudent.id, selectedStudent.name, selectedStudent.ticketNumber)}
-                className="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 title="Permanently Delete This Registration"
               >
                 <Trash2 className="w-4 h-4" />
@@ -1133,14 +1197,23 @@ export const AdminDashboard = () => {
 
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
               >
-                Close Details
+                Close
               </button>
             </div>
 
           </div>
         </div>
+      )}
+
+      {/* FULL PRINTABLE OFFICIAL PASS MODAL WITH DELETE */}
+      {viewingPass && (
+        <EntryPassModal
+          submission={viewingPass}
+          onClose={() => setViewingPass(null)}
+          onDelete={handleDeleteSubmission}
+        />
       )}
 
     </section>
