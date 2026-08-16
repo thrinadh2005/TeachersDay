@@ -3,13 +3,11 @@ import {
   X, 
   Loader2,
   Sparkles,
-  ArrowRight,
   User,
   ShieldCheck,
   CheckCircle2,
   Info,
-  Zap,
-  Check
+  Lock
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
@@ -49,26 +47,35 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     razorpayButtonRef.current.appendChild(form);
   }, []);
 
-  // 2. Automatic Listener for Razorpay Window Messages (instant auto-verification)
+  // 2. Automatic Detection when Payment Completes on Razorpay
   useEffect(() => {
     const handleRazorpayMessage = (event) => {
       if (event.data && typeof event.data === 'object') {
         const pId = event.data.razorpay_payment_id || event.data.payment_id;
         if (pId) {
-          handleDirectSuccess(pId);
+          handleAutoSuccess(pId);
         }
       }
     };
 
+    // Auto-check when student returns to tab after paying
+    const handleWindowFocus = () => {
+      if (!isProcessing) {
+        checkBackendStatusSilently();
+      }
+    };
+
     window.addEventListener('message', handleRazorpayMessage);
-    return () => window.removeEventListener('message', handleRazorpayMessage);
-  }, []);
+    window.addEventListener('focus', handleWindowFocus);
 
-  // 3. Live Server-Side Verification against Razorpay API
-  const handleVerifyLivePayment = async () => {
-    setIsProcessing(true);
-    setPaymentError(null);
+    return () => {
+      window.removeEventListener('message', handleRazorpayMessage);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [isProcessing, studentData, lockedAmount]);
 
+  // Silent automatic check when student finishes payment on Razorpay
+  const checkBackendStatusSilently = async () => {
     try {
       const res = await api.verifyRazorpayLiveStatus({
         email: studentData?.email || '',
@@ -79,18 +86,15 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       });
 
       if (res.success && res.verified) {
-        handleDirectSuccess(res.transactionId);
-      } else {
-        throw new Error(res.error || `No ₹${lockedAmount} payment detected on Razorpay yet.`);
+        handleAutoSuccess(res.transactionId);
       }
     } catch (err) {
-      console.warn('Payment check warning:', err);
-      setPaymentError(err.message || `No ₹${lockedAmount} payment found on Razorpay. Please click the Razorpay Button and complete payment first.`);
-      setIsProcessing(false);
+      // Keep waiting for student to complete payment
     }
   };
 
-  const handleDirectSuccess = (txnId) => {
+  // Instant Automatic Save & Pass Issuance
+  const handleAutoSuccess = (txnId) => {
     setIsProcessing(true);
     fireFestiveConfetti();
 
@@ -104,7 +108,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         paymentMethod: 'RAZORPAY_OFFICIAL',
         transactionId: finalId
       });
-    }, 450);
+    }, 400);
   };
 
   return (
@@ -131,11 +135,11 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                   ₹{lockedAmount} Contribution Pass
                 </h3>
                 <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                  Fixed Amount
+                  Official Gateway
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Official Razorpay Live Payment Gateway • GMRIT CSE
+                Official Razorpay Live Checkout • GMRIT CSE
               </p>
             </div>
           </div>
@@ -149,8 +153,8 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
           </button>
         </div>
 
-        {/* Modal Body (Scrollable) */}
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
+        {/* Modal Body */}
+        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
           
           {paymentError && (
             <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs animate-shake shadow-lg">
@@ -162,7 +166,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
           )}
 
           {/* Student Details Summary Card */}
-          <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-white/10 text-xs space-y-2 relative overflow-hidden">
+          <div className="p-4 rounded-2xl bg-slate-950/90 border border-white/10 text-xs space-y-2.5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none"></div>
             
             <div className="flex items-center justify-between border-b border-white/5 pb-2">
@@ -180,75 +184,58 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               </span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Fixed Contribution Amount</span>
-              <span className="font-black text-amber-400 text-base font-display">₹{lockedAmount}.00</span>
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-slate-400">Department & Class</span>
+              <span className="text-slate-200 font-semibold">{studentData?.year} • {studentData?.section} (CSE)</span>
+            </div>
+
+            <div className="flex items-center justify-between pt-0.5">
+              <span className="text-slate-400 font-medium">Contribution Pass Amount</span>
+              <span className="font-black text-amber-400 text-lg font-display">₹{lockedAmount}.00</span>
             </div>
           </div>
 
-          {/* RAZORPAY PAYMENT GATEWAY BUTTON CONTAINER */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald relative overflow-hidden text-center">
+          {/* FINAL RAZORPAY PAYMENT BUTTON (SINGLE ACTION) */}
+          <div className="p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald text-center relative overflow-hidden">
             
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  Step 1: Complete ₹{lockedAmount} Payment
-                </span>
-              </div>
-              <span className="text-[10px] text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                Google Pay • PhonePe • Cards
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-black uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                Final Step • Instant Pass
               </span>
+              <p className="text-xs text-slate-300 pt-1">
+                Click the official Razorpay button below to complete payment. Once paid, your details will be <strong>saved automatically and your Official Celebration Pass will be issued immediately!</strong>
+              </p>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Click the official <strong>Razorpay Button</strong> below to pay ₹{lockedAmount} using any UPI app (GPay, PhonePe, Paytm), Debit/Credit Cards, or NetBanking:
-            </p>
-
-            {/* Razorpay Button Embed */}
-            <div className="py-3 flex flex-col items-center justify-center min-h-[56px]">
-              <div ref={razorpayButtonRef} className="flex justify-center items-center scale-110 hover:scale-115 transition-transform"></div>
-              
-              {buttonLoading && (
-                <div className="flex items-center gap-2 text-xs text-emerald-300">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Loading Official Razorpay Button...</span>
+            {/* Official Razorpay Pay Button Embed */}
+            <div className="py-4 flex flex-col items-center justify-center min-h-[64px]">
+              {isProcessing ? (
+                <div className="flex flex-col items-center gap-2 text-emerald-300 py-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+                  <span className="text-xs font-bold animate-pulse">Payment completed! Saving registration & generating pass...</span>
                 </div>
+              ) : (
+                <>
+                  <div ref={razorpayButtonRef} className="flex justify-center items-center scale-125 hover:scale-130 transition-transform"></div>
+                  
+                  {buttonLoading && (
+                    <div className="flex items-center gap-2 text-xs text-emerald-300">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Loading Official Razorpay Gateway...</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-center">
-              <p className="text-[11px] text-emerald-200">
-                🔒 256-Bit Encrypted Secure Checkout hosted directly by Razorpay
+              <p className="text-[11px] text-emerald-200 flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                <span>256-Bit Encrypted Secure Checkout hosted directly by Razorpay</span>
               </p>
             </div>
 
-          </div>
-
-          {/* STEP 2: VERIFY PAYMENT & DOWNLOAD PASS (LIVE SERVER CHECK) */}
-          <div className="space-y-2.5 pt-1">
-            <button
-              type="button"
-              onClick={handleVerifyLivePayment}
-              disabled={isProcessing}
-              className="relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-black text-sm sm:text-base shadow-2xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2.5 shimmer-button overflow-hidden hover:scale-[1.02] active:scale-95 group"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
-                  <span>Checking Razorpay Live Servers...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 fill-current text-slate-950 group-hover:scale-125 transition-transform" />
-                  <span>I've Paid ₹{lockedAmount} — Verify & Download My Pass!</span>
-                  <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-            <p className="text-[11px] text-center text-slate-400">
-              ⚡ As soon as you finish payment on Razorpay, click above to verify and download your Official Celebration Pass!
-            </p>
           </div>
 
           {/* Security Guarantee Footer */}
