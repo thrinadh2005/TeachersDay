@@ -1732,7 +1732,7 @@ export const AdminDashboard = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 9663355000@ybl"
+                    placeholder="e.g. venkatathrinadh958301.rzp@rxairtel"
                     value={paymentSettings.upiId || ''}
                     onChange={(e) => setPaymentSettings({ ...paymentSettings, upiId: e.target.value })}
                     className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-white/15 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
@@ -1770,7 +1770,7 @@ export const AdminDashboard = () => {
                       Scan this QR code with any UPI app to verify that payments route correctly to your bank account before student registrations begin.
                     </p>
                     <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block">
-                      upi://pay?pa={paymentSettings.upiId || '9663355000@ybl'}&am=50
+                      upi://pay?pa={paymentSettings.upiId || 'venkatathrinadh958301.rzp@rxairtel'}&am=50
                     </span>
                   </div>
                 </div>

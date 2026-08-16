@@ -18,7 +18,7 @@ class Database {
       revealVotingResults: false,
       adminPin: process.env.ADMIN_PIN || '',
       paymentConfig: {
-        upiId: process.env.UPI_ID || '9663355000@ybl',
+        upiId: process.env.UPI_ID || 'venkatathrinadh958301.rzp@rxairtel',
         payeeName: process.env.PAYEE_NAME || 'ADABALA VENKATA THRINADH',
         enableUpi: true
       }
@@ -626,8 +626,8 @@ class Database {
 
   getPaymentConfig() {
     return this.data.paymentConfig || {
-      upiId: '9663355000@ybl',
-      payeeName: 'CSE Teachers Day 2026',
+      upiId: 'venkatathrinadh958301.rzp@rxairtel',
+      payeeName: 'ADABALA VENKATA THRINADH',
       enableUpi: true
     };
   }

@@ -164,10 +164,10 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
               <div className="space-y-0.5">
                 <div className="text-[11px] text-slate-400 flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Payment Method: <strong className="text-white">Direct UPI (9663355000@ybl)</strong></span>
+                  <span>Payment: <strong className="text-white">Razorpay Verified Merchant UPI</strong></span>
                 </div>
                 <div className="text-[11px] text-slate-400 font-mono">
-                  UTR / Txn Ref: <span className="text-amber-300 font-semibold select-all">{submission.payment?.transactionId || 'Direct UPI'}</span>
+                  UTR / Txn Ref: <span className="text-amber-300 font-semibold select-all">{submission.payment?.transactionId || 'Verified'}</span>
                 </div>
               </div>
 

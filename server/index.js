@@ -278,7 +278,7 @@ app.get('/api/pay/config', (req, res) => {
     currency: 'INR',
     razorpayKeyId: RAZORPAY_KEY_ID,
     enableRazorpay: Boolean(RAZORPAY_KEY_ID && razorpayClient),
-    upiId: pConfig.upiId || '9663355000@ybl',
+    upiId: pConfig.upiId || 'venkatathrinadh958301.rzp@rxairtel',
     payeeName: pConfig.payeeName || 'ADABALA VENKATA THRINADH',
     enableUpi: true
   });
@@ -712,8 +712,8 @@ app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
   try {
     const { upiId, payeeName } = req.body;
     const updated = db.updatePaymentConfig({
-      upiId: sanitizeString(upiId, 100) || '9663355000@ybl',
-      payeeName: sanitizeString(payeeName, 100) || 'CSE Teachers Day 2026',
+      upiId: sanitizeString(upiId, 100) || 'venkatathrinadh958301.rzp@rxairtel',
+      payeeName: sanitizeString(payeeName, 100) || 'ADABALA VENKATA THRINADH',
       enableUpi: true
     });
     res.json({
