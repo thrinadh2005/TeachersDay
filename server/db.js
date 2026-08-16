@@ -385,7 +385,7 @@ class Database {
         currency: 'INR',
         status: payload.paymentStatus || 'verified',
         transactionId: payload.transactionId || `TXN_CSE_${Date.now()}`,
-        paymentMethod: payload.paymentMethod || 'RAZORPAY',
+        paymentMethod: payload.paymentMethod || 'UPI_DIRECT',
         paidAt: new Date().toISOString()
       },
       createdAt: new Date().toISOString()

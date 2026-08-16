@@ -297,7 +297,7 @@ app.post('/api/submit', submitLimiter, (req, res) => {
     const sanitizedSpeechTopic = sanitizeString(speechTopic, 400);
     const sanitizedFavoriteTeacher = sanitizeString(favoriteTeacher, 80);
     const sanitizedAnecdote = sanitizeString(anecdote, 600);
-    const sanitizedMethod = sanitizeString(paymentMethod, 30) || 'RAZORPAY';
+    const sanitizedMethod = sanitizeString(paymentMethod, 30) || 'UPI_DIRECT';
     const sanitizedTxn = sanitizeString(transactionId, 80) || `TXN_${Date.now()}`;
     const sanitizedStatus = paymentStatus === 'verified' ? 'verified' : 'pending';
     const finalAmount = Math.max(50, Math.floor(Number(paymentAmount) || Number(amount) || 50));
