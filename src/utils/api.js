@@ -56,42 +56,10 @@ export const api = {
     return res.json();
   },
 
-  // Razorpay & Payments Integration
+  // Payments & UPI Integration
   async getPaymentConfig() {
     const res = await fetch(`${API_BASE}/pay/config`);
     if (!res.ok) throw new Error('Failed to fetch payment config');
-    return res.json();
-  },
-
-  async createRazorpayOrder(payload) {
-    const res = await fetch(`${API_BASE}/pay/razorpay-order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create Razorpay Order');
-    return data;
-  },
-
-  async verifyRazorpayPayment(payload) {
-    const res = await fetch(`${API_BASE}/pay/razorpay-verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to verify Razorpay Payment');
-    return data;
-  },
-
-  async createPaymentOrder(payload) {
-    const res = await fetch(`${API_BASE}/pay/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('Failed to initiate payment');
     return res.json();
   },
 

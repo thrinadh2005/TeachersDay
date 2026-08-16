@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { api } from '../utils/api';
-import { EntryPassModal } from './EntryPassModal';
+import { AcknowledgementModal } from './AcknowledgementModal';
 
 const defaultFacultyPresets = [
   { filename: "Dr_A_V_Ramana.jpg", path: "/faculty/Dr_A_V_Ramana.jpg", label: "Dr. A.V. Ramana" },
@@ -1737,9 +1737,9 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* FULL PRINTABLE OFFICIAL PASS MODAL WITH DELETE */}
+      {/* FULL PRINTABLE OFFICIAL ACKNOWLEDGEMENT MODAL WITH DELETE */}
       {viewingPass && (
-        <EntryPassModal
+        <AcknowledgementModal
           submission={viewingPass}
           onClose={() => setViewingPass(null)}
           onDelete={handleDeleteSubmission}

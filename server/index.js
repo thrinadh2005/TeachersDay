@@ -6,7 +6,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
-import Razorpay from 'razorpay';
 import { db } from './db.js';
 import { votingCategories } from './initialData.js';
 
@@ -130,24 +129,6 @@ const sanitizeCsvField = (field) => {
   }
   return `"${str.replace(/"/g, '""')}"`;
 };
-
-// ==========================================
-// 💳 RAZORPAY INITIALIZATION
-// ==========================================
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
-
-let razorpayInstance = null;
-if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
-  try {
-    razorpayInstance = new Razorpay({
-      key_id: RAZORPAY_KEY_ID,
-      key_secret: RAZORPAY_KEY_SECRET
-    });
-  } catch (err) {
-    console.warn('Razorpay initialization note:', err.message);
-  }
-}
 
 // ==========================================
 // 📡 PUBLIC API ROUTES
@@ -281,97 +262,6 @@ app.get('/api/pay/config', (req, res) => {
     payeeName: pConfig.payeeName || 'CSE Teachers Day 2026',
     enableUpi: true
   });
-});
-
-// POST /api/pay/razorpay-order - Create Razorpay Order (Minimum ₹50, allows higher custom contribution)
-app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
-  try {
-    const { rollNumber, name, amount } = req.body;
-    const sanitizedRoll = sanitizeString(rollNumber, 30).toUpperCase() || 'CSE';
-    const sanitizedName = sanitizeString(name, 80) || 'Student';
-
-    // Strict Single-Registration Enforcement: Check by JNTU Roll Number
-    const existing = db.getSubmissionByRoll(sanitizedRoll);
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        error: `Student with JNTU Roll Number ${sanitizedRoll} has already registered (${existing.name}, Ticket: ${existing.ticketNumber}). Duplicate registration is not permitted.`
-      });
-    }
-
-    // Dynamic Contribution Amount: Minimum ₹50.00
-    const parsedAmount = Math.max(50, Math.floor(Number(amount) || 50));
-    const amountInPaise = parsedAmount * 100;
-    const cleanRoll = sanitizedRoll.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
-    const receiptId = `rc_${cleanRoll}_${Date.now()}`.slice(0, 38);
-
-    if (razorpayInstance && process.env.RAZORPAY_KEY_SECRET) {
-      try {
-        const order = await razorpayInstance.orders.create({
-          amount: amountInPaise,
-          currency: 'INR',
-          receipt: receiptId,
-          notes: {
-            department: 'CSE',
-            studentName: sanitizedName,
-            rollNumber: sanitizedRoll,
-            eventPassAmount: parsedAmount
-          }
-        });
-        return res.json({
-          success: true,
-          data: {
-            orderId: order.id,
-            amount: amountInPaise,
-            currency: 'INR',
-            keyId: RAZORPAY_KEY_ID,
-            isRealOrder: true
-          }
-        });
-      } catch (rzpErr) {
-        console.warn('Razorpay Order creation notice:', rzpErr.message);
-      }
-    }
-
-    res.json({
-      success: true,
-      data: {
-        orderId: null,
-        amount: amountInPaise,
-        currency: 'INR',
-        keyId: RAZORPAY_KEY_ID,
-        isRealOrder: false
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Could not initialize order.' });
-  }
-});
-
-// POST /api/pay/razorpay-verify - HMAC-SHA256 Cryptographic Signature Verification
-app.post('/api/pay/razorpay-verify', (req, res) => {
-  try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-    if (process.env.RAZORPAY_KEY_SECRET && razorpay_signature) {
-      const generated_signature = crypto
-        .createHmac('sha256', RAZORPAY_KEY_SECRET)
-        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-        .digest('hex');
-
-      if (generated_signature !== razorpay_signature) {
-        return res.status(400).json({ success: false, error: 'Payment signature validation failed.' });
-      }
-    }
-
-    res.json({
-      success: true,
-      message: 'Payment verified securely.',
-      paymentId: razorpay_payment_id || `pay_${Date.now()}`
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Verification error.' });
-  }
 });
 
 // POST /api/submit - Submit CSE Student registration + mandatory payment verification

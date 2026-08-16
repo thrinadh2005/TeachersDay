@@ -248,5 +248,3 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
   );
 };
 
-// Export as EntryPassModal for backwards compatibility
-export const EntryPassModal = AcknowledgementModal;
