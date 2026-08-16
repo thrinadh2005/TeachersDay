@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
-app.use(express.json({ limit: '300kb' })); // Guard against oversized payload floods
+app.use(express.json({ limit: '10mb' })); // Support base64 image uploads
 
 // ==========================================
 // 🛡️ IN-MEMORY RATE LIMITER
@@ -102,6 +102,24 @@ const sanitizeString = (str, maxLen = 300) => {
     .replace(/javascript:/gi, '') // Strip javascript scheme
     .trim()
     .slice(0, maxLen);
+};
+
+const sanitizeAvatar = (avatarStr) => {
+  if (typeof avatarStr !== 'string' || !avatarStr.trim()) {
+    return '/faculty/Dr_A_V_Ramana.jpg';
+  }
+  const trimmed = avatarStr.trim();
+  // Support Base64 Data URL images (PNG, JPEG, WEBP, SVG, GIF)
+  if (trimmed.startsWith('data:image/')) {
+    if (/^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(trimmed)) {
+      return trimmed.slice(0, 5000000); // Allow up to 5MB data URL
+    }
+  }
+  // Support standard path or web image URL
+  return trimmed
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/javascript:/gi, '')
+    .slice(0, 2000);
 };
 
 const sanitizeCsvField = (field) => {
@@ -563,6 +581,31 @@ app.post('/api/admin/verify-payment', checkAdminAuth, (req, res) => {
   }
 });
 
+// GET /api/admin/faculty-presets - List available department faculty photos
+app.get('/api/admin/faculty-presets', checkAdminAuth, (req, res) => {
+  try {
+    const facultyDir = path.join(__dirname, '..', 'public', 'faculty');
+    if (fs.existsSync(facultyDir)) {
+      const files = fs.readdirSync(facultyDir);
+      const presets = files
+        .filter(f => /\.(jpg|jpeg|png|webp|svg)$/i.test(f))
+        .map(file => {
+          const namePart = file.replace(/\.(jpg|jpeg|png|webp|svg)$/i, '');
+          const formattedName = namePart.replace(/_/g, ' ');
+          return {
+            filename: file,
+            path: `/faculty/${file}`,
+            label: formattedName
+          };
+        });
+      return res.json({ success: true, data: presets });
+    }
+    res.json({ success: true, data: [] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/admin/teachers', checkAdminAuth, (req, res) => {
   try {
     const { name, degree, department, designation, avatar } = req.body;
@@ -574,7 +617,7 @@ app.post('/api/admin/teachers', checkAdminAuth, (req, res) => {
       degree: sanitizeString(degree, 40),
       department: sanitizeString(department, 80) || 'Computer Science & Engineering',
       designation: sanitizeString(designation, 80),
-      avatar: sanitizeString(avatar, 200) || '/faculty/Dr_A_V_Ramana.jpg'
+      avatar: sanitizeAvatar(avatar)
     });
     res.status(201).json({ success: true, data: newTeacher });
   } catch (err) {
@@ -590,7 +633,7 @@ app.put('/api/admin/teachers/:id', checkAdminAuth, (req, res) => {
       ...(name ? { name: sanitizeString(name, 80) } : {}),
       ...(degree ? { degree: sanitizeString(degree, 40) } : {}),
       ...(designation ? { designation: sanitizeString(designation, 80) } : {}),
-      ...(avatar ? { avatar: sanitizeString(avatar, 200) } : {})
+      ...(avatar !== undefined ? { avatar: sanitizeAvatar(avatar) } : {})
     });
     res.json(result);
   } catch (err) {

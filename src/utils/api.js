@@ -250,6 +250,15 @@ export const api = {
     return data;
   },
 
+  async getFacultyPresets(pin) {
+    const res = await fetch(`${API_BASE}/admin/faculty-presets`, {
+      headers: { 'x-admin-pin': pin }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch faculty presets');
+    return data;
+  },
+
   getExportCsvUrl(pin) {
     return `${API_BASE}/admin/export-csv?pin=${pin}`;
   }

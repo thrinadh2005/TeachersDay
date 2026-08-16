@@ -40,10 +40,29 @@ export default function App() {
 
   useEffect(() => {
     loadShowcaseData();
+
+    // Check URL hash or query param for tab routing
+    const hash = window.location.hash.replace('#', '').toLowerCase();
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab') || searchParams.get('page');
+    const path = window.location.pathname.toLowerCase();
+
+    if (hash === 'admin' || tabParam === 'admin' || path.includes('/admin')) {
+      setActiveTab('admin');
+    } else if (['register', 'vote', 'memories'].includes(hash)) {
+      setActiveTab(hash);
+    } else if (['register', 'vote', 'memories'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
   }, []);
 
   const handleTabSwitch = (tab) => {
     setActiveTab(tab);
+    if (tab === 'admin') {
+      window.location.hash = 'admin';
+    } else if (window.location.hash === '#admin') {
+      history.pushState(null, '', window.location.pathname);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

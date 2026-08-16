@@ -27,10 +27,57 @@ import {
   Star,
   Check,
   Ticket,
-  Printer
+  Printer,
+  UploadCloud,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Camera,
+  RotateCcw,
+  Layers,
+  FolderOpen
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { EntryPassModal } from './EntryPassModal';
+
+const defaultFacultyPresets = [
+  { filename: "Dr_A_V_Ramana.jpg", path: "/faculty/Dr_A_V_Ramana.jpg", label: "Dr. A.V. Ramana" },
+  { filename: "Dr_Deevi_Radha_Rani.jpg", path: "/faculty/Dr_Deevi_Radha_Rani.jpg", label: "Dr. Deevi Radha Rani" },
+  { filename: "Dr_K_Lakshmana_Rao.jpg", path: "/faculty/Dr_K_Lakshmana_Rao.jpg", label: "Dr. K. Lakshmana Rao" },
+  { filename: "Dr_R_Cristin.jpg", path: "/faculty/Dr_R_Cristin.jpg", label: "Dr. R. Cristin" },
+  { filename: "Dr_S_Akila_Agnes.jpg", path: "/faculty/Dr_S_Akila_Agnes.jpg", label: "Dr. S. Akila Agnes" },
+  { filename: "Dr_K_Kavitha.jpg", path: "/faculty/Dr_K_Kavitha.jpg", label: "Dr. K. Kavitha" },
+  { filename: "Dr_D_Sowjanya.jpg", path: "/faculty/Dr_D_Sowjanya.jpg", label: "Dr. D. Sowjanya" },
+  { filename: "Ms_A_Bhavani.jpg", path: "/faculty/Ms_A_Bhavani.jpg", label: "Ms. A. Bhavani" },
+  { filename: "Mr_Baisakh.jpg", path: "/faculty/Mr_Baisakh.jpg", label: "Mr. Baisakh" },
+  { filename: "Ms_Santhoshini_Sahu.jpg", path: "/faculty/Ms_Santhoshini_Sahu.jpg", label: "Ms. Santhoshini Sahu" },
+  { filename: "Mr_G_Suneel.jpg", path: "/faculty/Mr_G_Suneel.jpg", label: "Mr. G. Suneel" },
+  { filename: "Mr_G_Dharma_Raju.jpg", path: "/faculty/Mr_G_Dharma_Raju.jpg", label: "Mr. G. Dharma Raju" },
+  { filename: "Mr_D_Ganesh.jpg", path: "/faculty/Mr_D_Ganesh.jpg", label: "Mr. D. Ganesh" },
+  { filename: "Ms_Y_Nagamani.jpg", path: "/faculty/Ms_Y_Nagamani.jpg", label: "Ms. Y. Nagamani" },
+  { filename: "Ms_A_Vineela.jpg", path: "/faculty/Ms_A_Vineela.jpg", label: "Ms. A. Vineela" },
+  { filename: "Ms_M_Sravani.jpg", path: "/faculty/Ms_M_Sravani.jpg", label: "Ms. M. Sravani" },
+  { filename: "Mr_S_Vinod_Kumar.jpg", path: "/faculty/Mr_S_Vinod_Kumar.jpg", label: "Mr. S. Vinod Kumar" },
+  { filename: "Mr_D_Srinuvasa_Rao.jpg", path: "/faculty/Mr_D_Srinuvasa_Rao.jpg", label: "Mr. D. Srinuvasa Rao" },
+  { filename: "Ms_M_Maanasa.jpg", path: "/faculty/Ms_M_Maanasa.jpg", label: "Ms. M. Maanasa" },
+  { filename: "Ms_K_Venkata_Lakshmi.jpg", path: "/faculty/Ms_K_Venkata_Lakshmi.jpg", label: "Ms. K. Venkata Lakshmi" },
+  { filename: "Ms_T_Anusha.jpg", path: "/faculty/Ms_T_Anusha.jpg", label: "Ms. T. Anusha" },
+  { filename: "Ms_G_Nirosha.jpg", path: "/faculty/Ms_G_Nirosha.jpg", label: "Ms. G. Nirosha" },
+  { filename: "Mr_G_Ravi_Kumar.jpg", path: "/faculty/Mr_G_Ravi_Kumar.jpg", label: "Mr. G. Ravi Kumar" },
+  { filename: "Mr_S_Ravi_Shankar.jpg", path: "/faculty/Mr_S_Ravi_Shankar.jpg", label: "Mr. S. Ravi Shankar" },
+  { filename: "Mr_Suraj_Soren.jpg", path: "/faculty/Mr_Suraj_Soren.jpg", label: "Mr. Suraj Soren" },
+  { filename: "Ms_Binodini_Kar.jpg", path: "/faculty/Ms_Binodini_Kar.jpg", label: "Ms. Binodini Kar" },
+  { filename: "Ms_Sucheta_Krupalini_Moharana.jpg", path: "/faculty/Ms_Sucheta_Krupalini_Moharana.jpg", label: "Ms. Sucheta Krupalini Moharana" },
+  { filename: "Ms_K_Sakunthala.jpg", path: "/faculty/Ms_K_Sakunthala.jpg", label: "Ms. K. Sakunthala" },
+  { filename: "Mr_Y_Nagapramodkumar.jpg", path: "/faculty/Mr_Y_Nagapramodkumar.jpg", label: "Mr. Y. Nagapramodkumar" },
+  { filename: "Ms_S_Geetha.jpg", path: "/faculty/Ms_S_Geetha.jpg", label: "Ms. S. Geetha" },
+  { filename: "Mr_Md_Aamir_Sohail.jpg", path: "/faculty/Mr_Md_Aamir_Sohail.jpg", label: "Mr. Md. Aamir Sohail" },
+  { filename: "Mr_M_Harshavardhan.jpg", path: "/faculty/Mr_M_Harshavardhan.jpg", label: "Mr. M. Harshavardhan" },
+  { filename: "Mr_P_Kedar.jpg", path: "/faculty/Mr_P_Kedar.jpg", label: "Mr. P. Kedar" },
+  { filename: "Mr_Subrahmanya_Srikanth_G.jpg", path: "/faculty/Mr_Subrahmanya_Srikanth_G.jpg", label: "Mr. Subrahmanya Srikanth G" },
+  { filename: "Mr_N_L_V_Venu_Gopal.jpg", path: "/faculty/Mr_N_L_V_Venu_Gopal.jpg", label: "Mr. N.L.V. Venu Gopal" },
+  { filename: "Ms_G_Lavanya.jpg", path: "/faculty/Ms_G_Lavanya.jpg", label: "Ms. G. Lavanya" },
+  { filename: "Ms_Vasantha_Lakshmi_K.jpg", path: "/faculty/Ms_Vasantha_Lakshmi_K.jpg", label: "Ms. Vasantha Lakshmi K" }
+];
 
 export const AdminDashboard = () => {
   const [adminPin, setAdminPin] = useState(localStorage.getItem('td_admin_pin') || '');
@@ -70,6 +117,74 @@ export const AdminDashboard = () => {
     avatar: '/faculty/Dr_A_V_Ramana.jpg'
   });
 
+  // Image adding & Preset Gallery state
+  const [facultyPresets, setFacultyPresets] = useState(defaultFacultyPresets);
+  const [imageTab, setImageTab] = useState('upload'); // 'upload' | 'preset' | 'url'
+  const [presetSearch, setPresetSearch] = useState('');
+  const [isOptimizingImage, setIsOptimizingImage] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+
+  // Client-side Canvas Image Compression Helper (400x400 max, 85% JPEG)
+  const compressImageFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return reject(new Error('Please select a valid image file (PNG, JPG, WEBP, SVG, etc.).'));
+      }
+      if (file.type === 'image/svg+xml') {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('Failed to read SVG image file.'));
+        reader.readAsDataURL(file);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 400;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height = Math.round((height * MAX_SIZE) / width);
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => reject(new Error('Unable to decode image file.'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Failed to read image file.'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageFileUpload = async (file) => {
+    if (!file) return;
+    setIsOptimizingImage(true);
+    try {
+      const dataUrl = await compressImageFile(file);
+      setTeacherFormData(prev => ({ ...prev, avatar: dataUrl }));
+      setNotification({ type: 'success', message: 'Faculty photo uploaded and optimized successfully!' });
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message || 'Failed to process image file.' });
+    } finally {
+      setIsOptimizingImage(false);
+    }
+  };
+
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
     const pinToTry = pinInput || adminPin;
@@ -96,12 +211,13 @@ export const AdminDashboard = () => {
   const loadData = async (pin) => {
     setLoading(true);
     try {
-      const [anecRes, subRes, overRes, teacherRes, resultsRes] = await Promise.all([
+      const [anecRes, subRes, overRes, teacherRes, resultsRes, presetsRes] = await Promise.all([
         api.getAdminAnecdotes(pin),
         api.getAdminSubmissions(pin),
         api.getAdminOverview(pin),
         api.getTeachers(),
-        api.getAdminTeacherResults(pin)
+        api.getAdminTeacherResults(pin),
+        api.getFacultyPresets(pin).catch(() => ({ success: false, data: [] }))
       ]);
       if (anecRes.success) setAnecdotes(anecRes.data);
       if (subRes.success) setSubmissions(subRes.data);
@@ -113,6 +229,9 @@ export const AdminDashboard = () => {
       if (resultsRes.success) {
         setTeacherResults(resultsRes.data);
         setCategories(resultsRes.categories || []);
+      }
+      if (presetsRes && presetsRes.success && Array.isArray(presetsRes.data) && presetsRes.data.length > 0) {
+        setFacultyPresets(presetsRes.data);
       }
     } catch (err) {
       console.error(err);
@@ -331,6 +450,11 @@ export const AdminDashboard = () => {
   const filteredTeachers = teacherResults.filter(t =>
     t.name.toLowerCase().includes(teacherSearch.toLowerCase()) ||
     t.designation.toLowerCase().includes(teacherSearch.toLowerCase())
+  );
+
+  const filteredPresets = (facultyPresets && facultyPresets.length > 0 ? facultyPresets : defaultFacultyPresets).filter(p =>
+    p.label.toLowerCase().includes(presetSearch.toLowerCase()) ||
+    p.filename.toLowerCase().includes(presetSearch.toLowerCase())
   );
 
   return (
@@ -968,7 +1092,7 @@ export const AdminDashboard = () => {
                 {editingTeacherId ? 'Edit Faculty Details' : 'Add New Faculty to Roster'}
               </h4>
 
-              <form onSubmit={handleSaveTeacher} className="space-y-4">
+              <form onSubmit={handleSaveTeacher} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-300 mb-1">Faculty Full Name *</label>
@@ -1003,6 +1127,234 @@ export const AdminDashboard = () => {
                       onChange={(e) => setTeacherFormData({ ...teacherFormData, designation: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
                     />
+                  </div>
+                </div>
+
+                {/* Faculty Photo / Avatar Management Section */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <Camera className="w-4 h-4 text-amber-400" />
+                        <span>Faculty Member Photo / Avatar</span>
+                      </label>
+                      <p className="text-[11px] text-slate-400">
+                        Upload custom photo, pick from 40+ department faculty presets, or enter an image web URL.
+                      </p>
+                    </div>
+
+                    {/* Reset button */}
+                    <button
+                      type="button"
+                      onClick={() => setTeacherFormData({ ...teacherFormData, avatar: '/faculty/Dr_A_V_Ramana.jpg' })}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-400 hover:text-white border border-white/10 transition-colors self-start sm:self-auto"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset Photo</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                    
+                    {/* Left Column: Live Avatar Preview Card */}
+                    <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-900/90 border border-white/10 text-center space-y-2.5">
+                      <div className="relative group">
+                        <img
+                          src={teacherFormData.avatar || '/faculty/Dr_A_V_Ramana.jpg'}
+                          alt="Faculty Preview"
+                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xl shadow-amber-500/20 bg-slate-950 transition-all"
+                          onError={(e) => {
+                            e.target.src = '/faculty/Dr_A_V_Ramana.jpg';
+                          }}
+                        />
+                        {isOptimizingImage && (
+                          <div className="absolute inset-0 rounded-2xl bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-amber-400 text-xs font-bold gap-1">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span>Processing...</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="w-full">
+                        <div className="text-xs font-bold text-white truncate">
+                          {teacherFormData.name || 'Faculty Full Name'}
+                        </div>
+                        <div className="text-[10px] text-purple-300 truncate">
+                          {teacherFormData.designation || 'Designation'}
+                        </div>
+                        <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          teacherFormData.avatar?.startsWith('data:image/')
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                            : teacherFormData.avatar?.startsWith('http')
+                              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                              : 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                        }`}>
+                          {teacherFormData.avatar?.startsWith('data:image/')
+                            ? '✨ Uploaded Custom Photo'
+                            : teacherFormData.avatar?.startsWith('http')
+                              ? '🔗 Web Link Photo'
+                              : '🏛️ Department Preset'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Image Input Mode Tabs */}
+                    <div className="md:col-span-8 space-y-3">
+                      {/* Sub-tabs */}
+                      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                        <button
+                          type="button"
+                          onClick={() => setImageTab('upload')}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                            imageTab === 'upload'
+                              ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                          }`}
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Upload File</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setImageTab('preset')}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                            imageTab === 'preset'
+                              ? 'bg-purple-600 text-white font-bold shadow-md'
+                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                          }`}
+                        >
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Department Gallery ({facultyPresets.length || 40})</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setImageTab('url')}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                            imageTab === 'url'
+                              ? 'bg-cyan-600 text-white font-bold shadow-md'
+                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                          }`}
+                        >
+                          <LinkIcon className="w-3.5 h-3.5" />
+                          <span>Web URL Link</span>
+                        </button>
+                      </div>
+
+                      {/* Tab 1: Upload from Computer/Phone */}
+                      {imageTab === 'upload' && (
+                        <div className="space-y-3">
+                          <label
+                            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                            onDragLeave={() => setDragOver(false)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setDragOver(false);
+                              const file = e.dataTransfer.files?.[0];
+                              if (file) handleImageFileUpload(file);
+                            }}
+                            className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                              dragOver
+                                ? 'border-amber-400 bg-amber-400/10 scale-[1.01]'
+                                : 'border-white/20 hover:border-amber-400/60 bg-slate-900/50 hover:bg-slate-900'
+                            }`}
+                          >
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageFileUpload(file);
+                              }}
+                              className="hidden"
+                            />
+                            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center mb-2">
+                              <UploadCloud className="w-6 h-6" />
+                            </div>
+                            <div className="text-xs font-bold text-white">
+                              Click to Browse or Drag & Drop Photo Here
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              Supports PNG, JPG, JPEG, WEBP, SVG • Auto-resizes & compresses for high speed
+                            </p>
+                          </label>
+                        </div>
+                      )}
+
+                      {/* Tab 2: Choose from Department Gallery */}
+                      {imageTab === 'preset' && (
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="text"
+                              placeholder="Search department photo by faculty name..."
+                              value={presetSearch}
+                              onChange={(e) => setPresetSearch(e.target.value)}
+                              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-52 overflow-y-auto pr-1 p-1 bg-slate-950/60 rounded-xl border border-white/5">
+                            {filteredPresets.map((preset) => {
+                              const isSelected = teacherFormData.avatar === preset.path;
+                              return (
+                                <button
+                                  key={preset.filename}
+                                  type="button"
+                                  onClick={() => setTeacherFormData({ ...teacherFormData, avatar: preset.path })}
+                                  className={`relative group rounded-xl p-1.5 border transition-all text-left flex flex-col items-center ${
+                                    isSelected
+                                      ? 'border-amber-400 bg-amber-400/20 ring-2 ring-amber-400 shadow-md'
+                                      : 'border-white/10 hover:border-white/30 bg-slate-900/60 hover:bg-slate-800'
+                                  }`}
+                                  title={preset.label}
+                                >
+                                  <img
+                                    src={preset.path}
+                                    alt={preset.label}
+                                    className="w-12 h-12 rounded-lg object-cover bg-slate-950"
+                                    onError={(e) => { e.target.src = '/faculty/Dr_A_V_Ramana.jpg'; }}
+                                  />
+                                  <span className="text-[9px] text-slate-300 font-medium truncate w-full text-center mt-1 block">
+                                    {preset.label}
+                                  </span>
+                                  {isSelected && (
+                                    <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-[9px] shadow">
+                                      ✓
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tab 3: Web Image URL Link */}
+                      {imageTab === 'url' && (
+                        <div className="space-y-2">
+                          <label className="block text-xs font-semibold text-slate-300">
+                            Enter Public Image Web URL (HTTPS):
+                          </label>
+                          <div className="relative">
+                            <LinkIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="url"
+                              placeholder="https://example.com/faculty-photo.jpg"
+                              value={teacherFormData.avatar?.startsWith('data:') ? '' : teacherFormData.avatar}
+                              onChange={(e) => setTeacherFormData({ ...teacherFormData, avatar: e.target.value.trim() })}
+                              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                            />
+                          </div>
+                          <p className="text-[11px] text-slate-400">
+                            Paste any direct photo link from college website, Google Drive, LinkedIn, or Cloudinary.
+                          </p>
+                        </div>
+                      )}
+
+                    </div>
                   </div>
                 </div>
 
