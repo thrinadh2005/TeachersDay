@@ -1,56 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { 
-  CreditCard, 
   X, 
   Loader2,
   Sparkles,
-  Lock,
   ArrowRight,
   User,
-  CheckCircle2,
   ShieldCheck,
-  QrCode,
   Smartphone,
   Copy,
   Check,
   Info,
   Zap,
-  Coins,
   ExternalLink,
   HelpCircle,
-  Download,
-  ChevronDown,
-  ChevronUp
+  Download
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
 
-// Dynamic Razorpay Checkout Script Loader
-const loadRazorpayScript = () => {
-  return new Promise((resolve) => {
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
-
 export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingMsg, setProcessingMsg] = useState('Verifying payment & generating pass...');
   const [paymentError, setPaymentError] = useState(null);
   
   // Payment Config from Server (Razorpay Merchant VPA + Payee Name)
   const [paymentConfig, setPaymentConfig] = useState({
-    razorpayKeyId: 'rzp_live_TQ7vgo4Ec0Z9hX',
-    enableRazorpay: true,
     upiId: 'venkatathrinadh958301.rzp@rxairtel',
     payeeName: 'ADABALA VENKATA THRINADH',
     enableUpi: true
@@ -67,9 +41,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [showUtrHelp, setShowUtrHelp] = useState(false);
-  const [showCardGateway, setShowCardGateway] = useState(false);
 
   // Determine current effective amount (Minimum ₹50)
   const currentTypedNumber = Number(customInputText);
@@ -77,12 +49,12 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
     : (selectedPreset || 50);
 
-  // Load Payment Config from backend & preload Razorpay script
+  // Load Payment Config from backend
   useEffect(() => {
     const fetchConfig = async () => {
       try {
         const res = await api.getPaymentConfig();
-        if (res.success) {
+        if (res.success && res.upiId) {
           setPaymentConfig(res);
         }
       } catch (err) {
@@ -90,7 +62,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       }
     };
     fetchConfig();
-    loadRazorpayScript();
   }, []);
 
   // Generate Dynamic UPI QR Code & URI using Razorpay Verified Merchant VPA
@@ -117,13 +88,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2200);
-  };
-
-  // Copy Direct Payment Link helper with feedback
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(upiUri);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2200);
   };
 
   // Direct 1-Tap UPI Link Trigger
@@ -159,7 +123,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     }
 
     setIsProcessing(true);
-    setProcessingMsg('Verifying payment & issuing Official Celebration Pass...');
     fireFestiveConfetti();
 
     setTimeout(() => {
@@ -171,98 +134,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         transactionId: cleanUtr
       });
     }, 450);
-  };
-
-  // OPTIONAL: Razorpay Standard Checkout
-  const handleRazorpayPayment = async () => {
-    setIsProcessing(true);
-    setProcessingMsg('Opening Razorpay Gateway...');
-    setPaymentError(null);
-
-    try {
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) {
-        throw new Error('Razorpay script failed to load. Please use the Verified Merchant UPI QR above.');
-      }
-
-      const orderRes = await api.createRazorpayOrder({
-        amount: effectiveAmount,
-        rollNumber: studentData?.rollNumber || '',
-        name: studentData?.name || ''
-      });
-
-      if (!orderRes.success || !orderRes.order) {
-        throw new Error(orderRes.error || 'Failed to initialize payment gateway.');
-      }
-
-      const { order, keyId } = orderRes;
-      const activeKey = keyId || paymentConfig.razorpayKeyId;
-
-      const options = {
-        key: activeKey,
-        amount: order.amount,
-        currency: order.currency || 'INR',
-        name: "GMRIT CSE Teachers' Day 2026",
-        description: `₹${effectiveAmount} Pass (${studentData?.rollNumber || 'CSE'})`,
-        image: "https://img.icons8.com/fluency/96/graduation-cap.png",
-        order_id: order.id,
-        handler: async function (response) {
-          setIsProcessing(true);
-          setProcessingMsg('Verifying signature with bank...');
-
-          try {
-            const verifyRes = await api.verifyRazorpayPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            });
-
-            if (verifyRes.success && verifyRes.verified) {
-              fireFestiveConfetti();
-              onPaymentSuccess({
-                status: 'verified',
-                amount: effectiveAmount,
-                paymentMethod: 'RAZORPAY_INSTANT',
-                transactionId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id
-              });
-            } else {
-              throw new Error(verifyRes.error || 'Payment signature verification failed.');
-            }
-          } catch (verifyErr) {
-            setPaymentError(`Payment Verification Failed: ${verifyErr.message}`);
-            setIsProcessing(false);
-          }
-        },
-        prefill: {
-          name: studentData?.name || '',
-          email: studentData?.email || '',
-          contact: studentData?.phone || ''
-        },
-        notes: {
-          rollNumber: studentData?.rollNumber || '',
-          department: "CSE"
-        },
-        theme: {
-          color: "#10b981"
-        },
-        modal: {
-          ondismiss: function () {
-            setIsProcessing(false);
-          }
-        }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response) {
-        setPaymentError(`Payment Notice: Please scan or pay via the Verified Merchant UPI QR (${upiId}) above.`);
-        setIsProcessing(false);
-      });
-      rzp.open();
-    } catch (err) {
-      setPaymentError(`Notice: Please pay directly via the Verified Merchant UPI QR (${upiId}) above.`);
-      setIsProcessing(false);
-    }
   };
 
   return (
@@ -574,7 +445,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
-                  <span>{processingMsg}</span>
+                  <span>Verifying payment & issuing Official Celebration Pass...</span>
                 </>
               ) : (
                 <>
@@ -585,38 +456,6 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               )}
             </button>
           </form>
-
-          {/* OPTIONAL CARD / NETBANKING GATEWAY ACCORDION */}
-          <div className="rounded-2xl border border-white/10 overflow-hidden bg-slate-950/60">
-            <button
-              type="button"
-              onClick={() => setShowCardGateway(!showCardGateway)}
-              className="w-full p-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors text-xs text-slate-400"
-            >
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-slate-400" />
-                <span>Want to pay via Debit/Credit Card or NetBanking?</span>
-              </div>
-              {showCardGateway ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-
-            {showCardGateway && (
-              <div className="p-4 border-t border-white/10 space-y-2.5 animate-fadeIn">
-                <p className="text-xs text-slate-300">
-                  Launch the standard gateway to pay with Debit Card, Credit Card, or Internet Banking:
-                </p>
-                <button
-                  type="button"
-                  onClick={handleRazorpayPayment}
-                  disabled={isProcessing}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-white/20 transition-all flex items-center justify-center gap-2"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Open Cards / NetBanking Gateway</span>
-                </button>
-              </div>
-            )}
-          </div>
 
           {/* Security Guarantee Footer */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
@@ -631,5 +470,3 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     </div>
   );
 };
-
-
