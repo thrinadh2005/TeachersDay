@@ -37,7 +37,11 @@ import {
   Smartphone,
   QrCode,
   ExternalLink,
-  Save
+  Save,
+  FileSpreadsheet,
+  Layers,
+  Table,
+  FileText
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { api } from '../utils/api';
@@ -114,6 +118,7 @@ export const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [yearFilter, setYearFilter] = useState('ALL');
   const [sectionFilter, setSectionFilter] = useState('ALL');
+  const [showSectionBreakdown, setShowSectionBreakdown] = useState(true);
 
   // Add / Edit teacher form
   const [showAddTeacher, setShowAddTeacher] = useState(false);
@@ -966,9 +971,195 @@ export const AdminDashboard = () => {
 
       {/* TAB: ALL SUBMISSIONS & PAYMENTS */}
       {activeTab === 'submissions' && (
-        <div className="space-y-4">
+        <div className="space-y-5">
 
-          {/* Filters Bar */}
+          {/* Section-Wise Status & Payment Matrix */}
+          <div className="glass-card p-4 sm:p-5 rounded-3xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white font-display flex items-center gap-2">
+                    <span>Section-Wise Status & Payments</span>
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      12 Sections
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Live registration, verified payment count, funds raised, and 1-click section CSV downloads
+                  </p>
+                </div>
+              </div>
+
+              {/* Global CSV Download Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={api.getExportCsvUrl(adminPin, {})}
+                  download
+                  className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95"
+                  title="Download complete registered students & payment list"
+                >
+                  <Download className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Master CSV (All)</span>
+                </a>
+
+                <a
+                  href={api.getExportCsvUrl(adminPin, { summary: true })}
+                  download
+                  className="px-3.5 py-2 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95"
+                  title="Download executive section-wise summary numbers"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Section Summary CSV</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setShowSectionBreakdown(!showSectionBreakdown)}
+                  className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 font-bold text-xs transition-all"
+                >
+                  {showSectionBreakdown ? 'Hide Matrix' : 'Show Matrix'}
+                </button>
+              </div>
+            </div>
+
+            {showSectionBreakdown && (
+              <div className="space-y-4 pt-1">
+                {['2nd Year', '3rd Year', '4th Year'].map((year) => {
+                  const yearSubmissions = submissions.filter(s => s.year === year);
+                  const yearFunds = yearSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
+                  
+                  return (
+                    <div key={year} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                          <GraduationCap className="w-4 h-4" />
+                          {year} CSE
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          Total in {year}: <strong className="text-white">{yearSubmissions.length} Students</strong> • <strong className="text-emerald-400">₹{yearFunds} Collected</strong>
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                        {['Section A', 'Section B', 'Section C', 'Section D'].map((sec) => {
+                          const matching = submissions.filter(s => s.year === year && s.section === sec);
+                          const verified = matching.filter(s => s.payment?.status === 'verified');
+                          const funds = verified.reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
+                          const speakers = matching.filter(s => s.interestedInSpeaking === 'Yes').length;
+                          const isCurrentFilter = yearFilter === year && sectionFilter === sec;
+
+                          return (
+                            <div
+                              key={sec}
+                              className={`p-3 rounded-2xl border transition-all relative group flex flex-col justify-between ${
+                                isCurrentFilter
+                                  ? 'bg-purple-950/70 border-purple-400 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400'
+                                  : matching.length > 0
+                                  ? 'bg-slate-900/80 hover:bg-slate-900 border-white/10 hover:border-purple-400/40'
+                                  : 'bg-slate-950/40 border-white/5 opacity-75 hover:opacity-100'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                                    {sec}
+                                  </span>
+                                  <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                                    matching.length > 0 
+                                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                                      : 'bg-slate-800 text-slate-500'
+                                  }`}>
+                                    {matching.length} Students
+                                  </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-1 text-[11px] mb-2 font-mono">
+                                  <div className="bg-slate-950/60 p-1.5 rounded-lg border border-white/5">
+                                    <span className="text-slate-400 text-[10px] block">Verified:</span>
+                                    <span className="font-bold text-emerald-400">✓ {verified.length} (₹{funds})</span>
+                                  </div>
+                                  <div className="bg-slate-950/60 p-1.5 rounded-lg border border-white/5">
+                                    <span className="text-slate-400 text-[10px] block">Speakers:</span>
+                                    <span className="font-bold text-amber-300">🎤 {speakers}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action buttons inside card */}
+                              <div className="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setYearFilter(year);
+                                    setSectionFilter(sec);
+                                  }}
+                                  className={`flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${
+                                    isCurrentFilter
+                                      ? 'bg-purple-600 text-white'
+                                      : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white'
+                                  }`}
+                                >
+                                  {isCurrentFilter ? 'Selected' : 'Filter Table'}
+                                </button>
+
+                                <a
+                                  href={api.getExportCsvUrl(adminPin, { year, section: sec })}
+                                  download
+                                  className="p-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[10px] font-bold flex items-center gap-1 px-2"
+                                  title={`Download CSV for ${year} ${sec}`}
+                                >
+                                  <Download className="w-3 h-3" />
+                                  <span>CSV</span>
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Filters Bar & Summary Strip */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <div className="text-xs text-slate-400 font-mono">
+              Showing <strong className="text-white">{filteredSubmissions.length}</strong> matching students • Verified Total: <strong className="text-emerald-400">₹{filteredSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0)}</strong>
+            </div>
+
+            {(yearFilter !== 'ALL' || sectionFilter !== 'ALL' || statusFilter !== 'ALL' || searchTerm) && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setYearFilter('ALL');
+                    setSectionFilter('ALL');
+                    setStatusFilter('ALL');
+                    setSearchTerm('');
+                  }}
+                  className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline"
+                >
+                  Clear Filters
+                </button>
+                
+                <a
+                  href={api.getExportCsvUrl(adminPin, { year: yearFilter, section: sectionFilter, status: statusFilter })}
+                  download
+                  className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Download Filtered CSV ({filteredSubmissions.length})</span>
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Filters Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="relative sm:col-span-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1010,7 +1201,7 @@ export const AdminDashboard = () => {
               className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
             >
               <option value="ALL">All Payment Status</option>
-              <option value="verified">Verified (₹50 Paid)</option>
+              <option value="verified">Verified (₹50+ Paid)</option>
               <option value="pending">Pending</option>
             </select>
           </div>
@@ -1020,7 +1211,7 @@ export const AdminDashboard = () => {
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
                 <tr>
-                  <th className="p-3.5">Ticket ID</th>
+                  <th className="p-3.5">Receipt / Pass ID</th>
                   <th className="p-3.5">Student</th>
                   <th className="p-3.5">Year & Section</th>
                   <th className="p-3.5">Stage Speaker?</th>
@@ -1032,7 +1223,7 @@ export const AdminDashboard = () => {
                 {filteredSubmissions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-500">
-                      No student passes issued yet.
+                      No student contributions found matching this filter.
                     </td>
                   </tr>
                 ) : (

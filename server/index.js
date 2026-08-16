@@ -613,53 +613,132 @@ app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
   }
 });
 
-// CSV Export (Protected against CSV Formula Injection)
+// CSV Export with Section-wise Filtering, Payment Details & Executive Summary
 app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
   try {
-    const subs = db.getSubmissions();
+    const { year, section, status, summary } = req.query;
+    let subs = db.getSubmissions();
+
+    // Section-Wise Executive Summary CSV
+    if (summary === 'true') {
+      const years = ['2nd Year', '3rd Year', '4th Year'];
+      const sections = ['Section A', 'Section B', 'Section C', 'Section D'];
+      
+      const summaryHeaders = [
+        'Year',
+        'Section',
+        'Total Registered Students',
+        'Verified Payments Count',
+        'Pending Payments Count',
+        'Total Funds Collected (INR)',
+        'Stage Speakers Count'
+      ];
+
+      const summaryRows = [];
+      let grandTotalStudents = 0;
+      let grandTotalVerified = 0;
+      let grandTotalFunds = 0;
+      let grandTotalSpeakers = 0;
+
+      years.forEach(y => {
+        sections.forEach(s => {
+          const matching = subs.filter(sub => sub.year === y && sub.section === s);
+          const verified = matching.filter(sub => sub.payment?.status === 'verified');
+          const pending = matching.filter(sub => sub.payment?.status !== 'verified');
+          const funds = verified.reduce((acc, sub) => acc + (sub.payment?.amount || 50), 0);
+          const speakers = matching.filter(sub => sub.interestedInSpeaking === 'Yes').length;
+
+          grandTotalStudents += matching.length;
+          grandTotalVerified += verified.length;
+          grandTotalFunds += funds;
+          grandTotalSpeakers += speakers;
+
+          summaryRows.push([
+            sanitizeCsvField(y),
+            sanitizeCsvField(s),
+            matching.length,
+            verified.length,
+            pending.length,
+            funds,
+            speakers
+          ]);
+        });
+      });
+
+      // Add Grand Total Row
+      summaryRows.push([
+        '"TOTAL"',
+        '"ALL SECTIONS"',
+        grandTotalStudents,
+        grandTotalVerified,
+        grandTotalStudents - grandTotalVerified,
+        grandTotalFunds,
+        grandTotalSpeakers
+      ]);
+
+      const csvContent = [summaryHeaders.join(','), ...summaryRows.map(r => r.join(','))].join('\n');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="CSE_TeachersDay_2026_SectionWise_Summary_${new Date().toISOString().slice(0, 10)}.csv"`);
+      return res.send(csvContent);
+    }
+
+    // Apply Filter Criteria
+    if (year && year !== 'ALL') {
+      subs = subs.filter(s => s.year === year);
+    }
+    if (section && section !== 'ALL') {
+      subs = subs.filter(s => s.section === section);
+    }
+    if (status && status !== 'ALL') {
+      subs = subs.filter(s => s.payment?.status === status);
+    }
+
     const headers = [
-      'Ticket Number',
+      'S.No',
+      'Acknowledgement Number',
       'Student Name',
-      'Roll Number',
+      'JNTU Roll Number',
       'Department',
       'Year',
       'Section',
-      'Email',
-      'Phone',
-      'Wants to Speak on Stage',
-      'Teacher to Speak About',
-      'Speech Topic / Concept',
-      'Favorite Teacher',
+      'Amount Paid (INR)',
       'Payment Status',
-      'Amount (INR)',
-      'Transaction ID',
       'Payment Method',
-      'Registration Date'
+      'UPI Ref / Transaction UTR',
+      'Registration Date & Time',
+      'Speaking on Stage',
+      'Speech Nominated Faculty',
+      'Speech Topic',
+      'Favorite Faculty'
     ];
 
-    const rows = subs.map(s => [
-      sanitizeCsvField(s.ticketNumber),
+    const rows = subs.map((s, index) => [
+      index + 1,
+      sanitizeCsvField(s.acknowledgementNumber || s.receiptNumber || s.ticketNumber),
       sanitizeCsvField(s.name),
       sanitizeCsvField(s.rollNumber),
-      sanitizeCsvField(s.department || 'CSE'),
+      sanitizeCsvField(s.department || 'Computer Science & Engineering'),
       sanitizeCsvField(s.year),
       sanitizeCsvField(s.section),
-      sanitizeCsvField(s.email),
-      sanitizeCsvField(s.phone),
-      sanitizeCsvField(s.interestedInSpeaking || 'No'),
-      sanitizeCsvField(s.speechTeacher),
-      sanitizeCsvField(s.speechTopic),
-      sanitizeCsvField(s.favoriteTeacher),
-      sanitizeCsvField(s.payment?.status || 'pending'),
       s.payment?.amount || 50,
-      sanitizeCsvField(s.payment?.transactionId),
-      sanitizeCsvField(s.payment?.paymentMethod),
-      sanitizeCsvField(s.createdAt)
+      sanitizeCsvField(s.payment?.status === 'verified' ? 'Verified (Paid)' : 'Pending'),
+      sanitizeCsvField(s.payment?.paymentMethod || 'UPI_DIRECT'),
+      sanitizeCsvField(s.payment?.transactionId || 'N/A'),
+      sanitizeCsvField(s.createdAt ? new Date(s.createdAt).toLocaleString('en-IN') : 'N/A'),
+      sanitizeCsvField(s.interestedInSpeaking === 'Yes' ? 'Yes' : 'No'),
+      sanitizeCsvField(s.speechTeacher || 'N/A'),
+      sanitizeCsvField(s.speechTopic || 'N/A'),
+      sanitizeCsvField(s.favoriteTeacher || 'N/A')
     ]);
+
+    let filenamePrefix = 'CSE_TeachersDay_2026';
+    if (year && year !== 'ALL') filenamePrefix += `_${year.replace(/\s+/g, '')}`;
+    if (section && section !== 'ALL') filenamePrefix += `_${section.replace(/\s+/g, '')}`;
+    if (status && status !== 'ALL') filenamePrefix += `_${status}`;
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="CSE_TeachersDay_2026_Registrations_${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filenamePrefix}_Contributions_${new Date().toISOString().slice(0, 10)}.csv"`);
     res.send(csvContent);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

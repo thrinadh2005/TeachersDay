@@ -250,7 +250,12 @@ export const api = {
     return data;
   },
 
-  getExportCsvUrl(pin) {
-    return `${API_BASE}/admin/export-csv?pin=${pin}`;
+  getExportCsvUrl(pin, filters = {}) {
+    const params = new URLSearchParams({ pin });
+    if (filters.year && filters.year !== 'ALL') params.append('year', filters.year);
+    if (filters.section && filters.section !== 'ALL') params.append('section', filters.section);
+    if (filters.status && filters.status !== 'ALL') params.append('status', filters.status);
+    if (filters.summary) params.append('summary', 'true');
+    return `${API_BASE}/admin/export-csv?${params.toString()}`;
   }
 };
