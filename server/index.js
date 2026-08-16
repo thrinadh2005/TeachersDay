@@ -14,8 +14,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Initialize Live Razorpay Payment Gateway
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TQ7vgo4Ec0Z9hX';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'Nm7qaO4kFE5cwkAZZTUMDlAO';
 
 let razorpayClient = null;
 if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
