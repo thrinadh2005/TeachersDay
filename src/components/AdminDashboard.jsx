@@ -87,7 +87,7 @@ export const AdminDashboard = () => {
         loadData(pinToTry);
       }
     } catch (err) {
-      setAuthError('Invalid Admin PIN. Default code is 2026.');
+      setAuthError(err.message || 'Invalid Admin Authorization PIN. Access denied.');
     } finally {
       setLoading(false);
     }
