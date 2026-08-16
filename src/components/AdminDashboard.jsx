@@ -78,6 +78,12 @@ const defaultFacultyPresets = [
   { filename: "Mr_M_Harshavardhan.jpg", path: "/faculty/Mr_M_Harshavardhan.jpg", label: "Mr. M. Harshavardhan" },
   { filename: "Mr_P_Kedar.jpg", path: "/faculty/Mr_P_Kedar.jpg", label: "Mr. P. Kedar" },
   { filename: "Mr_Subrahmanya_Srikanth_G.jpg", path: "/faculty/Mr_Subrahmanya_Srikanth_G.jpg", label: "Mr. Subrahmanya Srikanth G" },
+  { filename: "Mr_M_Santhosh_Kumar.jpg", path: "/faculty/Mr_M_Santhosh_Kumar.jpg", label: "Mr. M. Santhosh Kumar (AS)" },
+  { filename: "Dr_B_Sanyasi_Rao.jpg", path: "/faculty/Dr_B_Sanyasi_Rao.jpg", label: "Dr. B. Sanyasi Rao (SS)" },
+  { filename: "Dr_A_Ganapathi_Rao.jpg", path: "/faculty/Dr_A_Ganapathi_Rao.jpg", label: "Dr. A. Ganapathi Rao (DMS)" },
+  { filename: "Dr_Y_Aditya.jpg", path: "/faculty/Dr_Y_Aditya.jpg", label: "Dr. Y. Aditya (DMS)" },
+  { filename: "Dr_D_Srinivasa_Kumar.jpg", path: "/faculty/Dr_D_Srinivasa_Kumar.jpg", label: "Dr. D. Srinivasa Kumar (EEPM)" },
+  { filename: "Dr_KVS_Prasad.jpg", path: "/faculty/Dr_KVS_Prasad.jpg", label: "Dr. KVS Prasad (EEPM)" },
   { filename: "Mr_N_L_V_Venu_Gopal.jpg", path: "/faculty/Mr_N_L_V_Venu_Gopal.jpg", label: "Mr. N.L.V. Venu Gopal" },
   { filename: "Ms_G_Lavanya.jpg", path: "/faculty/Ms_G_Lavanya.jpg", label: "Ms. G. Lavanya" },
   { filename: "Ms_Vasantha_Lakshmi_K.jpg", path: "/faculty/Ms_Vasantha_Lakshmi_K.jpg", label: "Ms. Vasantha Lakshmi K" }

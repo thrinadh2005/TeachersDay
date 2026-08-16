@@ -361,9 +361,70 @@ export const gmritCseFaculty = [
     avatar: "/faculty/Mr_P_Kedar.svg",
     categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
     totalVotes: 0
+  },
+  {
+    id: "80409",
+    name: "Mr. M. Santhosh Kumar",
+    degree: "M.Tech.",
+    department: "Electrical & Electronics Engineering (EEE)",
+    designation: "Assistant Professor (AS)",
+    avatar: "/faculty/Mr_M_Santhosh_Kumar.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
+  },
+  {
+    id: "52324",
+    name: "Dr. B. Sanyasi Rao",
+    degree: "M.A., B.Ed., M.Phil., Ph.D.",
+    department: "Basic Science & Humanities (BS&H)",
+    designation: "Assistant Professor (SS)",
+    avatar: "/faculty/Dr_B_Sanyasi_Rao.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
+  },
+  {
+    id: "52095",
+    name: "Dr. A. Ganapathi Rao",
+    degree: "M.Phil., Ph.D.",
+    department: "Basic Science & Humanities (BS&H)",
+    designation: "Assistant Professor (DMS)",
+    avatar: "/faculty/Dr_A_Ganapathi_Rao.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
+  },
+  {
+    id: "51888",
+    name: "Dr. Y. Aditya",
+    degree: "M.Sc., Ph.D.",
+    department: "Basic Science & Humanities (BS&H)",
+    designation: "Assistant Professor (DMS)",
+    avatar: "/faculty/Dr_Y_Aditya.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
+  },
+  {
+    id: "50299",
+    name: "Dr. D. Srinivasa Kumar",
+    degree: "MBA, Ph.D.",
+    department: "Basic Science & Humanities (BS&H)",
+    designation: "Professor (EEPM)",
+    avatar: "/faculty/Dr_D_Srinivasa_Kumar.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
+  },
+  {
+    id: "50310",
+    name: "Dr. KVS Prasad",
+    degree: "MBA, M.Com., M.Phil., B.L., Ph.D.",
+    department: "Basic Science & Humanities (BS&H)",
+    designation: "Professor (EEPM)",
+    avatar: "/faculty/Dr_KVS_Prasad.jpg",
+    categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 },
+    totalVotes: 0
   }
 ];
 
 export const initialAnecdotes = [];
 export const initialSubmissions = [];
 export const initialTeachers = gmritCseFaculty;
+

@@ -89,14 +89,23 @@ class Database {
       const count = await teachersCol.countDocuments();
       if (count === 0) {
         await teachersCol.insertMany(this.data.teachers);
-        console.log(`🍃 Seeded ${this.data.teachers.length} CSE faculty members into MongoDB Atlas.`);
+        console.log(`🍃 Seeded ${this.data.teachers.length} faculty members into MongoDB Atlas.`);
       } else {
+        // Ensure any new teachers added to initialTeachers are synced into MongoDB Atlas
+        for (const initT of initialTeachers) {
+          const exists = await teachersCol.findOne({ id: initT.id });
+          if (!exists) {
+            await teachersCol.insertOne(initT);
+            console.log(`🍃 Synced new faculty "${initT.name}" into MongoDB Atlas.`);
+          }
+        }
         const cloudTeachers = await teachersCol.find({}).toArray();
         if (cloudTeachers.length > 0) {
           this.data.teachers = cloudTeachers.map(t => {
             const { _id, ...rest } = t;
             return rest;
           });
+          this.saveLocal();
         }
       }
 
