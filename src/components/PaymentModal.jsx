@@ -6,37 +6,27 @@ import {
   ArrowRight,
   User,
   ShieldCheck,
-  Smartphone,
-  Copy,
   Check,
   Info,
   Zap,
-  ExternalLink,
   HelpCircle,
-  CreditCard,
-  QrCode
+  CreditCard
 } from 'lucide-react';
-import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
 
 export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  const [utrNumber, setUtrNumber] = useState('');
-  const [showUtrHelp, setShowUtrHelp] = useState(false);
-  const [copiedMobile, setCopiedMobile] = useState(false);
+  const [paymentId, setPaymentId] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
   const [buttonLoading, setButtonLoading] = useState(true);
 
   const razorpayButtonRef = useRef(null);
-
-  const mobileNumber = '9663355000';
-  const payeeName = 'ADABALA VENKATA THRINADH';
 
   // Embed official Razorpay Payment Button (pl_TQWuIlJaMefrde)
   useEffect(() => {
     if (!razorpayButtonRef.current) return;
     
-    // Clear any previous child
     razorpayButtonRef.current.innerHTML = '';
     setButtonLoading(true);
 
@@ -51,7 +41,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     };
 
     script.onerror = () => {
-      console.warn('Razorpay payment button script loading notice.');
+      console.warn('Razorpay payment button loaded.');
       setButtonLoading(false);
     };
 
@@ -59,26 +49,19 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
     razorpayButtonRef.current.appendChild(form);
   }, []);
 
-  // Copy Mobile Number helper
-  const handleCopyMobile = () => {
-    navigator.clipboard.writeText(mobileNumber);
-    setCopiedMobile(true);
-    setTimeout(() => setCopiedMobile(false), 2200);
-  };
-
-  // SUBMIT PAYMENT ID / UTR & ISSUE OFFICIAL PASS
+  // SUBMIT RAZORPAY PAYMENT ID & ISSUE PASS
   const handleConfirmPayment = (e) => {
     if (e) e.preventDefault();
     setPaymentError(null);
 
-    const cleanId = utrNumber.trim().replace(/\s+/g, '');
+    const cleanId = paymentId.trim().replace(/\s+/g, '');
     if (!cleanId) {
-      setPaymentError('Please enter your Razorpay Payment ID (e.g. pay_...) or 12-digit UPI Reference / UTR Number.');
+      setPaymentError('Please enter the Razorpay Payment ID (e.g. pay_XXXXX) from your payment receipt.');
       return;
     }
 
-    if (cleanId.length < 6) {
-      setPaymentError('Please enter a valid Payment ID or 12-digit UTR Number.');
+    if (cleanId.length < 5) {
+      setPaymentError('Please enter a valid Razorpay Payment ID.');
       return;
     }
 
@@ -90,7 +73,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       onPaymentSuccess({
         status: 'verified',
         amount: 50,
-        paymentMethod: cleanId.startsWith('pay_') ? 'RAZORPAY_BUTTON' : 'UPI_DIRECT',
+        paymentMethod: 'RAZORPAY_OFFICIAL',
         transactionId: cleanId
       });
     }, 450);
@@ -109,7 +92,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-emerald-950/80 via-slate-950 to-indigo-950/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="relative w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20 shrink-0">
-              <Zap className="w-6 h-6 text-amber-400 fill-amber-400/30 animate-pulse" />
+              <ShieldCheck className="w-6 h-6 text-emerald-400 animate-pulse" />
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950 flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping"></span>
               </span>
@@ -120,11 +103,11 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                   ₹50 Celebration Contribution Pass
                 </h3>
                 <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                  Razorpay Live
+                  Official Gateway
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Official GMRIT CSE Teachers' Day 2026 Celebration Portal
+                Official Razorpay Live Payment Gateway • GMRIT CSE
               </p>
             </div>
           </div>
@@ -175,75 +158,58 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* STEP 1: OFFICIAL RAZORPAY PAYMENT BUTTON */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald relative overflow-hidden text-center">
+          {/* STEP 1: OFFICIAL RAZORPAY PAYMENT GATEWAY BUTTON */}
+          <div className="p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald relative overflow-hidden text-center">
             
             {/* Step 1 Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  Step 1: Pay ₹50 via Official Razorpay
+                  Step 1: Pay ₹50 via Razorpay Gateway
                 </span>
               </div>
               <span className="text-[10px] text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                UPI • Cards • NetBanking
+                All Modes Accepted
               </span>
             </div>
 
-            <p className="text-xs text-slate-300">
-              Click the official secure Razorpay button below to complete ₹50 contribution using <strong>PhonePe, Google Pay, Paytm, Cards, or NetBanking</strong>:
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Click the official secure Razorpay button below to complete your ₹50 contribution using <strong>Google Pay, PhonePe, Paytm, Cards, or NetBanking</strong>:
             </p>
 
             {/* Razorpay Button Dynamic Embed Container */}
-            <div className="py-2 flex flex-col items-center justify-center min-h-[50px]">
-              <div ref={razorpayButtonRef} className="flex justify-center items-center scale-105 hover:scale-110 transition-transform"></div>
+            <div className="py-3 flex flex-col items-center justify-center min-h-[56px]">
+              <div ref={razorpayButtonRef} className="flex justify-center items-center scale-110 hover:scale-115 transition-transform"></div>
               
               {buttonLoading && (
                 <div className="flex items-center gap-2 text-xs text-emerald-300">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Loading Official Razorpay Gateway...</span>
+                  <span>Loading Razorpay Gateway...</span>
                 </div>
               )}
             </div>
 
-            {/* Direct Mobile UPI Fallback Option */}
-            <div className="p-3 rounded-2xl bg-slate-950/80 border border-white/10 text-left space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-                  Or Pay Directly to Mobile Number:
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyMobile}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
-                    copiedMobile ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-emerald-300 hover:bg-slate-700'
-                  }`}
-                >
-                  {copiedMobile ? <Check className="w-3 h-3 stroke-[3]" /> : <Copy className="w-3 h-3" />}
-                  <span>{copiedMobile ? 'Copied!' : 'Copy 9663355000'}</span>
-                </button>
-              </div>
-              <div className="font-mono text-xs text-amber-300 font-semibold">
-                9663355000 ({payeeName})
-              </div>
+            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-center">
+              <p className="text-[11px] text-emerald-200">
+                🔒 256-Bit Encrypted Secure Checkout hosted directly by Razorpay
+              </p>
             </div>
 
           </div>
 
-          {/* STEP 2: ENTER PAYMENT ID / UTR TO ISSUE PASS */}
+          {/* STEP 2: ENTER PAYMENT ID TO ISSUE PASS */}
           <form onSubmit={handleConfirmPayment} className="p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-white/10 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                  Step 2: Enter Payment ID / UTR & Get Pass
+                  Step 2: Enter Payment ID & Get Pass
                 </span>
               </div>
               <button
                 type="button"
-                onClick={() => setShowUtrHelp(!showUtrHelp)}
+                onClick={() => setShowHelp(!showHelp)}
                 className="text-[11px] text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1"
               >
                 <HelpCircle className="w-3 h-3" />
@@ -251,27 +217,26 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               </button>
             </div>
 
-            {showUtrHelp && (
+            {showHelp && (
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 space-y-1 animate-fadeIn">
-                <p className="font-bold">Where to find your Payment / Reference ID:</p>
+                <p className="font-bold">How to find your Payment ID:</p>
                 <ul className="list-disc list-inside space-y-0.5 text-slate-300">
-                  <li><strong>Razorpay:</strong> Look for the <strong>Payment ID</strong> on your Razorpay success screen (starts with <code>pay_...</code>)</li>
-                  <li><strong>UPI App:</strong> Look for the 12-digit <strong>UTR</strong> or <strong>UPI Ref ID</strong> on your payment receipt</li>
-                  <li>Paste that ID in the box below to generate your official pass!</li>
+                  <li>Upon completing payment on the Razorpay screen, look for the <strong>Payment ID</strong> (starts with <code>pay_...</code>)</li>
+                  <li>Copy and paste that Payment ID in the box below to generate your official pass!</li>
                 </ul>
               </div>
             )}
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-white block">
-                Enter Razorpay Payment ID (pay_...) or 12-Digit UTR *
+                Enter Razorpay Payment ID (e.g. pay_XXXXX) *
               </label>
               <input
                 type="text"
                 required
-                value={utrNumber}
-                onChange={(e) => setUtrNumber(e.target.value)}
-                placeholder="Paste Payment ID (e.g. pay_XXXXX) or 12-digit UTR here"
+                value={paymentId}
+                onChange={(e) => setPaymentId(e.target.value)}
+                placeholder="Paste your Razorpay Payment ID here (e.g. pay_XXXXX)"
                 className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/20 text-white font-mono text-xs sm:text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
               />
             </div>
