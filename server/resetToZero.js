@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.join(__dirname, 'data.json');
 
-const mongoUri = process.env.MONGODB_URI || "mongodb+srv://TeachersDay:TeachersDay@teachersday.snlrlxy.mongodb.net/teachersday_cse_2026?retryWrites=true&w=majority&appName=TeachersDay";
+const mongoUri = process.env.MONGODB_URI;
 
 async function resetAllToZero() {
   console.log("=================================================");

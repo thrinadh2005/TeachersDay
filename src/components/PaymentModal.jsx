@@ -69,7 +69,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
 
       // 3. Prepare Razorpay Options
       const options = {
-        key: keyId || 'rzp_live_TQ7vgo4Ec0Z9hX',
+        key: keyId || '',
         amount: amountInPaise || (effectiveAmount * 100),
         currency: 'INR',
         name: "GMRIT CSE Teachers' Day 2026",

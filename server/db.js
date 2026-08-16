@@ -8,8 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, 'data.json');
 
-const DEFAULT_MONGO_URI = "mongodb+srv://TeachersDay:TeachersDay@teachersday.snlrlxy.mongodb.net/teachersday_cse_2026?retryWrites=true&w=majority&appName=TeachersDay";
-
 class Database {
   constructor() {
     this.data = {
@@ -44,27 +42,28 @@ class Database {
       console.warn('Local DB init note:', err.message);
     }
 
-    // 2. Connect to MongoDB Atlas Cloud Database
-    const mongoUri = process.env.MONGODB_URI || DEFAULT_MONGO_URI;
-    try {
-      const client = new MongoClient(mongoUri, {
-        serverApi: {
-          version: ServerApiVersion.v1,
-          strict: true,
-          deprecationErrors: true,
-        }
-      });
+    // 2. Connect to MongoDB Atlas Cloud Database if URI is provided in environment
+    const mongoUri = process.env.MONGODB_URI;
+    if (mongoUri && typeof mongoUri === 'string' && mongoUri.startsWith('mongodb')) {
+      try {
+        const client = new MongoClient(mongoUri, {
+          serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+          }
+        });
+        await client.connect();
+        this.db = client.db('teachersday_cse_2026');
+        this.mongoConnected = true;
+        console.log("🍃 Connected to MongoDB Atlas Cloud Database (teachersday_cse_2026)!");
 
-      await client.connect();
-      this.db = client.db("teachersday_cse_2026");
-      this.mongoConnected = true;
-      console.log('🍃 Connected to MongoDB Atlas Cloud Database (teachersday_cse_2026)!');
-
-      // Sync data from cloud or seed if empty
-      await this.syncWithMongo();
-    } catch (mongoErr) {
-      console.warn('MongoDB Atlas connection note:', mongoErr.message);
-      console.log('⚡ Running on local persistent database fallback.');
+        // Sync data from cloud or seed if empty
+        await this.syncWithMongo();
+      } catch (mongoErr) {
+        console.warn('MongoDB Atlas connection note:', mongoErr.message);
+        console.log('⚡ Running on local persistent database fallback.');
+      }
     }
   }
 

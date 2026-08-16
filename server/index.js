@@ -116,17 +116,19 @@ const sanitizeCsvField = (field) => {
 // ==========================================
 // 💳 RAZORPAY INITIALIZATION
 // ==========================================
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TQ7vgo4Ec0Z9hX';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'Nm7qaO4kFE5cwkAZZTUMDlAO';
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
 let razorpayInstance = null;
-try {
-  razorpayInstance = new Razorpay({
-    key_id: RAZORPAY_KEY_ID,
-    key_secret: RAZORPAY_KEY_SECRET
-  });
-} catch (err) {
-  console.warn('Razorpay initialization note:', err.message);
+if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
+  try {
+    razorpayInstance = new Razorpay({
+      key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET
+    });
+  } catch (err) {
+    console.warn('Razorpay initialization note:', err.message);
+  }
 }
 
 // ==========================================
