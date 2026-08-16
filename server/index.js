@@ -462,7 +462,7 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
 });
 
 // POST /api/submit - Submit CSE Student registration + mandatory payment verification
-app.post('/api/submit', submitLimiter, (req, res) => {
+app.post('/api/submit', submitLimiter, async (req, res) => {
   try {
     const {
       name,
