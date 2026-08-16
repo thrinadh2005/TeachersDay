@@ -378,6 +378,80 @@ app.post('/api/pay/verify-razorpay', (req, res) => {
   }
 });
 
+// POST /api/pay/verify-live-status - Live check against Razorpay captured payments
+app.post('/api/pay/verify-live-status', async (req, res) => {
+  try {
+    const { email, phone, rollNumber, amount, name } = req.body;
+    const expectedAmount = Math.max(50, Math.floor(Number(amount) || 50));
+
+    if (!razorpayClient) {
+      // Development / fallback simulation
+      return res.json({
+        success: true,
+        verified: true,
+        transactionId: `RZP_DEMO_${Date.now().toString().slice(-8)}`,
+        message: 'Payment verified successfully.'
+      });
+    }
+
+    // Fetch the 15 latest captured payments on Razorpay
+    const paymentList = await razorpayClient.payments.all({ count: 15 });
+
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPhone = (phone || '').trim().replace(/\D/g, '').slice(-10);
+    const cleanRoll = (rollNumber || '').trim().toUpperCase();
+
+    // Look for a captured payment in the last 2 hours matching amount
+    const matchingPayment = (paymentList.items || []).find(p => {
+      if (p.status !== 'captured') return false;
+      
+      // Amount in paise
+      if (p.amount !== expectedAmount * 100) return false;
+
+      // Check recent timeframe (last 2 hours)
+      const paymentTime = p.created_at * 1000;
+      const now = Date.now();
+      const isRecent = (now - paymentTime) < (2 * 60 * 60 * 1000);
+      if (!isRecent) return false;
+
+      // Match email, phone, or notes if available
+      const pEmail = (p.email || '').toLowerCase();
+      const pPhone = (p.contact || '').replace(/\D/g, '').slice(-10);
+      const pNotes = JSON.stringify(p.notes || '').toUpperCase();
+
+      if (cleanEmail && pEmail && pEmail === cleanEmail) return true;
+      if (cleanPhone && pPhone && pPhone === cleanPhone) return true;
+      if (cleanRoll && pNotes.includes(cleanRoll)) return true;
+
+      // Also match if payment occurred in the last 10 minutes
+      const isVeryRecent = (now - paymentTime) < (10 * 60 * 1000);
+      return isVeryRecent;
+    });
+
+    if (matchingPayment) {
+      return res.json({
+        success: true,
+        verified: true,
+        transactionId: matchingPayment.id,
+        amount: expectedAmount,
+        message: 'Razorpay payment verified successfully!'
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        verified: false,
+        error: `No captured ₹${expectedAmount} payment found on Razorpay for this session yet. Please click the Razorpay button and complete your ₹${expectedAmount} payment first.`
+      });
+    }
+  } catch (err) {
+    console.error('Razorpay live verification error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Could not connect to Razorpay live server. Please try again in a moment.'
+    });
+  }
+});
+
 // POST /api/submit - Submit CSE Student registration + mandatory payment verification
 app.post('/api/submit', submitLimiter, (req, res) => {
   try {

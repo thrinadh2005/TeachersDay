@@ -85,6 +85,17 @@ export const api = {
     return data;
   },
 
+  async verifyRazorpayLiveStatus(payload) {
+    const res = await fetch(`${API_BASE}/pay/verify-live-status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Payment verification failed');
+    return data;
+  },
+
   async submitStudentIdea(payload) {
     const res = await fetch(`${API_BASE}/submit`, {
       method: 'POST',
