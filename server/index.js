@@ -270,7 +270,8 @@ app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
 
     // SERVER-ENFORCED AMOUNT: Always ₹50.00 (5000 paise)
     const amountInPaise = 5000;
-    const receiptId = `rcpt_${sanitizedRoll.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now().toString().slice(-6)}`;
+    const cleanRoll = sanitizedRoll.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
+    const receiptId = `rc_${cleanRoll}_${Date.now()}`.slice(0, 38);
 
     if (razorpayInstance && process.env.RAZORPAY_KEY_SECRET) {
       try {
@@ -290,7 +291,8 @@ app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
             orderId: order.id,
             amount: amountInPaise,
             currency: 'INR',
-            keyId: RAZORPAY_KEY_ID
+            keyId: RAZORPAY_KEY_ID,
+            isRealOrder: true
           }
         });
       } catch (rzpErr) {
@@ -298,14 +300,14 @@ app.post('/api/pay/razorpay-order', submitLimiter, async (req, res) => {
       }
     }
 
-    const fallbackOrderId = `order_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     res.json({
       success: true,
       data: {
-        orderId: fallbackOrderId,
+        orderId: null,
         amount: amountInPaise,
         currency: 'INR',
-        keyId: RAZORPAY_KEY_ID
+        keyId: RAZORPAY_KEY_ID,
+        isRealOrder: false
       }
     });
   } catch (err) {
