@@ -55,9 +55,18 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
   const [activeCategory, setActiveCategory] = useState('starFaculty');
   const [teacherSearch, setTeacherSearch] = useState('');
 
-  // Step 3: Payment & Completion
+  // Step 3: Payment & Contribution Amount Selection
+  const presetAmounts = [50, 100, 150, 200, 500];
+  const [contributionAmount, setContributionAmount] = useState(50);
+  const [customAmountText, setCustomAmountText] = useState('');
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [completedRecord, setCompletedRecord] = useState(null);
+
+  const currentTypedNumber = Number(customAmountText);
+  const effectiveContributionAmount = isCustomAmount
+    ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
+    : contributionAmount;
 
   const years = ['2nd Year', '3rd Year', '4th Year'];
   const sections = ['Section A', 'Section B', 'Section C', 'Section D'];
@@ -166,8 +175,8 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
         paymentStatus: paymentDetails.status || 'verified',
         paymentMethod: paymentDetails.paymentMethod || 'RAZORPAY',
         transactionId: paymentDetails.transactionId || `TXN_${Date.now()}`,
-        paymentAmount: paymentDetails.amount || 50,
-        amount: paymentDetails.amount || 50
+        paymentAmount: paymentDetails.amount || effectiveContributionAmount || 50,
+        amount: paymentDetails.amount || effectiveContributionAmount || 50
       };
 
       const response = await api.submitStudentIdea(payload);
@@ -209,13 +218,13 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
 
   return (
-    <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <section id="registration-section" className="relative py-8 sm:py-16 max-w-4xl mx-auto px-4">
       
       {/* Visual Stepper Header */}
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-black uppercase tracking-wider mb-3 shadow-md">
-          <Code className="w-4 h-4 text-amber-400" />
-          <span>CSE Department Exclusive • 2nd, 3rd & 4th Years (Sections A, B, C, D)</span>
+          <GraduationCap className="w-4 h-4 text-amber-400" />
+          <span>CSE Department Exclusive • 2nd, 3rd & 4th Years</span>
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-black font-display text-white">
@@ -230,7 +239,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
           )}
         </h2>
 
-        {/* 3-Step Progress Bar (Mobile Responsive & Zero Overlap) */}
+        {/* 3-Step Progress Bar */}
         <div className="grid grid-cols-3 gap-1.5 sm:gap-3 max-w-xl mx-auto mt-5">
           <div className={`p-2 sm:p-3 rounded-2xl border text-center transition-all ${
             currentStep === 1 
@@ -260,7 +269,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               : 'bg-slate-900/60 border-white/5 text-slate-500'
           }`}>
             <span className="text-[9px] sm:text-[10px] uppercase block font-black">Step 3</span>
-            <span className="text-[11px] sm:text-xs truncate block mt-0.5">3. Pay ₹50</span>
+            <span className="text-[11px] sm:text-xs truncate block mt-0.5">3. Confirmed</span>
           </div>
         </div>
       </div>
@@ -279,7 +288,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
         <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl animate-fadeIn">
           <form onSubmit={handleProceedToVoting} className="space-y-8">
             
-            {/* 1. Student Information */}
             <div>
               <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
                 <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
@@ -388,7 +396,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               </div>
             </div>
 
-            {/* 2. Stage Speech Interest (Optional - Yes toggle only) */}
             <div>
               <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
                 <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
@@ -460,7 +467,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               </div>
             </div>
 
-            {/* 3. Favorite Teacher & Fun Memories (Optional) */}
             <div>
               <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
                 <div className="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold text-xs">
@@ -514,7 +520,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
               </div>
             </div>
 
-            {/* Next Button: Go to Step 2 (Voting) */}
             <button
               type="submit"
               className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-base shadow-xl shadow-purple-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-3"
@@ -555,7 +560,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             </button>
           </div>
 
-          {/* Category Selector Tabs */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase text-slate-400">Select Award Category:</span>
@@ -605,7 +609,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             </div>
           </div>
 
-          {/* Active Category Description Banner */}
           {currentCategoryObj && (
             <div className="p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
@@ -633,7 +636,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             </div>
           )}
 
-          {/* Search Box */}
           <div className="max-w-xs relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -645,7 +647,6 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             />
           </div>
 
-          {/* Clean Faculty Grid (Zero Captions, Zero Domains) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-1">
             {filteredTeachers.map((teacher) => {
               const isSelectedForActiveCat = selectedVotes[activeCategory] === teacher.id;
@@ -688,28 +689,39 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
             })}
           </div>
 
-          {/* Proceed to Payment Bar */}
-          <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-xs text-slate-400">
-              <span className="text-white font-bold">Mandatory ₹50 Celebration Contribution</span>
-              <p className="text-[11px]">Proceed to secure Razorpay checkout to confirm your registration.</p>
+          <div className="pt-4 border-t border-white/10 space-y-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/30 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-purple-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Celebration Contribution</span>
+                  </span>
+                </div>
+                <div className="text-left sm:text-right shrink-0">
+                  <span className="font-black text-amber-400 text-2xl font-display">₹{effectiveContributionAmount}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {presetAmounts.map((amt) => (
+                  <button key={amt} type="button" onClick={() => { setContributionAmount(amt); setIsCustomAmount(false); }} className={`py-2 rounded-xl text-xs font-bold border transition-all ${!isCustomAmount && contributionAmount === amt ? 'bg-purple-600 border-amber-400 text-white' : 'bg-slate-950/80 border-white/10 text-slate-300'}`}>₹{amt}</button>
+                ))}
+              </div>
             </div>
 
             <button
               onClick={handleProceedToPayment}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all flex items-center justify-center gap-2"
+              className="w-full px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
             >
               <CreditCard className="w-4 h-4" />
-              <span>Confirm & Pay ₹50 (Step 3)</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Confirm & Pay ₹{effectiveContributionAmount}</span>
             </button>
           </div>
-
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* STEP 3: SUCCESS CONFIRMATION (NO PASS NEEDED) */}
+      {/* STEP 3: SUCCESS CONFIRMATION */}
       {/* ========================================================================= */}
       {currentStep === 3 && completedRecord && (
         <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border border-emerald-500/30 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto">
@@ -719,79 +731,31 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
           </div>
 
           <div>
-            <span className="text-xs font-black uppercase text-emerald-400 tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-              Registration & Payment Completed
-            </span>
             <h3 className="text-2xl sm:text-3xl font-black text-white font-display mt-3">
               Thank You, {completedRecord.name}!
             </h3>
             <p className="text-slate-300 text-sm max-w-md mx-auto mt-2">
-              Your registration and <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || 50} contribution</span> for Teachers' Day 2026 have been successfully recorded.
+              Your registration and <span className="text-amber-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50} contribution</span> have been recorded.
             </p>
           </div>
 
-          {/* Summary Details Card */}
           <div className="p-5 rounded-2xl bg-slate-950/80 border border-white/10 text-left space-y-3 text-xs">
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-slate-400">JNTU Roll Number</span>
               <span className="text-white font-mono font-bold">{completedRecord.rollNumber}</span>
             </div>
-
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Year & Section</span>
-              <span className="text-white font-semibold">{completedRecord.year} • {completedRecord.section}</span>
-            </div>
-
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-slate-400">Contribution Amount</span>
-              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || 50}.00 (Verified)</span>
+              <span className="text-amber-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (Verified)</span>
             </div>
-
-            {completedRecord.interestedInSpeaking === 'Yes' && (
-              <div className="flex justify-between border-b border-white/10 pb-2">
-                <span className="text-slate-400">Stage Speech Interest</span>
-                <span className="text-amber-300 font-bold flex items-center gap-1">
-                  <Mic className="w-3.5 h-3.5" /> Registered ({completedRecord.speechTeacher})
-                </span>
-              </div>
-            )}
-
-            <div className="flex justify-between">
-              <span className="text-slate-400">Favorite Teacher Tribute</span>
-              <span className="text-purple-300 font-bold">{completedRecord.favoriteTeacher}</span>
-            </div>
-          </div>
-
-          {/* Thank you tribute notice */}
-          <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 text-center">
-            🎉 Your secret votes have been securely recorded. See you at the CSE Quadrangle on <span className="text-amber-300 font-bold">September 5, 2026</span>!
           </div>
 
           <button
-            onClick={() => {
-              setCurrentStep(1);
-              setFormData({
-                name: '',
-                rollNumber: '',
-                department: 'Computer Science & Engineering (CSE)',
-                year: '3rd Year',
-                section: 'Section A',
-                email: '',
-                phone: '',
-                wantsToSpeak: false,
-                speechTeacher: '',
-                speechTopic: '',
-                favoriteTeacher: teachers[0]?.name || '',
-                anecdote: ''
-              });
-              setSelectedVotes({});
-              setCompletedRecord(null);
-            }}
+            onClick={() => { window.location.reload(); }}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all"
           >
             <span>Register Another Student</span>
           </button>
-
         </div>
       )}
 
@@ -799,6 +763,7 @@ export const SubmissionForm = ({ onSubmissionCompleted }) => {
       {showPaymentModal && (
         <PaymentModal
           studentData={formData}
+          initialAmount={effectiveContributionAmount}
           onPaymentSuccess={handlePaymentSuccess}
           onClose={() => setShowPaymentModal(false)}
         />

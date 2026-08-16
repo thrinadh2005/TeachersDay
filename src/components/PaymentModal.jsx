@@ -32,20 +32,29 @@ const loadRazorpayScript = () => {
   });
 };
 
-export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
+export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  const [contributionAmount, setContributionAmount] = useState(50);
-  const [isCustomInput, setIsCustomInput] = useState(false);
-
+  
   const presetAmounts = [50, 100, 150, 200, 500];
+  const initialIsPreset = presetAmounts.includes(Number(initialAmount));
+  
+  const [selectedPreset, setSelectedPreset] = useState(initialIsPreset ? Number(initialAmount) : null);
+  const [customInputText, setCustomInputText] = useState(!initialIsPreset && initialAmount ? String(initialAmount) : '');
+  const [isCustom, setIsCustom] = useState(!initialIsPreset && Boolean(initialAmount));
+
+  // Determine current effective amount (Minimum ₹50)
+  const currentTypedNumber = Number(customInputText);
+  const effectiveAmount = isCustom
+    ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
+    : (selectedPreset || 50);
 
   // RAZORPAY CHECKOUT TRIGGER
   const handleLaunchRazorpay = async () => {
     setIsProcessing(true);
     setPaymentError(null);
 
-    const effectiveAmount = Math.max(50, Math.floor(Number(contributionAmount) || 50));
+    const finalAmountToPay = effectiveAmount;
 
     try {
       // 1. Ensure Razorpay SDK is loaded
@@ -56,7 +65,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
 
       // 2. Create order on server
       const orderRes = await api.createRazorpayOrder({
-        amount: effectiveAmount,
+        amount: finalAmountToPay,
         rollNumber: studentData?.rollNumber || 'CSE',
         name: studentData?.name || 'Student'
       });
@@ -70,10 +79,10 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
       // 3. Prepare Razorpay Options
       const options = {
         key: keyId || '',
-        amount: amountInPaise || (effectiveAmount * 100),
+        amount: amountInPaise || (finalAmountToPay * 100),
         currency: 'INR',
         name: "GMRIT CSE Teachers' Day 2026",
-        description: `₹${effectiveAmount} Celebration Contribution (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
+        description: `₹${finalAmountToPay} Celebration Contribution (${studentData?.year || 'CSE'} ${studentData?.section || ''})`,
         image: "https://gmrit.edu.in/images/logo.jpg",
         order_id: (isRealOrder && orderId && orderId.startsWith('order_')) ? orderId : undefined,
         prefill: {
@@ -86,7 +95,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
           department: 'CSE',
           section: studentData?.section || '',
           year: studentData?.year || '',
-          contributionAmount: effectiveAmount
+          contributionAmount: finalAmountToPay
         },
         theme: {
           color: "#9333ea"
@@ -104,7 +113,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             if (verifyRes.success) {
               onPaymentSuccess({
                 status: 'verified',
-                amount: effectiveAmount,
+                amount: finalAmountToPay,
                 paymentMethod: 'RAZORPAY_LIVE',
                 transactionId: response.razorpay_payment_id || `RZP_${Date.now()}`
               });
@@ -115,7 +124,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             setPaymentError('Payment recorded: ' + vErr.message);
             onPaymentSuccess({
               status: 'verified',
-              amount: effectiveAmount,
+              amount: finalAmountToPay,
               paymentMethod: 'RAZORPAY_LIVE',
               transactionId: response.razorpay_payment_id || `RZP_${Date.now()}`
             });
@@ -157,7 +166,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-white leading-tight">
-                Confirm Registration & ₹50 Payment
+                Confirm Registration & ₹{effectiveAmount} Payment
               </h3>
               <p className="text-[11px] text-purple-300">
                 Google Pay, PhonePe, Paytm, Cards & UPI
@@ -267,33 +276,34 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
           <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/30 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[11px] uppercase tracking-wider font-bold text-purple-300 block flex items-center gap-1">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-purple-300 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Celebration Contribution
                 </span>
                 <span className="text-[11px] text-slate-400">
-                  Minimum: ₹50 • Feel free to contribute more for our teachers! 🎉
+                  Select an amount or enter any custom contribution (Min ₹50) 🎉
                 </span>
               </div>
               <div className="text-right shrink-0">
-                <span className="font-black text-amber-400 text-2xl font-display">₹{contributionAmount}</span>
+                <span className="font-black text-amber-400 text-2xl font-display">₹{effectiveAmount}</span>
               </div>
             </div>
 
             {/* Quick Presets */}
             <div className="grid grid-cols-5 gap-1.5">
               {presetAmounts.map((amt) => {
-                const isSelected = contributionAmount === amt && !isCustomInput;
+                const isSelected = !isCustom && selectedPreset === amt;
                 return (
                   <button
                     key={amt}
                     type="button"
                     onClick={() => {
-                      setContributionAmount(amt);
-                      setIsCustomInput(false);
+                      setSelectedPreset(amt);
+                      setCustomInputText('');
+                      setIsCustom(false);
                     }}
-                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
+                    className={`py-2 px-2 rounded-xl text-xs font-bold transition-all ${
                       isSelected
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30 scale-[1.02] border border-purple-400'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30 scale-[1.02] border border-purple-400 ring-2 ring-purple-400/40'
                         : 'bg-slate-950/80 hover:bg-white/10 text-slate-300 border border-white/10'
                     }`}
                   >
@@ -312,17 +322,34 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
                   type="number"
                   min="50"
                   step="10"
-                  value={contributionAmount}
+                  value={isCustom ? customInputText : ''}
                   onChange={(e) => {
-                    const raw = Number(e.target.value);
-                    setContributionAmount(raw < 50 ? 50 : raw);
-                    setIsCustomInput(true);
+                    const val = e.target.value;
+                    setCustomInputText(val);
+                    setIsCustom(true);
                   }}
-                  className="w-full pl-7 pr-3 py-1.5 rounded-xl bg-slate-950 border border-white/20 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
-                  placeholder="Enter amount (Min ₹50)"
+                  onBlur={() => {
+                    if (isCustom) {
+                      const num = Number(customInputText);
+                      if (isNaN(num) || num < 50) {
+                        setCustomInputText('50');
+                      }
+                    }
+                  }}
+                  className={`w-full pl-7 pr-3 py-1.5 rounded-xl bg-slate-950 border text-white font-mono text-xs focus:outline-none ${
+                    isCustom 
+                      ? 'border-amber-400 ring-1 ring-amber-400/40' 
+                      : 'border-white/20 focus:border-purple-400'
+                  }`}
+                  placeholder="Enter other amount (e.g. 250, 500)"
                 />
               </div>
             </div>
+            {isCustom && customInputText && Number(customInputText) < 50 && (
+              <p className="text-[10px] text-amber-400 font-medium">
+                Note: Minimum contribution pass is ₹50. It will automatically adjust to ₹50 at checkout.
+              </p>
+            )}
           </div>
 
           {/* Razorpay Gateway Direct Button */}
@@ -340,7 +367,7 @@ export const PaymentModal = ({ studentData, onPaymentSuccess, onClose }) => {
               ) : (
                 <>
                   <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>Pay ₹{contributionAmount} (Google Pay / PhonePe / Cards / UPI)</span>
+                  <span>Pay ₹{effectiveAmount} (Google Pay / PhonePe / Cards / UPI)</span>
                   <ArrowRight className="w-5 h-5 ml-1" />
                 </>
               )}
