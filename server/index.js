@@ -206,16 +206,19 @@ app.get('/api/teachers', (req, res) => {
 app.post('/api/vote', voteLimiter, (req, res) => {
   try {
     const { teacherId, voterKey, categoryId = 'starFaculty' } = req.body;
-    
+    const rollValidation = validateJntuRollBackend(voterKey);
+    if (!rollValidation.isValid) {
+      return res.status(400).json({ success: false, error: rollValidation.error });
+    }
+    const cleanRoll = rollValidation.clean;
     const sanitizedTeacherId = sanitizeString(teacherId, 50);
-    const sanitizedVoterKey = sanitizeString(voterKey, 30).toUpperCase();
     const sanitizedCategoryId = sanitizeString(categoryId, 40);
 
-    if (!sanitizedTeacherId || !sanitizedVoterKey) {
-      return res.status(400).json({ success: false, error: 'Teacher ID and JNTU Roll Number are required.' });
+    if (!sanitizedTeacherId) {
+      return res.status(400).json({ success: false, error: 'Please select a faculty member to cast your vote.' });
     }
 
-    const result = db.voteTeacher(sanitizedTeacherId, sanitizedVoterKey, sanitizedCategoryId);
+    const result = db.voteTeacher(sanitizedTeacherId, cleanRoll, sanitizedCategoryId);
     if (!result.success) {
       return res.status(result.alreadyVoted ? 409 : 400).json(result);
     }
@@ -229,11 +232,11 @@ app.post('/api/vote', voteLimiter, (req, res) => {
 app.post('/api/vote-batch', voteLimiter, (req, res) => {
   try {
     const { voterKey, votes } = req.body;
-    const sanitizedVoterKey = sanitizeString(voterKey, 30).toUpperCase();
-
-    if (!sanitizedVoterKey) {
-      return res.status(400).json({ success: false, error: 'JNTU Roll Number is required to vote.' });
+    const rollValidation = validateJntuRollBackend(voterKey);
+    if (!rollValidation.isValid) {
+      return res.status(400).json({ success: false, error: rollValidation.error });
     }
+    const cleanRoll = rollValidation.clean;
 
     if (!votes || typeof votes !== 'object' || Object.keys(votes).length === 0) {
       return res.status(400).json({ success: false, error: 'Please select at least one faculty award category.' });
@@ -246,7 +249,7 @@ app.post('/api/vote-batch', voteLimiter, (req, res) => {
       }
     }
 
-    const result = db.submitBallot(sanitizedVoterKey, cleanVotes);
+    const result = db.submitBallot(cleanRoll, cleanVotes);
     if (!result.success) {
       return res.status(result.alreadyVoted ? 409 : 400).json(result);
     }
@@ -259,8 +262,13 @@ app.post('/api/vote-batch', voteLimiter, (req, res) => {
 // GET /api/voter-status/:roll - Check if roll has already voted (Zero choice exposure)
 app.get('/api/voter-status/:roll', (req, res) => {
   try {
-    const sanitizedRoll = sanitizeString(req.params.roll, 30).toUpperCase();
-    const status = db.getStudentVoteHistory(sanitizedRoll);
+    const rawRoll = req.params.roll || '';
+    const rollValidation = validateJntuRollBackend(rawRoll);
+    if (!rollValidation.isValid) {
+      return res.status(400).json({ success: false, error: rollValidation.error });
+    }
+    const cleanRoll = rollValidation.clean;
+    const status = db.getStudentVoteHistory(cleanRoll);
     res.json({ success: true, data: status });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to retrieve voter status.' });

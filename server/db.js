@@ -134,7 +134,13 @@ class Database {
       const cloudVoters = await votersCol.find({}).toArray();
       cloudVoters.forEach(v => {
         if (v.roll) {
-          this.data.voters[v.roll] = v.votes || {};
+          const rollKey = v.roll.trim().toUpperCase();
+          this.data.voters[rollKey] = {
+            hasVoted: true,
+            votedAt: v.votedAt || new Date().toISOString(),
+            votesCount: v.votesCount || (v.votes ? Object.keys(v.votes).length : 1),
+            votes: v.votes || {}
+          };
         }
       });
 
@@ -211,12 +217,20 @@ class Database {
     }
 
     // STRICT 1-TIME VOTE CHECK: If roll has already voted, reject immediately
-    if (this.data.voters[roll] && (this.data.voters[roll].hasVoted || Object.keys(this.data.voters[roll].votes || {}).length > 0)) {
-      return { 
-        success: false, 
-        alreadyVoted: true,
-        error: `Student with JNTU Roll Number "${roll}" has already cast their secret ballot. Each roll number is strictly allowed to vote only ONCE.` 
-      };
+    const existingRecord = this.data.voters[roll];
+    if (existingRecord) {
+      const alreadyHasVoted = Boolean(
+        existingRecord === true || 
+        existingRecord.hasVoted === true || 
+        (typeof existingRecord === 'object' && Object.keys(existingRecord.votes || existingRecord).length > 0)
+      );
+      if (alreadyHasVoted) {
+        return { 
+          success: false, 
+          alreadyVoted: true,
+          error: `JNTU Roll Number "${roll}" has already cast their secret ballot. Each student is strictly permitted to vote only ONCE.` 
+        };
+      }
     }
 
     const voteEntries = Object.entries(votes).filter(([catId, teacherId]) => Boolean(teacherId));
@@ -284,11 +298,12 @@ class Database {
     }
 
     // STRICT 1-TIME VOTE CHECK:
-    if (this.data.voters[roll] && this.data.voters[roll].hasVoted) {
+    const history = this.getStudentVoteHistory(roll);
+    if (history.hasVoted) {
       return { 
         success: false, 
         alreadyVoted: true,
-        error: `Student with JNTU Roll Number "${roll}" has already cast their secret ballot. Multiple voting is not permitted.` 
+        error: `JNTU Roll Number "${roll}" has already cast their secret ballot. Each student can vote only ONCE.` 
       };
     }
 
@@ -298,15 +313,20 @@ class Database {
   // Zero-Knowledge Voter Status (Never exposes who student voted for to protect privacy)
   getStudentVoteHistory(voterRoll) {
     const roll = (voterRoll || '').trim().toUpperCase();
+    if (!roll) return { hasVoted: false, votesCount: 0 };
     const record = this.data.voters[roll];
     if (!record) {
       return { hasVoted: false, votesCount: 0 };
     }
-    const hasVoted = Boolean(record.hasVoted || (record.votes && Object.keys(record.votes).length > 0));
+    const hasVoted = Boolean(
+      record === true || 
+      record.hasVoted === true || 
+      (typeof record === 'object' && Object.keys(record.votes || record).length > 0)
+    );
     return {
       hasVoted,
       votedAt: record.votedAt || null,
-      votesCount: record.votesCount || (record.votes ? Object.keys(record.votes).length : 0)
+      votesCount: record.votesCount || (record.votes ? Object.keys(record.votes).length : 1)
     };
   }
 

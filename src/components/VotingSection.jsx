@@ -15,14 +15,20 @@ import {
   CheckCircle2, 
   ArrowRight,
   Eye,
-  Lock
+  Lock,
+  Ban,
+  HelpCircle
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
 import { cleanJntuRoll, validateJntuRoll, JNTU_ROLL_LENGTH } from '../utils/jntuValidation';
 
 export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
-  const [voterRoll, setVoterRoll] = useState(cleanJntuRoll(initialRollNumber).slice(0, JNTU_ROLL_LENGTH));
+  const [voterRoll, setVoterRoll] = useState(() => {
+    const savedRoll = initialRollNumber || (typeof localStorage !== 'undefined' ? localStorage.getItem('td_voted_roll') : '') || '';
+    return cleanJntuRoll(savedRoll).slice(0, JNTU_ROLL_LENGTH);
+  });
+
   const [teachers, setTeachers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('starFaculty');
@@ -76,16 +82,27 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       .catch(err => console.error('Failed to load voting data:', err));
   }, []);
 
-  // Check if roll number has already voted (Zero choice exposure)
+  // Continuous Verification: Check if roll number has already voted
   useEffect(() => {
     if (cleanRoll.length === JNTU_ROLL_LENGTH) {
+      // 1. Instant client-side verification
+      const localVoted = localStorage.getItem(`td_voted_roll_${cleanRoll}`);
+      if (localVoted === 'true') {
+        setAlreadyVoted(true);
+        setError(`JNTU Roll Number "${cleanRoll}" has already cast their secret ballot. As per official rules, multiple voting is strictly prohibited.`);
+      }
+
+      // 2. Authoritative server verification
       setCheckingVoterStatus(true);
       api.getVoterHistory(cleanRoll)
         .then(res => {
           if (res.success && res.data && res.data.hasVoted) {
             setAlreadyVoted(true);
-            setError(`Student with JNTU Roll Number "${cleanRoll}" has already cast their secret ballot. Each student is permitted to vote only ONCE.`);
-          } else {
+            try {
+              localStorage.setItem(`td_voted_roll_${cleanRoll}`, 'true');
+            } catch (e) {}
+            setError(`JNTU Roll Number "${cleanRoll}" has already voted. Each student is strictly permitted to vote only ONCE.`);
+          } else if (localVoted !== 'true') {
             setAlreadyVoted(false);
             setError(null);
           }
@@ -94,6 +111,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
         .finally(() => setCheckingVoterStatus(false));
     } else {
       setAlreadyVoted(false);
+      setError(null);
     }
   }, [cleanRoll]);
 
@@ -101,10 +119,14 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
     const raw = e.target.value;
     const sanitized = cleanJntuRoll(raw).slice(0, JNTU_ROLL_LENGTH);
     setVoterRoll(sanitized);
+    setError(null);
   };
 
   const handleSelectVote = (teacherId) => {
-    if (alreadyVoted) return;
+    if (alreadyVoted) {
+      setError(`Your vote is already recorded for Roll Number "${cleanRoll}". Changes are not allowed under the Single-Vote Rule.`);
+      return;
+    }
     setSelectedVotes(prev => ({
       ...prev,
       [activeCategory]: teacherId
@@ -122,7 +144,32 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
     }
 
     if (alreadyVoted) {
-      setError(`Student with JNTU Roll Number "${cleanRoll}" has already voted. Multiple voting is strictly prohibited.`);
+      if (!storyText.trim()) {
+        setError(`Roll Number "${cleanRoll}" has already voted. Each student can vote only once.`);
+        return;
+      }
+      // If already voted, only submit the anonymous story
+      setLoading(true);
+      try {
+        await api.submitAnonymousAnecdote({
+          teacherName: storyTeacher || 'CSE Faculty',
+          anecdote: storyText.trim(),
+          rollNumber: cleanRoll,
+          section: 'CSE'
+        });
+        fireFestiveConfetti();
+        setSuccessData({
+          voterRoll: cleanRoll,
+          votesCount: 0,
+          hasStory: true,
+          storyTeacher: storyTeacher,
+          isStoryOnly: true
+        });
+      } catch (err) {
+        setError(err.message || 'Failed to submit memory. Please try again.');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -131,7 +178,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
     const hasStory = storyText.trim().length > 0;
 
     if (!hasVotes && !hasStory) {
-      setError('Please select at least one faculty award vote or share a crazy faculty story.');
+      setError('Please select at least one faculty award category above.');
       return;
     }
 
@@ -156,6 +203,12 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
           section: 'CSE'
         });
       }
+
+      // 3. Mark as voted locally & in memory
+      try {
+        localStorage.setItem(`td_voted_roll_${cleanRoll}`, 'true');
+        localStorage.setItem('td_voted_roll', cleanRoll);
+      } catch (e) {}
 
       setAlreadyVoted(true);
       setSuccessData({
@@ -182,6 +235,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
   });
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
+  const votedCategoriesCount = Object.keys(selectedVotes).length;
 
   return (
     <section id="voting-section" className="relative py-6 sm:py-12 max-w-4xl mx-auto px-4 space-y-8 animate-fadeIn">
@@ -201,18 +255,29 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
           )}
         </h2>
 
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium leading-relaxed">
           {successData 
             ? 'Your confidential faculty award votes and anonymous memories have been securely recorded!'
-            : 'Cast your confidential votes across 5 superlative categories and share 100% anonymous crazy classroom moments!'}
+            : 'Cast your confidential votes across 5 superlative categories. Remember: Each student can vote strictly ONCE.'}
         </p>
+
+        {/* Anti-Duplication Rule Notice Banner */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-sm">
+          <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span>Strict Rule: 1 Student = 1 Secret Ballot (Duplicate Votes Blocked)</span>
+        </div>
       </div>
 
-      {/* Error Alert */}
+      {/* Error / Duplicate Warning Alert */}
       {error && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/15 border-2 border-rose-400 flex items-center gap-3 text-rose-800 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
-          <span>{error}</span>
+        <div className="p-4 sm:p-5 rounded-2xl bg-rose-50 dark:bg-rose-500/15 border-2 border-rose-400 dark:border-rose-500/30 flex items-start sm:items-center gap-3 text-rose-800 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5 sm:mt-0" />
+          <div className="space-y-1 flex-1">
+            <div className="font-black uppercase text-[11px] tracking-wider text-rose-700 dark:text-rose-300">
+              {alreadyVoted ? 'Single-Vote Restriction Notice' : 'Validation Error'}
+            </div>
+            <div>{error}</div>
+          </div>
         </div>
       )}
 
@@ -222,7 +287,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       {!successData ? (
         <div className="space-y-8">
           
-          {/* Roll Number Voter Identity Bar with 10-Digit Validation */}
+          {/* Step 1: Roll Number Voter Identity Bar with Live 10-Digit Validation */}
           <div className="glass-card-glow rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-white/10 shadow-xl space-y-3 bg-white dark:bg-slate-950">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2.5">
@@ -231,13 +296,13 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 </div>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Voter Authentication (10-Digit JNTU Roll)</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Enter your 10-digit JNTU Roll Number to cast your 1-vote-per-category ballot.</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Validated against single-vote restrictions.</p>
                 </div>
               </div>
 
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-slate-900/80 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold shrink-0">
                 <ShieldCheck className="w-4 h-4" />
-                <span>100% Secret Ballot</span>
+                <span>100% Secret & Anonymous</span>
               </div>
             </div>
 
@@ -245,7 +310,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase">JNTU Roll Number</span>
                 
-                {/* 10-Digit Badge */}
+                {/* 10-Digit Live Badge */}
                 <div className="text-[11px] font-mono font-bold">
                   {cleanRoll.length === 0 && <span className="text-slate-400">e.g. 24341A0502</span>}
                   {cleanRoll.length > 0 && cleanRoll.length < JNTU_ROLL_LENGTH && (
@@ -254,10 +319,17 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                     </span>
                   )}
                   {cleanRoll.length === JNTU_ROLL_LENGTH && rollValidation.isValid && (
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
-                      <Check className="w-3 h-3" />
-                      <span>{checkingVoterStatus ? 'Verifying...' : '✓ 10/10 Valid'}</span>
-                    </span>
+                    alreadyVoted ? (
+                      <span className="px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 flex items-center gap-1">
+                        <Lock className="w-3 h-3" />
+                        <span>Already Voted (Locked)</span>
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span>{checkingVoterStatus ? 'Verifying...' : '✓ 1 Vote Available'}</span>
+                      </span>
+                    )
                   )}
                 </div>
               </div>
@@ -270,52 +342,69 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 value={voterRoll}
                 onChange={handleRollChange}
                 className={`w-full px-4 py-3 rounded-2xl text-sm sm:text-base font-mono font-bold tracking-wider uppercase focus:outline-none transition-all shadow-inner ${
-                  rollValidation.isValid && cleanRoll.length === JNTU_ROLL_LENGTH
-                    ? 'border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-400/30'
-                    : 'border border-slate-300 dark:border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'
+                  alreadyVoted 
+                    ? 'border-2 border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
+                    : rollValidation.isValid && cleanRoll.length === JNTU_ROLL_LENGTH
+                      ? 'border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-400/30'
+                      : 'border border-slate-300 dark:border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'
                 }`}
               />
             </div>
           </div>
 
-          {/* If Roll Number Has Already Voted - Show Sealed Ballot Screen */}
+          {/* ========================================================================= */}
+          {/* STEP 2: CATEGORY VOTING OR ALREADY-VOTED LOCKOUT CARD */}
+          {/* ========================================================================= */}
           {alreadyVoted ? (
-            <div className="glass-card-glow rounded-3xl p-8 sm:p-10 border border-amber-500/40 shadow-2xl text-center space-y-5 animate-fadeIn bg-white dark:bg-slate-950">
-              <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/30">
+            <div className="glass-card-glow rounded-3xl p-8 sm:p-10 border-2 border-amber-400 shadow-2xl text-center space-y-5 animate-fadeIn bg-white dark:bg-slate-950">
+              <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-400/40">
                 <Lock className="w-8 h-8" />
               </div>
 
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-black uppercase tracking-wider">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Confidential Ballot Sealed</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                  Vote Already Cast for {cleanRoll}
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
+                  Secret Ballot Already Cast for {cleanRoll}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed font-medium">
-                  You have already submitted your secret ballot for Teachers' Day 2026. As per official CSE regulations:
+                  Your votes for the 5 faculty award superlatives are recorded in the secret ballot vault. As per official CSE department regulations:
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left text-xs">
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-slate-700 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Single-Vote Rule:</strong> Each JNTU Roll Number is strictly permitted to vote only once.</span>
+                  <Ban className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <span className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white">Strict Single Vote:</strong> Each JNTU Roll Number is permitted to cast only 1 ballot to ensure fair results.
+                  </span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 flex items-start gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-                  <span className="text-slate-700 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Strict Secrecy:</strong> Your votes are 100% confidential and never exposed.</span>
+                  <span className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white">100% Confidential:</strong> Your individual votes are sealed and never revealed to anyone.
+                  </span>
                 </div>
               </div>
 
-              {/* Still allow submitting crazy stories if they haven't submitted */}
-              <div className="pt-4 border-t border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 font-medium">
-                Want to share an anonymous crazy memory about faculty? You can submit it below!
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (setActiveTab) setActiveTab('vote');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md transition-all touch-press"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>View Grand Award Reveal Ceremony</span>
+                </button>
               </div>
             </div>
           ) : (
-            /* Category Voting Box */
+            /* Category Voting Grid */
             <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 bg-white dark:bg-slate-950">
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
@@ -326,11 +415,11 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Select Faculty for 5 Award Superlatives</h3>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-10">Choose a faculty member for each award category below.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-10">Choose 1 faculty member per award title. Ballots cannot be modified once cast.</p>
                 </div>
 
                 <span className="text-xs text-amber-700 dark:text-amber-400 font-bold px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/20 self-start sm:self-auto">
-                  Categories Voted: {Object.keys(selectedVotes).length} / {categories.length}
+                  Categories Voted: {votedCategoriesCount} / {categories.length}
                 </span>
               </div>
 
@@ -387,7 +476,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                       <div className="text-sm font-bold text-slate-900 dark:text-white">{currentCategoryObj.title}</div>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">1 vote allowed</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">1 vote allowed per category</span>
                 </div>
               )}
 
@@ -449,45 +538,46 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                   );
                 })}
               </div>
+
             </div>
           )}
 
-          {/* 100% Anonymous "Crazy Things About Faculty" Section */}
+          {/* ========================================================================= */}
+          {/* STEP 3: 100% ANONYMOUS CRAZY STORY / MEMORY COMPOSER */}
+          {/* ========================================================================= */}
           <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-5 bg-white dark:bg-slate-950">
-            
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center font-black text-xs">
-                  3
+                <div className="w-8 h-8 rounded-xl bg-pink-500/20 text-pink-700 dark:text-pink-300 flex items-center justify-center font-black text-xs">
+                  {alreadyVoted ? 1 : 3}
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-pink-500" />
-                    <span>"Crazy Things About Faculty" (100% Anonymous)</span>
+                    <span>100% Anonymous Classroom Memory</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-700 dark:text-pink-300">
+                      Optional
+                    </span>
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Share unforgettable lab moments, hilarious classroom dialogues, or teacher tributes.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Share a funny dialogue, unforgettable lab moment, or sweet gesture.</p>
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-700 dark:text-pink-300 text-xs font-bold self-start sm:self-auto">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>100% Anonymous</span>
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 dark:bg-slate-900/80 border border-pink-500/30 text-pink-700 dark:text-pink-400 text-xs font-bold">
+                <MessageSquare className="w-4 h-4" />
+                <span>Zero Identity Exposed</span>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Select Faculty Member <span className="text-xs font-normal text-slate-500">(Optional)</span>
+                  Select Faculty Member
                 </label>
                 <select
                   value={storyTeacher}
                   onChange={(e) => setStoryTeacher(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-white/10 text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 text-xs font-bold focus:outline-none focus:border-pink-400 shadow-inner"
                 >
-                  <option value="All CSE Faculty Members">
-                    🌟 All CSE Faculty Members
-                  </option>
                   {teachers.map(t => (
                     <option key={t.id} value={t.name}>
                       {t.name} ({t.designation})
@@ -517,10 +607,15 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
           <div className="pt-2">
             <button
               onClick={handleSubmitVotesAndStories}
-              disabled={loading || !rollValidation.isValid || (alreadyVoted && !storyText.trim())}
+              disabled={
+                loading || 
+                !rollValidation.isValid || 
+                (alreadyVoted && !storyText.trim()) ||
+                (!alreadyVoted && votedCategoriesCount === 0 && !storyText.trim())
+              }
               className={`w-full py-4 sm:py-5 px-8 rounded-2xl font-black text-base sm:text-lg shadow-2xl transition-all flex items-center justify-center gap-3 touch-press ${
-                !rollValidation.isValid || (alreadyVoted && !storyText.trim())
-                  ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                !rollValidation.isValid || (alreadyVoted && !storyText.trim()) || (!alreadyVoted && votedCategoriesCount === 0 && !storyText.trim())
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-white/10'
                   : 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-pink-500 text-white shadow-purple-500/30 hover:scale-[1.01]'
               }`}
             >
@@ -534,15 +629,27 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 ) : (
                   <>
                     <Lock className="w-5 h-5 text-amber-400" />
-                    <span>Secret Ballot Already Submitted for {cleanRoll}</span>
+                    <span>Secret Ballot Sealed for {cleanRoll} (Single Vote Rule)</span>
                   </>
                 )
               ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  <span>{loading ? 'Submitting Ballot...' : 'Submit Secret Votes & Anonymous Stories'}</span>
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                </>
+                !rollValidation.isValid ? (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    <span>Enter 10-Digit Roll ({cleanRoll.length}/10)</span>
+                  </>
+                ) : votedCategoriesCount === 0 && !storyText.trim() ? (
+                  <>
+                    <HelpCircle className="w-5 h-5 text-amber-300" />
+                    <span>Select Faculty Category Above to Vote</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span>{loading ? 'Submitting Ballot...' : `Submit Secret Ballot (${votedCategoriesCount} Categories)`}</span>
+                    <Sparkles className="w-5 h-5 text-amber-300" />
+                  </>
+                )
               )}
             </button>
           </div>
@@ -587,8 +694,8 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Award Ceremony</span>
-              <span className="text-slate-800 dark:text-slate-200 font-medium">Grand Winner Reveal Live on Stage!</span>
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Voting Status</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">✓ Sealed (Single-Vote Applied)</span>
             </div>
           </div>
 
