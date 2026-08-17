@@ -24,9 +24,27 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
   const razorpayButtonRef = useRef(null);
 
+  const [alreadyPaidData, setAlreadyPaidData] = useState(null);
+
+  // Check if roll number has already paid
+  useEffect(() => {
+    const cleanRoll = (studentData?.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    if (cleanRoll) {
+      api.checkRegistration(cleanRoll)
+        .then(res => {
+          if (res.alreadyRegistered) {
+            const rec = res.data || res.submission;
+            setAlreadyPaidData(rec);
+            setPaymentError(`JNTU Roll Number "${cleanRoll}" has already contributed ₹${rec?.amount || rec?.payment?.amount || 50} (Receipt: ${rec?.acknowledgementNumber || rec?.ticketNumber}). Duplicate payments are strictly not allowed.`);
+          }
+        })
+        .catch(err => console.warn('Check roll modal notice:', err));
+    }
+  }, [studentData?.rollNumber]);
+
   // 1. Embed official Razorpay Payment Button (pl_TQWuIlJaMefrde)
   useEffect(() => {
-    if (!razorpayButtonRef.current) return;
+    if (!razorpayButtonRef.current || alreadyPaidData) return;
     
     razorpayButtonRef.current.innerHTML = '';
     setButtonLoading(true);
@@ -47,7 +65,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
     form.appendChild(script);
     razorpayButtonRef.current.appendChild(form);
-  }, []);
+  }, [alreadyPaidData]);
 
   // 2. Strict Live Verification against Razorpay Live Servers
   const verifyWithLiveServer = async (explicitUserClick = false) => {
@@ -200,66 +218,89 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             </div>
           </div>
 
-          {/* FINAL RAZORPAY PAYMENT BUTTON (HIGH VISIBILITY BOX) */}
-          <div className="p-6 rounded-3xl bg-slate-950 border-2 border-emerald-400 space-y-4 shadow-2xl text-center relative overflow-hidden">
-            
-            <div className="space-y-1.5">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-md">
-                <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-                Live Razorpay Checkout
-              </span>
-              <p className="text-xs sm:text-sm text-slate-100 pt-1 leading-relaxed font-medium">
-                Click the official Razorpay button below to pay <strong className="text-amber-300 font-black">₹{lockedAmount}</strong>. Your Celebration Pass is strictly activated only after the payment is successfully captured by Razorpay.
-              </p>
-            </div>
-
-            {/* Official Razorpay Pay Button Embed Box */}
-            <div 
-              onClick={() => setPaymentInitiated(true)} 
-              className="py-5 px-3 rounded-2xl bg-slate-900 border border-emerald-500/30 flex flex-col items-center justify-center min-h-[72px] shadow-inner"
-            >
-              {isProcessing ? (
-                <div className="flex flex-col items-center gap-2 text-emerald-300 py-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-                  <span className="text-xs sm:text-sm font-black text-emerald-300 animate-pulse">
-                    Connecting to Razorpay live servers to verify real payment...
-                  </span>
-                </div>
-              ) : (
-                <>
-                  <div ref={razorpayButtonRef} className="flex justify-center items-center scale-125 hover:scale-130 transition-transform"></div>
-                  
-                  {buttonLoading && (
-                    <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-300 font-bold">
-                      <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                      <span>Loading Official Razorpay Gateway...</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Auto-check / Re-verify button if student already completed on app */}
-            {paymentInitiated && !isProcessing && (
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => verifyWithLiveServer(true)}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Paid on Razorpay? Click to Verify & Get Pass</span>
-                </button>
+          {/* FINAL RAZORPAY PAYMENT BUTTON OR ALREADY PAID CARD */}
+          {alreadyPaidData ? (
+            <div className="p-6 rounded-3xl bg-slate-950 border-2 border-amber-400/80 space-y-4 text-center shadow-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase">
+                <CheckCircle2 className="w-4 h-4" />
+                Pass Already Activated
               </div>
-            )}
-
-            {/* Security Assurance */}
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-center gap-2 text-xs text-emerald-300 font-bold">
-              <Lock className="w-4 h-4 text-emerald-400" />
-              <span>256-Bit Encrypted Secure Checkout hosted directly by Razorpay</span>
+              <h4 className="text-lg font-black text-white">Payment Already Received</h4>
+              <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                This JNTU Roll Number (<strong className="text-amber-300 font-mono">{studentData?.rollNumber}</strong>) already has a verified celebration contribution on record. Multiple payments are not permitted.
+              </p>
+              <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 font-bold">
+                Receipt: {alreadyPaidData.acknowledgementNumber || alreadyPaidData.ticketNumber} • Paid: ₹{alreadyPaidData.amount || alreadyPaidData.payment?.amount || 50}
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition-all shadow-md"
+              >
+                Close & Return
+              </button>
             </div>
+          ) : (
+            <div className="p-6 rounded-3xl bg-slate-950 border-2 border-emerald-400 space-y-4 shadow-2xl text-center relative overflow-hidden">
+              
+              <div className="space-y-1.5">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-md">
+                  <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                  Live Razorpay Checkout
+                </span>
+                <p className="text-xs sm:text-sm text-slate-100 pt-1 leading-relaxed font-medium">
+                  Click the official Razorpay button below to pay <strong className="text-amber-300 font-black">₹{lockedAmount}</strong>. Your Celebration Pass is strictly activated only after the payment is successfully captured by Razorpay.
+                </p>
+              </div>
 
-          </div>
+              {/* Official Razorpay Pay Button Embed Box */}
+              <div 
+                onClick={() => setPaymentInitiated(true)} 
+                className="py-5 px-3 rounded-2xl bg-slate-900 border border-emerald-500/30 flex flex-col items-center justify-center min-h-[72px] shadow-inner"
+              >
+                {isProcessing ? (
+                  <div className="flex flex-col items-center gap-2 text-emerald-300 py-2">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+                    <span className="text-xs sm:text-sm font-black text-emerald-300 animate-pulse">
+                      Connecting to Razorpay live servers to verify real payment...
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div ref={razorpayButtonRef} className="flex justify-center items-center scale-125 hover:scale-130 transition-transform"></div>
+                    
+                    {buttonLoading && (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-300 font-bold">
+                        <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                        <span>Loading Official Razorpay Gateway...</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Auto-check / Re-verify button if student already completed on app */}
+              {paymentInitiated && !isProcessing && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => verifyWithLiveServer(true)}
+                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Paid on Razorpay? Click to Verify & Get Pass</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Security Assurance */}
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-center gap-2 text-xs text-emerald-300 font-bold">
+                <Lock className="w-4 h-4 text-emerald-400" />
+                <span>256-Bit Encrypted Secure Checkout hosted directly by Razorpay</span>
+              </div>
+
+            </div>
+          )}
 
           {/* Footer note */}
           <div className="text-center text-xs text-slate-300 font-semibold pt-1">

@@ -61,9 +61,40 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       .catch(err => console.error('Failed to load teachers:', err));
   }, []);
 
+  const [checkingRoll, setCheckingRoll] = useState(false);
+
+  // Debounced auto-check: if student types a roll number that has already paid, detect and lock immediately
+  useEffect(() => {
+    const clean = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
+    if (clean.length >= 6) {
+      const timer = setTimeout(async () => {
+        setCheckingRoll(true);
+        try {
+          const res = await api.checkRegistration(clean);
+          if (res.alreadyRegistered) {
+            const rec = res.data || res.submission;
+            setExistingSubmission(rec);
+            setError(`Student with JNTU Roll Number "${clean}" has already completed payment & activated their Celebration Pass. Duplicate payments are strictly not permitted.`);
+          } else {
+            setExistingSubmission(null);
+            setError(null);
+          }
+        } catch (e) {
+          console.warn('Check roll error:', e);
+        } finally {
+          setCheckingRoll(false);
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    } else {
+      setExistingSubmission(null);
+      setError(null);
+    }
+  }, [rollNumber]);
+
   const handleStartPayment = async (e) => {
     if (e) e.preventDefault();
-    const cleanRoll = rollNumber.trim().toUpperCase();
+    const cleanRoll = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
 
     if (!cleanRoll) {
       setError('Please enter your JNTU Roll Number to proceed with payment.');
@@ -100,7 +131,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     setLoading(true);
     setError(null);
 
-    const cleanRoll = rollNumber.trim().toUpperCase();
+    const cleanRoll = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
     const yearDerive = selectedSection.includes('2') ? '2nd Year' : '3rd Year';
 
     try {
@@ -143,7 +174,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
   };
 
   const handleGoToVoting = () => {
-    const voterRoll = completedRecord?.rollNumber || rollNumber.trim().toUpperCase();
+    const voterRoll = completedRecord?.rollNumber || existingSubmission?.rollNumber || rollNumber.trim().toUpperCase();
     if (onProceedToVoting) {
       onProceedToVoting(voterRoll);
     }
@@ -160,7 +191,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
-          {completedRecord ? (
+          {completedRecord || existingSubmission ? (
             <>Payment & Contribution <span className="gradient-text-festive">Completed!</span></>
           ) : (
             <>Celebration Contribution <span className="gradient-text-gold">(₹50)</span></>
@@ -168,44 +199,113 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         </h2>
 
         <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
-          {completedRecord
-            ? 'Your celebration contribution has been verified. Now proceed to vote for your favorite faculty!'
+          {completedRecord || existingSubmission
+            ? 'Your celebration contribution has been verified and recorded. You cannot pay again.'
             : 'Enter your JNTU Roll Number and select your CSE Section to make your celebration contribution directly.'}
         </p>
       </div>
 
+      {/* ========================================================================= */}
+      {/* CASE 0: ALREADY PAID CARD (BLOCK DUPLICATE PAYMENTS) */}
+      {/* ========================================================================= */}
+      {existingSubmission && !completedRecord && (
+        <div className="mb-8 glass-card-glow rounded-3xl p-6 sm:p-8 border-2 border-emerald-400/80 bg-slate-950/90 shadow-2xl space-y-5 animate-scaleUp text-center">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20">
+            <ShieldCheck className="w-9 h-9 text-emerald-400" />
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-400 text-slate-950 px-3 py-1 rounded-full shadow-sm inline-block">
+              ✓ Celebration Pass Activated & Paid
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-white font-display">
+              Payment Already Received!
+            </h3>
+            <p className="text-xs text-slate-300 max-w-md mx-auto">
+              This JNTU Roll Number has already contributed. Once paid, the portal strictly does not allow duplicate payments.
+            </p>
+          </div>
+
+          {/* Student Pass Summary Card */}
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-2.5 text-xs">
+            <div className="flex justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400 font-bold">JNTU Roll Number</span>
+              <span className="text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded font-mono font-black text-xs">
+                {existingSubmission.rollNumber}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400 font-bold">Department & Section</span>
+              <span className="text-teal-300 font-bold">
+                {existingSubmission.year || 'CSE'} • {existingSubmission.section}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400 font-bold">Acknowledgement Number</span>
+              <span className="text-amber-300 font-mono font-bold">
+                {existingSubmission.acknowledgementNumber || existingSubmission.receiptNumber || existingSubmission.ticketNumber}
+              </span>
+            </div>
+            <div className="flex justify-between pt-0.5">
+              <span className="text-slate-400 font-bold">Amount Paid</span>
+              <span className="text-emerald-400 font-mono font-black text-sm">
+                ₹{existingSubmission.amount || existingSubmission.payment?.amount || 50}.00 (Verified)
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAckModal(true)}
+              className="w-full py-3.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02]"
+            >
+              <FileText className="w-4 h-4" />
+              <span>View & Print Official Receipt</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGoToVoting}
+              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02]"
+            >
+              <Vote className="w-4 h-4 text-amber-300" />
+              <span>Proceed to Faculty Voting</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setRollNumber('');
+              setExistingSubmission(null);
+              setError(null);
+            }}
+            className="text-[11px] text-slate-400 hover:text-white underline pt-1 block mx-auto"
+          >
+            Enter a different Roll Number
+          </button>
+        </div>
+      )}
+
       {/* Error Alert */}
-      {error && (
+      {error && !existingSubmission && (
         <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-200 text-xs sm:text-sm animate-shake shadow-lg">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
             <div>
               <span className="font-semibold">{error}</span>
-              {existingSubmission && (
-                <p className="text-xs text-rose-300/90 mt-1">
-                  Receipt: <strong className="font-mono text-amber-300">{existingSubmission.acknowledgementNumber || existingSubmission.ticketNumber}</strong> • Amount: ₹{existingSubmission.payment?.amount || 50}
-                </p>
-              )}
             </div>
           </div>
-
-          {existingSubmission && (
-            <button
-              type="button"
-              onClick={() => setShowAckModal(true)}
-              className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shrink-0 transition-all hover:scale-105"
-            >
-              <FileText className="w-4 h-4" />
-              <span>View Official Receipt</span>
-            </button>
-          )}
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* CASE 1: PAYMENT FORM (IF NOT COMPLETED) */}
+      {/* CASE 1: PAYMENT FORM (IF NOT COMPLETED AND NOT ALREADY PAID) */}
       {/* ========================================================================= */}
-      {!completedRecord ? (
+      {!completedRecord && !existingSubmission ? (
         <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl space-y-8 animate-fadeIn">
           
           <form onSubmit={handleStartPayment} className="space-y-7">
@@ -217,7 +317,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                   1. JNTU Roll Number (Unique ID) <span className="text-rose-400">*</span>
                 </label>
                 <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
-                  e.g. 24341A0502
+                  {checkingRoll ? 'Checking...' : 'e.g. 24341A0502'}
                 </span>
               </div>
 

@@ -348,15 +348,33 @@ app.post('/api/pay/create-order', async (req, res) => {
     const { amount, rollNumber, name } = req.body;
     const effectiveAmount = Math.max(50, Math.floor(Number(amount) || 50));
 
+    const cleanRoll = sanitizeString(rollNumber, 30).toUpperCase().replace(/\s+/g, '');
+    const cleanName = sanitizeString(name, 80);
+
+    if (!cleanRoll) {
+      return res.status(400).json({
+        success: false,
+        error: 'JNTU Roll Number is required to initialize payment.'
+      });
+    }
+
+    // STRICT CHECK: Disallow multiple payments for the same Roll Number
+    const existing = db.getSubmissionByRoll(cleanRoll);
+    if (existing && existing.payment?.status === 'verified') {
+      return res.status(409).json({
+        success: false,
+        isDuplicate: true,
+        error: `JNTU Roll Number "${cleanRoll}" has already contributed (Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Once paid, duplicate payments are strictly not allowed.`,
+        data: existing
+      });
+    }
+
     if (!razorpayClient || !RAZORPAY_KEY_ID) {
       return res.status(400).json({
         success: false,
         error: 'Razorpay Gateway is not active. Please proceed with direct UPI contribution.'
       });
     }
-
-    const cleanRoll = sanitizeString(rollNumber, 30).toUpperCase();
-    const cleanName = sanitizeString(name, 80);
 
     const options = {
       amount: effectiveAmount * 100, // amount in paise
@@ -387,7 +405,20 @@ app.post('/api/pay/create-order', async (req, res) => {
 // POST /api/pay/verify-razorpay - Verify HMAC-SHA256 Payment Signature
 app.post('/api/pay/verify-razorpay', (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, rollNumber } = req.body;
+
+    if (rollNumber) {
+      const cleanRoll = sanitizeString(rollNumber, 30).toUpperCase().replace(/\s+/g, '');
+      const existing = db.getSubmissionByRoll(cleanRoll);
+      if (existing && existing.payment?.status === 'verified') {
+        return res.status(409).json({
+          success: false,
+          isDuplicate: true,
+          error: `JNTU Roll Number "${cleanRoll}" already has a verified payment. Duplicate payments are not allowed.`,
+          data: existing
+        });
+      }
+    }
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({
@@ -440,6 +471,20 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
   try {
     const { email, phone, rollNumber, amount, name } = req.body;
     const expectedAmount = Math.max(50, Math.floor(Number(amount) || 50));
+    const cleanRoll = (rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+
+    // Check if already paid
+    if (cleanRoll) {
+      const existing = db.getSubmissionByRoll(cleanRoll);
+      if (existing && existing.payment?.status === 'verified') {
+        return res.status(409).json({
+          success: false,
+          isDuplicate: true,
+          error: `JNTU Roll Number "${cleanRoll}" has already contributed (Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Duplicate payment is not permitted.`,
+          data: existing
+        });
+      }
+    }
 
     if (!razorpayClient) {
       // Development / fallback simulation
