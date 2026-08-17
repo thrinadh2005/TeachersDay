@@ -12,7 +12,9 @@ import {
   MessageSquare,
   Home,
   Vote,
-  Lock
+  Lock,
+  Camera,
+  Images
 } from 'lucide-react';
 import { fireFestiveConfetti } from '../utils/confetti';
 import { getInitialTheme, applyTheme } from '../utils/theme';
@@ -35,6 +37,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'pay', label: '1. Payment & Pass', icon: CreditCard, isHighlight: true, badge: '₹50' },
     { id: 'vote-faculty', label: '2. Vote Faculty', icon: Vote, isVoteTrack: true, badge: '5 Awards' },
+    { id: 'gallery', label: '2025 Gallery', icon: Camera, badge: 'Flashback' },
     { id: 'memories', label: 'Crazy Stories', icon: MessageSquare },
     { id: 'vote', label: 'Awards Ceremony', icon: Trophy },
   ];
@@ -261,8 +264,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
       {/* ==========================================================
           📱 FLOATING MOBILE BOTTOM NAVIGATION BAR (Instant 1-Thumb Touch)
           ========================================================== */}
-      <div className="md:hidden fixed bottom-3 left-3 right-3 z-40">
-        <div className="glass-card rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl flex items-center justify-around bg-white/95 dark:bg-slate-950/95 border-2 border-slate-200 dark:border-white/15">
+      <div className="md:hidden fixed bottom-3 left-2 right-2 z-40">
+        <div className="glass-card rounded-2xl p-1 shadow-2xl backdrop-blur-2xl flex items-center justify-around bg-white/95 dark:bg-slate-950/95 border-2 border-slate-200 dark:border-white/15">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -271,7 +274,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all touch-press ${
+                className={`flex flex-col items-center justify-center py-1.5 px-1 sm:px-2 rounded-xl transition-all touch-press flex-1 ${
                   item.isHighlight && isActive
                     ? 'bg-amber-400 text-slate-950 font-black shadow-md scale-105'
                     : item.isHighlight
@@ -281,9 +284,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-white' : ''}`} />
-                <span className="text-[9px] font-bold mt-0.5 leading-none">
-                  {item.id === 'home' ? 'Home' : item.id === 'pay' ? 'Payment' : item.id === 'vote-faculty' ? 'Vote' : item.id === 'memories' ? 'Stories' : 'Awards'}
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-white' : ''}`} />
+                <span className="text-[8px] sm:text-[9px] font-bold mt-0.5 leading-none">
+                  {item.id === 'home' ? 'Home' : item.id === 'pay' ? 'Payment' : item.id === 'vote-faculty' ? 'Vote' : item.id === 'gallery' ? 'Gallery' : item.id === 'memories' ? 'Stories' : 'Awards'}
                 </span>
               </button>
             );

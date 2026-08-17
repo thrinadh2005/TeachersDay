@@ -13,7 +13,8 @@ import {
   Users,
   Coins,
   Award,
-  ArrowRight
+  ArrowRight,
+  Camera
 } from 'lucide-react';
 import { CountdownTimer } from './CountdownTimer';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
@@ -129,6 +130,15 @@ export const HeroSection = ({ setActiveTab, stats }) => {
         {/* Secondary Quick Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-6">
           <button
+            onClick={() => { setActiveTab('gallery'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 glass-card hover:border-purple-400/40 hover:bg-slate-50 dark:hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
+          >
+            <Camera className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+            <span>2025 Celebration Gallery</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 font-extrabold">9 Photos</span>
+          </button>
+
+          <button
             onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 glass-card hover:border-amber-400/40 hover:bg-slate-50 dark:hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
           >
@@ -192,6 +202,56 @@ export const HeroSection = ({ setActiveTab, stats }) => {
             </p>
           </div>
 
+        </div>
+
+        {/* 2025 FLASHBACK MEMORIES TEASER BANNER */}
+        <div 
+          onClick={() => { setActiveTab('gallery'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className="glass-card p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-white/10 hover:border-amber-400/50 cursor-pointer transition-all hover:scale-[1.01] touch-press group max-w-4xl mx-auto bg-gradient-to-r from-amber-500/5 via-purple-500/5 to-indigo-500/5"
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                  Flashback 2025
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Teachers' Day Archive</span>
+              </div>
+              <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors flex items-center justify-center sm:justify-start gap-2">
+                <Camera className="w-4 h-4 text-amber-500" />
+                <span>Explore Last Year's Celebration Gallery</span>
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                9 memorable photos of faculty felicitations, cake cutting, and cheerful memories.
+              </p>
+            </div>
+
+            {/* Thumbnail preview stack */}
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-3 overflow-hidden p-1">
+                <img 
+                  src="/TECHERSDAY_2025/IMG-20250908-WA0050.jpg" 
+                  alt="2025 memory 1" 
+                  className="inline-block h-12 w-12 rounded-2xl ring-2 ring-white dark:ring-slate-900 object-cover group-hover:scale-105 transition-transform" 
+                />
+                <img 
+                  src="/TECHERSDAY_2025/IMG-20250908-WA0052.jpg" 
+                  alt="2025 memory 2" 
+                  className="inline-block h-12 w-12 rounded-2xl ring-2 ring-white dark:ring-slate-900 object-cover group-hover:scale-105 transition-transform" 
+                />
+                <img 
+                  src="/TECHERSDAY_2025/IMG-20250908-WA0079.jpg" 
+                  alt="2025 memory 3" 
+                  className="inline-block h-12 w-12 rounded-2xl ring-2 ring-white dark:ring-slate-900 object-cover group-hover:scale-105 transition-transform" 
+                />
+              </div>
+
+              <span className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-amber-400 text-slate-950 text-xs font-black shadow-md group-hover:bg-amber-300 transition-colors">
+                <span>View All</span>
+                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Countdown Timer Component */}

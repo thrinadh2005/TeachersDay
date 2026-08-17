@@ -5,12 +5,13 @@ import { PaymentSection } from './components/PaymentSection';
 import { VotingSection } from './components/VotingSection';
 import { VotingWall } from './components/VotingWall';
 import { FunWall } from './components/FunWall';
+import { CelebrationGallery } from './components/CelebrationGallery';
 import { AdminDashboard } from './components/AdminDashboard';
 import { Footer } from './components/Footer';
 import { api } from './utils/api';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'pay' | 'vote-faculty' | 'vote' | 'memories' | 'admin'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'pay' | 'vote-faculty' | 'gallery' | 'vote' | 'memories' | 'admin'
   const [voterRoll, setVoterRoll] = useState('');
   const [showcaseData, setShowcaseData] = useState(null);
   const [stats, setStats] = useState({
@@ -51,15 +52,15 @@ export default function App() {
 
     if (hash === 'admin' || tabParam === 'admin' || path.includes('/admin')) {
       setActiveTab('admin');
-    } else if (['pay', 'register', 'vote-faculty', 'vote', 'awards', 'memories'].includes(hash)) {
-      setActiveTab(hash === 'register' ? 'pay' : hash === 'awards' ? 'vote' : hash);
-    } else if (['pay', 'register', 'vote-faculty', 'vote', 'awards', 'memories'].includes(tabParam)) {
-      setActiveTab(tabParam === 'register' ? 'pay' : tabParam === 'awards' ? 'vote' : tabParam);
+    } else if (['pay', 'register', 'vote-faculty', 'gallery', 'photos', 'vote', 'awards', 'memories'].includes(hash)) {
+      setActiveTab(hash === 'register' ? 'pay' : hash === 'awards' ? 'vote' : hash === 'photos' ? 'gallery' : hash);
+    } else if (['pay', 'register', 'vote-faculty', 'gallery', 'photos', 'vote', 'awards', 'memories'].includes(tabParam)) {
+      setActiveTab(tabParam === 'register' ? 'pay' : tabParam === 'awards' ? 'vote' : tabParam === 'photos' ? 'gallery' : tabParam);
     }
   }, []);
 
   const handleTabSwitch = (tab) => {
-    const targetTab = tab === 'register' ? 'pay' : tab === 'awards' ? 'vote' : tab;
+    const targetTab = tab === 'register' ? 'pay' : tab === 'awards' ? 'vote' : tab === 'photos' ? 'gallery' : tab;
     setActiveTab(targetTab);
     if (targetTab === 'admin') {
       window.location.hash = 'admin';
@@ -114,6 +115,13 @@ export default function App() {
               initialRollNumber={voterRoll}
               setActiveTab={handleTabSwitch}
             />
+          </div>
+        )}
+
+        {/* PAGE 3: 2025 CELEBRATION FLASHBACK GALLERY */}
+        {activeTab === 'gallery' && (
+          <div className="animate-fadeIn">
+            <CelebrationGallery setActiveTab={handleTabSwitch} />
           </div>
         )}
 

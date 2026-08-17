@@ -62,6 +62,11 @@ export const Footer = ({ setActiveTab }) => {
                 </button>
               </li>
               <li>
+                <button onClick={() => { setActiveTab('gallery'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  2025 Celebration Gallery
+                </button>
+              </li>
+              <li>
                 <button onClick={() => { setActiveTab('memories'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                   Crazy Stories Wall
                 </button>
