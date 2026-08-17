@@ -162,7 +162,7 @@ export const HeroSection = ({ setActiveTab }) => {
               <span>Option 2: Vote Faculty & Crazy Stories</span>
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Vote across 5 award categories for 33 CSE faculty members under confidential secret ballot, and share 100% anonymous classroom memories!
+              Vote across 5 award categories for all 39 faculty members (33 CSE + 6 Allied Professors) under secret ballot, and share 100% anonymous classroom memories!
             </p>
           </div>
 

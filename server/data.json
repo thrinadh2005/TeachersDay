@@ -12,9 +12,9 @@
         "explainer": 0,
         "friendly": 0,
         "techGuru": 0,
-        "starFaculty": 0
+        "starFaculty": 2
       },
-      "totalVotes": 0
+      "totalVotes": 2
     },
     {
       "id": "87018",
@@ -24,13 +24,13 @@
       "designation": "Professor",
       "avatar": "/faculty/Dr_Deevi_Radha_Rani.jpg",
       "categoryVotes": {
-        "inspiring": 0,
+        "inspiring": 2,
         "explainer": 0,
         "friendly": 0,
         "techGuru": 0,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 2
     },
     {
       "id": "50390",
@@ -57,12 +57,12 @@
       "avatar": "/faculty/Dr_R_Cristin.jpg",
       "categoryVotes": {
         "inspiring": 0,
-        "explainer": 0,
+        "explainer": 1,
         "friendly": 0,
         "techGuru": 0,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "52122",
@@ -75,10 +75,10 @@
         "inspiring": 0,
         "explainer": 0,
         "friendly": 0,
-        "techGuru": 0,
+        "techGuru": 1,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "52307",
@@ -107,10 +107,10 @@
         "inspiring": 0,
         "explainer": 0,
         "friendly": 0,
-        "techGuru": 0,
+        "techGuru": 1,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "51738",
@@ -120,13 +120,13 @@
       "designation": "Assistant Professor",
       "avatar": "/faculty/Ms_A_Bhavani.jpg",
       "categoryVotes": {
-        "inspiring": 0,
+        "inspiring": 1,
         "explainer": 0,
-        "friendly": 0,
+        "friendly": 1,
         "techGuru": 0,
-        "starFaculty": 0
+        "starFaculty": 1
       },
-      "totalVotes": 0
+      "totalVotes": 3
     },
     {
       "id": "52342",
@@ -139,10 +139,10 @@
         "inspiring": 0,
         "explainer": 0,
         "friendly": 0,
-        "techGuru": 0,
+        "techGuru": 1,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "51861",
@@ -188,9 +188,9 @@
         "explainer": 0,
         "friendly": 0,
         "techGuru": 0,
-        "starFaculty": 0
+        "starFaculty": 1
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "52249",
@@ -200,13 +200,13 @@
       "designation": "Assistant Professor",
       "avatar": "/faculty/Mr_D_Ganesh.jpg",
       "categoryVotes": {
-        "inspiring": 0,
+        "inspiring": 1,
         "explainer": 0,
         "friendly": 0,
         "techGuru": 0,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "52117",
@@ -217,12 +217,12 @@
       "avatar": "/faculty/Ms_Y_Nagamani.jpg",
       "categoryVotes": {
         "inspiring": 0,
-        "explainer": 0,
+        "explainer": 2,
         "friendly": 0,
         "techGuru": 0,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 2
     },
     {
       "id": "52112",
@@ -330,11 +330,11 @@
       "categoryVotes": {
         "inspiring": 0,
         "explainer": 0,
-        "friendly": 0,
+        "friendly": 2,
         "techGuru": 0,
         "starFaculty": 0
       },
-      "totalVotes": 0
+      "totalVotes": 2
     },
     {
       "id": "83745",
@@ -532,7 +532,7 @@
       "id": "80409",
       "name": "Mr. M. Santhosh Kumar",
       "degree": "M.Tech.",
-      "department": "Computer Science & Engineering",
+      "department": "Electrical & Electronics Engineering (EEE)",
       "designation": "Assistant Professor (AS)",
       "avatar": "/faculty/Mr_M_Santhosh_Kumar.jpg",
       "categoryVotes": {
@@ -548,7 +548,7 @@
       "id": "52324",
       "name": "Dr. B. Sanyasi Rao",
       "degree": "M.A., B.Ed., M.Phil., Ph.D.",
-      "department": "Computer Science & Engineering",
+      "department": "Basic Science & Humanities (BS&H)",
       "designation": "Assistant Professor (SS)",
       "avatar": "/faculty/Dr_B_Sanyasi_Rao.jpg",
       "categoryVotes": {
@@ -556,15 +556,15 @@
         "explainer": 0,
         "friendly": 0,
         "techGuru": 0,
-        "starFaculty": 0
+        "starFaculty": 1
       },
-      "totalVotes": 0
+      "totalVotes": 1
     },
     {
       "id": "52095",
       "name": "Dr. A. Ganapathi Rao",
       "degree": "M.Phil., Ph.D.",
-      "department": "Computer Science & Engineering",
+      "department": "Basic Science & Humanities (BS&H)",
       "designation": "Assistant Professor (DMS)",
       "avatar": "/faculty/Dr_A_Ganapathi_Rao.jpg",
       "categoryVotes": {
@@ -580,7 +580,7 @@
       "id": "51888",
       "name": "Dr. Y. Aditya",
       "degree": "M.Sc., Ph.D.",
-      "department": "Computer Science & Engineering",
+      "department": "Basic Science & Humanities (BS&H)",
       "designation": "Assistant Professor (DMS)",
       "avatar": "/faculty/Dr_Y_Aditya.jpg",
       "categoryVotes": {
@@ -596,7 +596,7 @@
       "id": "50299",
       "name": "Dr. D. Srinivasa Kumar",
       "degree": "MBA, Ph.D.",
-      "department": "Computer Science & Engineering",
+      "department": "Basic Science & Humanities (BS&H)",
       "designation": "Professor (EEPM)",
       "avatar": "/faculty/Dr_D_Srinivasa_Kumar.jpg",
       "categoryVotes": {
@@ -612,7 +612,7 @@
       "id": "50310",
       "name": "Dr. KVS Prasad",
       "degree": "MBA, M.Com., M.Phil., B.L., Ph.D.",
-      "department": "Computer Science & Engineering",
+      "department": "Basic Science & Humanities (BS&H)",
       "designation": "Professor (EEPM)",
       "avatar": "/faculty/Dr_KVS_Prasad.jpg",
       "categoryVotes": {
@@ -625,9 +625,86 @@
       "totalVotes": 0
     }
   ],
-  "submissions": [],
-  "anecdotes": [],
-  "voters": {},
+  "anecdotes": [
+    {
+      "id": "a-1786973776906-438",
+      "studentName": "Anonymous CSE Student",
+      "department": "CSE",
+      "year": "CSE Student",
+      "section": "CSE 3B",
+      "teacherName": "Dr. A.V. Ramana",
+      "anecdote": "Great lecture and inspiring mentorship!",
+      "status": "pending",
+      "reactions": {
+        "funny": 0,
+        "heart": 0,
+        "clap": 0
+      },
+      "createdAt": "2026-08-17T13:36:16.907Z"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "sub-1786904832608",
+      "ticketNumber": "TD26-CSEA-5339",
+      "acknowledgementNumber": "GMRIT-CSE-ACK-A5339",
+      "receiptNumber": "GMRIT-CSE-ACK-A5339",
+      "name": "ADABALA VENKATA THRINADH",
+      "rollNumber": "24341A0502",
+      "department": "Computer Science & Engineering (CSE)",
+      "year": "3rd Year",
+      "section": "Section A",
+      "email": "thrinadh2005@gmail.com",
+      "phone": "+919663355000",
+      "interestedInSpeaking": "No",
+      "speechTeacher": "",
+      "speechTopic": "",
+      "favoriteTeacher": "CSE Faculty",
+      "anecdoteId": null,
+      "payment": {
+        "amount": 50,
+        "currency": "INR",
+        "status": "verified",
+        "transactionId": "pay_TQXWF1tiJfUmnu",
+        "paymentMethod": "RAZORPAY_OFFICIAL",
+        "paidAt": "2026-08-16T18:27:12.608Z"
+      },
+      "createdAt": "2026-08-16T18:27:12.608Z"
+    }
+  ],
+  "voters": {
+    "24341A0502": {
+      "inspiring": "52249",
+      "friendly": "83748",
+      "explainer": "52117",
+      "starFaculty": "51738",
+      "techGuru": "52342"
+    },
+    "TEST5624": {
+      "starFaculty": "50170"
+    },
+    "24341A0503": {
+      "inspiring": "87018",
+      "explainer": "51709",
+      "friendly": "51738",
+      "techGuru": "52270",
+      "starFaculty": "52217"
+    },
+    "TESTROLL856": {
+      "hasVoted": true,
+      "votedAt": "2026-08-17T13:51:18.930Z",
+      "votesCount": 2,
+      "votes": {
+        "starFaculty": "50170",
+        "inspiring": "87018"
+      }
+    }
+  },
   "revealVotingResults": false,
-  "adminPin": ""
+  "adminPin": "2026",
+  "paymentConfig": {
+    "upiId": "9663355000@ybl",
+    "payeeName": "ADABALA VENKATA THRINADH",
+    "enableUpi": true
+  }
 }

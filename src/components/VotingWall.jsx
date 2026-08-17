@@ -203,7 +203,7 @@ export const VotingWall = ({ setActiveTab }) => {
                   </div>
 
                   <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>33 Nominees</span>
+                    <span>{teachers.length || 39} Nominees</span>
                     <span className="text-amber-400 font-bold">🔒 Secret</span>
                   </div>
                 </div>
@@ -215,8 +215,8 @@ export const VotingWall = ({ setActiveTab }) => {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-bold text-white">33 Nominated CSE Faculty Members</h3>
-                <p className="text-xs text-slate-400">All present professors and assistant professors across Sections A-D</p>
+                <h3 className="text-lg font-bold text-white">{teachers.length || 39} Nominated Faculty Members</h3>
+                <p className="text-xs text-slate-400">33 CSE Department Professors + 6 Allied Department Professors teaching 2nd & 3rd Year CSE</p>
               </div>
 
               <div className="w-full sm:w-64 relative">
