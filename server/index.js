@@ -501,7 +501,6 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
 
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPhone = (phone || '').trim().replace(/\D/g, '').slice(-10);
-    const cleanRoll = (rollNumber || '').trim().toUpperCase();
     const allSubs = db.getSubmissions() || [];
 
     // Filter available captured payments matching expected amount
