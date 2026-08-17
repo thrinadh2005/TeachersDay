@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
+import { normalizeRollNumber } from '../utils/rollNumber';
 
 export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,7 +29,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
   // Check if roll number has already paid
   useEffect(() => {
-    const cleanRoll = (studentData?.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    const cleanRoll = normalizeRollNumber(studentData?.rollNumber);
     if (cleanRoll) {
       api.checkRegistration(cleanRoll)
         .then(res => {

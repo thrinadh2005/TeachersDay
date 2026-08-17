@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
 import Razorpay from 'razorpay';
-import { db } from './db.js';
+import { db, normalizeRollNumber } from './db.js';
 import { votingCategories } from './initialData.js';
 
 const app = express();
@@ -297,7 +297,7 @@ app.post('/api/anecdotes/:id/react', (req, res) => {
 // GET /api/check-registration/:roll - Check if roll number has already registered & contributed
 app.get(['/api/check-registration/:roll', '/api/check-roll/:roll'], (req, res) => {
   try {
-    const sanitizedRoll = sanitizeString(req.params.roll, 30).toUpperCase().replace(/\s+/g, '');
+    const sanitizedRoll = normalizeRollNumber(sanitizeString(req.params.roll, 30));
     const existing = db.getSubmissionByRoll(sanitizedRoll);
     if (existing) {
       return res.json({
@@ -357,13 +357,19 @@ app.post('/api/pay/create-order', async (req, res) => {
     const { amount, rollNumber, name } = req.body;
     const effectiveAmount = Math.max(50, Math.floor(Number(amount) || 50));
 
-    const cleanRoll = sanitizeString(rollNumber, 30).toUpperCase().replace(/\s+/g, '');
+    const cleanRoll = normalizeRollNumber(sanitizeString(rollNumber, 30));
     const cleanName = sanitizeString(name, 80);
 
     if (!cleanRoll) {
       return res.status(400).json({
         success: false,
         error: 'JNTU Roll Number is required to initialize payment.'
+      });
+    }
+    if (cleanRoll.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        error: 'JNTU Roll Number must be exactly 10 digits/characters (e.g. 24341A0502).'
       });
     }
 
@@ -480,7 +486,7 @@ app.post('/api/pay/verify-live-status', async (req, res) => {
   try {
     const { email, phone, rollNumber, amount, name } = req.body;
     const expectedAmount = Math.max(50, Math.floor(Number(amount) || 50));
-    const cleanRoll = (rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    const cleanRoll = normalizeRollNumber(rollNumber);
 
     // Check if already paid
     if (cleanRoll) {
@@ -593,7 +599,7 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
       amount
     } = req.body;
 
-    const sanitizedRoll = sanitizeString(rollNumber, 30).toUpperCase();
+    const sanitizedRoll = normalizeRollNumber(sanitizeString(rollNumber, 30));
     const sanitizedSection = sanitizeString(section, 30);
     const sanitizedName = sanitizeString(name, 80) || `Student (${sanitizedRoll})`;
     const sanitizedYear = sanitizeString(year, 20) || (sanitizedSection.includes('2') ? '2nd Year' : sanitizedSection.includes('3') ? '3rd Year' : 'CSE');
@@ -609,10 +615,17 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
     const sanitizedStatus = paymentStatus === 'verified' ? 'verified' : 'pending';
     const finalAmount = Math.max(50, Math.floor(Number(paymentAmount) || Number(amount) || 50));
 
-    if (!sanitizedRoll || !sanitizedSection) {
+    if (!sanitizedRoll || sanitizedRoll.length !== 10) {
       return res.status(400).json({
         success: false,
-        error: 'Please provide your JNTU Roll Number and select your Section (CSE 2A..2D, CSE 3A..3D).'
+        error: 'JNTU Roll Number must be exactly 10 characters (e.g. 24341A0502).'
+      });
+    }
+
+    if (!sanitizedSection) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please select your CSE Section (CSE 2A..2D, CSE 3A..3D).'
       });
     }
 

@@ -20,9 +20,10 @@ import {
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
+import { normalizeRollNumber, isValidJntuRoll } from '../utils/rollNumber';
 
 export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
-  const [voterRoll, setVoterRoll] = useState(initialRollNumber || '');
+  const [voterRoll, setVoterRoll] = useState(initialRollNumber ? normalizeRollNumber(initialRollNumber) : '');
   const [teachers, setTeachers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('starFaculty');
@@ -50,7 +51,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
   useEffect(() => {
     if (initialRollNumber) {
-      setVoterRoll(initialRollNumber.toUpperCase());
+      setVoterRoll(normalizeRollNumber(initialRollNumber));
     }
   }, [initialRollNumber]);
 
@@ -73,10 +74,10 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       .catch(err => console.error('Failed to load voting data:', err));
   }, []);
 
-  // Check if roll number has already voted (Zero choice exposure)
+  // Check if roll number has already voted (Trigger strictly when 10 digits typed)
   useEffect(() => {
-    const cleanRoll = voterRoll.trim().toUpperCase();
-    if (cleanRoll.length >= 6) {
+    const cleanRoll = normalizeRollNumber(voterRoll);
+    if (cleanRoll.length === 10) {
       setCheckingVoterStatus(true);
       api.getVoterHistory(cleanRoll)
         .then(res => {
@@ -106,10 +107,16 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
   const handleSubmitVotesAndStories = async (e) => {
     if (e) e.preventDefault();
-    const cleanRoll = voterRoll.trim().toUpperCase();
+    const cleanRoll = normalizeRollNumber(voterRoll);
 
     if (!cleanRoll) {
-      setError('Please enter your JNTU Roll Number to cast your confidential votes.');
+      setError('Please enter your 10-digit JNTU Roll Number to cast your confidential votes.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (cleanRoll.length !== 10) {
+      setError(`JNTU Roll Number must be exactly 10 digits/characters (Currently ${cleanRoll.length}/10: "${cleanRoll}"). Example: 24341A0502.`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -234,18 +241,37 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 <span>100% Secret Ballot</span>
               </div>
             </div>
-            <div className="max-w-md">
+            <div className="max-w-md space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  JNTU Roll Number (10 Digits)
+                </label>
+                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-full border tracking-wider ${
+                  voterRoll.length === 10
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                    : 'bg-purple-500/10 text-purple-300 border-purple-500/20'
+                }`}>
+                  {voterRoll.length === 10 ? '✓ 10/10 Digits' : `${voterRoll.length}/10 Digits`}
+                </span>
+              </div>
+
               <input
                 type="text"
                 required
-                maxLength={20}
-                placeholder="Enter JNTU Roll Number (e.g. 24341A0502)"
+                maxLength={10}
+                placeholder="24341A0502"
                 value={voterRoll}
-                onChange={(e) => setVoterRoll(e.target.value.toUpperCase())}
-                className="w-full px-4 py-3 rounded-2xl bg-slate-950/90 border border-white/15 text-white placeholder-slate-500 text-sm sm:text-base font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all"
+                onChange={(e) => setVoterRoll(normalizeRollNumber(e.target.value))}
+                className="w-full px-4 py-3 rounded-2xl bg-slate-950/90 border border-white/15 text-white placeholder-slate-600 text-base sm:text-lg font-mono font-bold tracking-[0.18em] uppercase focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all"
               />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-400 gap-1 px-1">
+                <span>Format: <strong className="text-amber-300 font-mono font-bold">24341A0502</strong></span>
+                <span className="text-slate-400">Zero <strong className="font-mono text-emerald-400 font-bold">0</strong> vs Letter <strong className="font-mono text-purple-300 font-bold">O</strong></span>
+              </div>
+
               {checkingVoterStatus && (
-                <p className="text-[11px] text-amber-400 mt-1.5 animate-pulse">Checking voter record status...</p>
+                <p className="text-[11px] text-amber-400 animate-pulse font-mono">Checking voter record status...</p>
               )}
             </div>
           </div>

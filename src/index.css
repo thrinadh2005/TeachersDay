@@ -68,6 +68,13 @@
     color: var(--text-heading);
     letter-spacing: -0.02em;
   }
+
+  /* Distinct Zero vs Letter O (Slashed Zero) */
+  .font-mono, input.font-mono, textarea.font-mono, code, pre, kbd, samp {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    font-feature-settings: "zero" 1;
+    font-variant-numeric: slashed-zero;
+  }
 }
 
 /* ========================================================

@@ -16,6 +16,7 @@ import { api } from '../utils/api';
 import { PaymentModal } from './PaymentModal';
 import { AcknowledgementModal } from './AcknowledgementModal';
 import { fireFestiveConfetti } from '../utils/confetti';
+import { normalizeRollNumber, isValidJntuRoll } from '../utils/rollNumber';
 
 export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => {
   const [teachers, setTeachers] = useState([]);
@@ -64,8 +65,9 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     try {
       const savedRoll = localStorage.getItem('teachers_day_paid_roll');
       if (savedRoll) {
-        setRollNumber(savedRoll);
-        api.checkRegistration(savedRoll)
+        const cleanSaved = normalizeRollNumber(savedRoll);
+        setRollNumber(cleanSaved);
+        api.checkRegistration(cleanSaved)
           .then(res => {
             if (res.alreadyRegistered) {
               setExistingSubmission(res.data || res.submission);
@@ -80,10 +82,10 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
 
   const [checkingRoll, setCheckingRoll] = useState(false);
 
-  // Debounced auto-check: if student types a roll number that has already paid, detect and lock immediately
+  // Debounced auto-check: if student types a full 10-digit roll number that has already paid, detect and lock immediately
   useEffect(() => {
-    const clean = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
-    if (clean.length >= 6) {
+    const clean = normalizeRollNumber(rollNumber);
+    if (clean.length === 10) {
       const timer = setTimeout(async () => {
         setCheckingRoll(true);
         try {
@@ -101,7 +103,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         } finally {
           setCheckingRoll(false);
         }
-      }, 350);
+      }, 300);
       return () => clearTimeout(timer);
     } else {
       setExistingSubmission(null);
@@ -111,10 +113,14 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
 
   const handleStartPayment = async (e) => {
     if (e) e.preventDefault();
-    const cleanRoll = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
+    const cleanRoll = normalizeRollNumber(rollNumber);
 
     if (!cleanRoll) {
-      setError('Please enter your JNTU Roll Number to proceed with payment.');
+      setError('Please enter your 10-digit JNTU Roll Number to proceed with payment.');
+      return;
+    }
+    if (cleanRoll.length !== 10) {
+      setError(`JNTU Roll Number must be exactly 10 digits/characters (Currently ${cleanRoll.length}/10: "${cleanRoll}"). Example format: 24341A0502.`);
       return;
     }
     if (!selectedSection) {
@@ -148,7 +154,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     setLoading(true);
     setError(null);
 
-    const cleanRoll = rollNumber.trim().toUpperCase().replace(/\s+/g, '');
+    const cleanRoll = normalizeRollNumber(rollNumber);
     const yearDerive = selectedSection.includes('2') ? '2nd Year' : '3rd Year';
 
     try {
@@ -333,26 +339,51 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
           
           <form onSubmit={handleStartPayment} className="space-y-7">
             
-            {/* 1. JNTU Roll Number Input */}
+            {/* 1. JNTU Roll Number Input (Strict 10 Digits & Zero vs O Clarity) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  1. JNTU Roll Number (Unique ID) <span className="text-rose-400">*</span>
+                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>1. JNTU Roll Number</span>
+                  <span className="text-[10px] text-amber-400 font-bold">(10 Digits Only)</span>
+                  <span className="text-rose-400">*</span>
                 </label>
-                <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
-                  {checkingRoll ? 'Checking...' : 'e.g. 24341A0502'}
-                </span>
+                <div className="flex items-center gap-2">
+                  {checkingRoll && (
+                    <span className="text-[10px] text-amber-300 animate-pulse font-mono font-bold">
+                      Checking status...
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border tracking-wider transition-all ${
+                    rollNumber.length === 10
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40 shadow-sm'
+                      : 'bg-purple-500/10 text-purple-300 border-purple-500/20'
+                  }`}>
+                    {rollNumber.length === 10 ? '✓ 10/10 Digits' : `${rollNumber.length}/10 Digits`}
+                  </span>
+                </div>
               </div>
 
               <input
                 type="text"
                 required
-                maxLength={20}
-                placeholder="Enter JNTU Roll Number (e.g. 24341A0502)"
+                maxLength={10}
+                placeholder="24341A0502"
                 value={rollNumber}
-                onChange={(e) => setRollNumber(e.target.value.toUpperCase())}
-                className="w-full px-4 py-3.5 rounded-2xl bg-slate-950/90 border border-white/15 text-white placeholder-slate-500 text-base sm:text-lg font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
+                onChange={(e) => setRollNumber(normalizeRollNumber(e.target.value))}
+                className="w-full px-4 py-3.5 rounded-2xl bg-slate-950/90 border border-white/15 text-white placeholder-slate-600 text-lg sm:text-xl font-mono font-bold tracking-[0.18em] uppercase focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
               />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-400 gap-1 px-1 pt-0.5">
+                <span>
+                  Format: <strong className="text-amber-300 font-mono tracking-wider font-bold">24341A0502</strong>
+                </span>
+                <span className="text-slate-400 flex items-center gap-1">
+                  <span>Number zero is slashed:</span>
+                  <span className="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">0</span>
+                  <span>vs Letter</span>
+                  <span className="font-mono text-purple-300 font-bold bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/20">O</span>
+                </span>
+              </div>
             </div>
 
             {/* 2. New Interactive Section Selector (2nd & 3rd Year Only) */}
