@@ -99,16 +99,16 @@ export const VotingWall = ({ setActiveTab }) => {
   });
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 animate-fadeIn text-slate-900 dark:text-slate-100">
       
       {/* Page Header */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-black uppercase tracking-wider shadow-md">
-          <Code className="w-4 h-4 text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
+          <Code className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           <span>CSE Department 2026 • Grand Superlative Awards</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black font-display text-white tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-black font-display text-slate-900 dark:text-white tracking-tight leading-tight">
           {isRevealed ? (
             <>🏆 The Winners: <span className="gradient-text-gold">Faculty Award Results</span></>
           ) : (
@@ -116,7 +116,7 @@ export const VotingWall = ({ setActiveTab }) => {
           )}
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-300">
+        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
           {isRevealed 
             ? 'The secret ballot votes from CSE 2nd, 3rd & 4th year students (Sections A-D) are officially revealed!'
             : 'All votes cast during student registrations are held in strict confidence. Official winners across 5 award categories will be announced live on stage!'}
@@ -130,43 +130,43 @@ export const VotingWall = ({ setActiveTab }) => {
         <div className="space-y-8 animate-fadeIn">
           
           {/* Grand Locked Vault Banner */}
-          <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border border-amber-500/40 text-center relative overflow-hidden shadow-2xl">
+          <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border-2 border-amber-400 dark:border-amber-500/40 text-center relative overflow-hidden shadow-2xl bg-white dark:bg-slate-950/80">
             <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
             
             <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/30 mb-6">
               <Lock className="w-10 h-10" />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-black uppercase tracking-wider mb-3">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-400/10 border border-amber-300 dark:border-amber-400/30 text-amber-900 dark:text-amber-400 text-xs font-black uppercase tracking-wider mb-3">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
               <span>Secret Ballot Mode Active • Results Sealed</span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-black text-white font-display mb-3">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display mb-3">
               Confidential Voting in Progress
             </h2>
 
-            <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed mb-6">
+            <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto leading-relaxed mb-6 font-medium">
               Every vote cast by CSE 2nd & 3rd Year students is held under strict confidential secret ballot. The grand winners will be crowned live on stage during the Teachers' Day Celebration ceremony!
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-300">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950/80 border border-white/10">
-                <Calendar className="w-4 h-4 text-purple-400" />
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-200 dark:border-white/10 shadow-sm">
+                <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span>Ceremony: September 5, 2026</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950/80 border border-white/10">
-                <Clock className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-200 dark:border-white/10 shadow-sm">
+                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 <span>Venue: CSE Quadrangle Stage</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950/80 border border-white/10">
-                <Crown className="w-4 h-4 text-yellow-400" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-200 dark:border-white/10 shadow-sm">
+                <Crown className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                 <span>5 Grand Award Superlatives</span>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <span className="text-xs text-slate-400">Haven't cast your secret vote yet?</span>
+            <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Haven't cast your secret vote yet?</span>
               <button
                 onClick={() => {
                   if (setActiveTab) setActiveTab('vote-faculty');
@@ -183,28 +183,28 @@ export const VotingWall = ({ setActiveTab }) => {
           {/* Award Categories Showcase Cards */}
           <div>
             <div className="text-center mb-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-white">The 5 Superlative Award Titles</h3>
-              <p className="text-xs text-slate-400">Categories competing for student honors</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">The 5 Superlative Award Titles</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Categories competing for student honors</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {categories.map((cat, idx) => (
                 <div 
                   key={cat.id}
-                  className="glass-card rounded-2xl p-5 border border-white/10 hover:border-amber-400/40 transition-all flex flex-col justify-between space-y-4 hover:scale-[1.02]"
+                  className="glass-card rounded-2xl p-5 border-2 border-slate-200 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-400/40 transition-all flex flex-col justify-between space-y-4 hover:scale-[1.02] shadow-sm"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center mb-3 border border-white/10">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 flex items-center justify-center mb-3 border border-slate-200 dark:border-white/10 shadow-sm">
                       {categoryIcons[cat.id] || <Trophy className="w-5 h-5" />}
                     </div>
-                    <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider">Award #{idx + 1}</span>
-                    <h4 className="text-sm font-bold text-white mt-1">{cat.title}</h4>
-                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{cat.desc}</p>
+                    <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider">Award #{idx + 1}</span>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white mt-1">{cat.title}</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">{cat.desc}</p>
                   </div>
 
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                  <div className="pt-3 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 font-semibold">
                     <span>{teachers.length || 39} Nominees</span>
-                    <span className="text-amber-400 font-bold">🔒 Secret</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">🔒 Secret</span>
                   </div>
                 </div>
               ))}
@@ -215,8 +215,8 @@ export const VotingWall = ({ setActiveTab }) => {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-bold text-white">{teachers.length || 39} Nominated Faculty Members</h3>
-                <p className="text-xs text-slate-400">33 CSE Department Professors + 6 Allied Department Professors teaching 2nd & 3rd Year CSE</p>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">{teachers.length || 39} Nominated Faculty Members</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">33 CSE Department Professors + 6 Allied Department Professors teaching 2nd & 3rd Year CSE</p>
               </div>
 
               <div className="w-full sm:w-64 relative">
@@ -226,7 +226,7 @@ export const VotingWall = ({ setActiveTab }) => {
                   placeholder="Search faculty..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border-2 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 focus:outline-none focus:border-purple-500 shadow-inner"
                 />
               </div>
             </div>
@@ -235,18 +235,18 @@ export const VotingWall = ({ setActiveTab }) => {
               {filteredTeachers.map(teacher => (
                 <div 
                   key={teacher.id}
-                  className="glass-card rounded-2xl p-3 text-center border border-white/10 hover:border-purple-500/30 transition-all flex flex-col items-center justify-between"
+                  className="glass-card rounded-2xl p-3 text-center border-2 border-slate-200 dark:border-white/10 hover:border-purple-500/40 transition-all flex flex-col items-center justify-between shadow-sm"
                 >
                   <img
                     src={teacher.avatar}
                     alt={teacher.name}
-                    className="w-14 h-14 rounded-2xl object-cover border border-white/15 shadow-md mb-2"
+                    className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-200 dark:border-white/15 shadow-md mb-2"
                     onError={(e) => { e.target.src = '/faculty/Dr_A_V_Ramana.jpg'; }}
                   />
                   <div>
-                    <h5 className="text-xs font-bold text-white line-clamp-1">{teacher.name}</h5>
-                    <p className="text-[10px] text-slate-400 line-clamp-1">{teacher.designation}</p>
-                    <span className="text-[9px] text-purple-300 font-medium">{teacher.degree}</span>
+                    <h5 className="text-xs font-black text-slate-900 dark:text-white line-clamp-1">{teacher.name}</h5>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-1 font-medium">{teacher.designation}</p>
+                    <span className="text-[9px] text-purple-700 dark:text-purple-300 font-bold">{teacher.degree}</span>
                   </div>
                 </div>
               ))}
@@ -265,10 +265,10 @@ export const VotingWall = ({ setActiveTab }) => {
           {/* Winners Podium Section */}
           <div>
             <div className="text-center mb-8">
-              <span className="text-xs font-black uppercase text-amber-400 tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+              <span className="text-xs font-black uppercase text-amber-800 dark:text-amber-400 tracking-wider bg-amber-100 dark:bg-amber-500/10 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-500/20 shadow-sm">
                 🎉 Official Award Winners
               </span>
-              <h2 className="text-2xl sm:text-4xl font-black text-white font-display mt-2">
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-display mt-2">
                 2026 CSE Faculty Award Champions
               </h2>
             </div>
@@ -283,19 +283,19 @@ export const VotingWall = ({ setActiveTab }) => {
                 return (
                   <div
                     key={cat.id}
-                    className="glass-card-glow rounded-3xl p-6 border border-amber-400/40 shadow-2xl relative flex flex-col justify-between space-y-4 hover:scale-[1.02] transition-transform text-center"
+                    className="glass-card-glow rounded-3xl p-6 border-2 border-amber-400 dark:border-amber-400/40 shadow-2xl relative flex flex-col justify-between space-y-4 hover:scale-[1.02] transition-transform text-center bg-white dark:bg-slate-950/80"
                   >
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <span className="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                        <Crown className="w-3.5 h-3.5 text-amber-400" /> Award #{idx + 1}
+                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                      <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-400/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-400/30 text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                        <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" /> Award #{idx + 1}
                       </span>
-                      <div className="p-2 rounded-xl bg-slate-950/80 border border-white/10">
+                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 shadow-sm">
                         {categoryIcons[cat.id] || <Trophy className="w-4 h-4" />}
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-xs text-amber-400 font-bold uppercase tracking-wide">
+                      <div className="text-xs text-amber-700 dark:text-amber-400 font-black uppercase tracking-wide">
                         {cat.title}
                       </div>
 
@@ -307,21 +307,21 @@ export const VotingWall = ({ setActiveTab }) => {
                       />
 
                       <div>
-                        <h3 className="text-base sm:text-lg font-black text-white leading-snug">
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug">
                           {winner.name}
                         </h3>
-                        <p className="text-xs text-purple-300 font-medium mt-0.5">
+                        <p className="text-xs text-purple-700 dark:text-purple-300 font-bold mt-0.5">
                           {winner.designation}
                         </p>
-                        <p className="text-[11px] text-slate-400 font-normal">
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                           {winner.degree}
                         </p>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Total Category Votes:</span>
-                      <span className="font-mono font-black text-amber-400 text-sm">
+                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/5 flex items-center justify-between text-xs shadow-inner">
+                      <span className="text-slate-600 dark:text-slate-400 font-bold">Total Category Votes:</span>
+                      <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-sm">
                         {votes} {votes === 1 ? 'Vote' : 'Votes'}
                       </span>
                     </div>
@@ -332,12 +332,12 @@ export const VotingWall = ({ setActiveTab }) => {
           </div>
 
           {/* Full Category Leaderboard */}
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border-2 border-slate-200 dark:border-white/10 space-y-6 bg-white dark:bg-slate-950/80 shadow-md">
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-white">Full Category Standings</h3>
-                <p className="text-xs text-slate-400">Select an award category to view all faculty standings</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">Full Category Standings</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Select an award category to view all faculty standings</p>
               </div>
 
               <div className="w-full sm:w-64 relative">
@@ -347,7 +347,7 @@ export const VotingWall = ({ setActiveTab }) => {
                   placeholder="Search faculty..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border-2 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 focus:outline-none focus:border-purple-500 shadow-inner"
                 />
               </div>
             </div>
@@ -360,10 +360,10 @@ export const VotingWall = ({ setActiveTab }) => {
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`p-3 rounded-xl text-left border transition-all text-xs font-bold ${
+                    className={`p-3 rounded-xl text-left border-2 transition-all text-xs font-black ${
                       isSelected
-                        ? 'bg-purple-600/30 border-amber-400 text-white shadow-md'
-                        : 'glass-card border-white/10 text-slate-400 hover:text-white'
+                        ? 'bg-purple-600 border-purple-600 text-white shadow-md'
+                        : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-400 hover:text-purple-600'
                     }`}
                   >
                     {cat.title}
@@ -373,33 +373,33 @@ export const VotingWall = ({ setActiveTab }) => {
             </div>
 
             {/* Leaderboard Table */}
-            <div className="rounded-2xl border border-white/10 overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-white/10 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase font-black border-b-2 border-slate-200 dark:border-white/10">
                   <tr>
                     <th className="p-3.5">Rank</th>
                     <th className="p-3.5">Faculty Member</th>
                     <th className="p-3.5">Designation</th>
-                    <th className="p-3.5 text-right font-black text-amber-400">Category Votes</th>
+                    <th className="p-3.5 text-right font-black text-amber-600 dark:text-amber-400">Category Votes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                   {sortedByCategory.map((t, idx) => {
                     const catVotes = (t.categoryVotes && t.categoryVotes[activeCategory]) || 0;
 
                     return (
-                      <tr key={t.id} className="hover:bg-white/5 transition-colors">
-                        <td className="p-3.5 font-bold font-mono">
+                      <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <td className="p-3.5 font-black font-mono">
                           {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
                         </td>
                         <td className="p-3.5">
                           <div className="flex items-center gap-3">
-                            <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-lg object-cover border border-white/15" />
-                            <span className="font-bold text-white">{t.name}</span>
+                            <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-lg object-cover border border-slate-300 dark:border-white/15" />
+                            <span className="font-bold text-slate-900 dark:text-white">{t.name}</span>
                           </div>
                         </td>
-                        <td className="p-3.5 text-slate-400">{t.designation}</td>
-                        <td className="p-3.5 text-right font-mono font-black text-amber-400 text-sm">{catVotes}</td>
+                        <td className="p-3.5 text-slate-600 dark:text-slate-400 font-medium">{t.designation}</td>
+                        <td className="p-3.5 text-right font-mono font-black text-amber-600 dark:text-amber-400 text-sm">{catVotes}</td>
                       </tr>
                     );
                   })}

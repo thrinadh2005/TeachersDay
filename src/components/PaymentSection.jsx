@@ -339,51 +339,29 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
           
           <form onSubmit={handleStartPayment} className="space-y-7">
             
-            {/* 1. JNTU Roll Number Input (Strict 10 Digits & Zero vs O Clarity) */}
+            {/* 1. JNTU Roll Number Input */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>1. JNTU Roll Number</span>
-                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">(10 Digits Only)</span>
+                <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1">
+                  <span>JNTU Roll Number</span>
                   <span className="text-rose-500">*</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  {checkingRoll && (
-                    <span className="text-[10px] text-amber-600 dark:text-amber-300 animate-pulse font-mono font-bold">
-                      Checking status...
-                    </span>
-                  )}
-                  <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border tracking-wider transition-all ${
-                    rollNumber.length === 10
-                      ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 shadow-sm'
-                      : 'bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/20'
-                  }`}>
-                    {rollNumber.length === 10 ? '✓ 10/10 Digits' : `${rollNumber.length}/10 Digits`}
+                {checkingRoll && (
+                  <span className="text-[10px] text-amber-600 dark:text-amber-300 animate-pulse font-mono font-bold">
+                    Checking status...
                   </span>
-                </div>
+                )}
               </div>
 
               <input
                 type="text"
                 required
                 maxLength={10}
-                placeholder="24341A0502"
+                placeholder="Enter JNTU Roll Number (e.g. 24341A0502)"
                 value={rollNumber}
                 onChange={(e) => setRollNumber(normalizeRollNumber(e.target.value))}
-                className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-300 dark:border-white/15 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-lg sm:text-xl font-mono font-bold tracking-[0.18em] uppercase focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
+                className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-300 dark:border-white/15 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-base sm:text-lg font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
               />
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 gap-1 px-1 pt-0.5 font-medium">
-                <span>
-                  Format: <strong className="text-amber-700 dark:text-amber-300 font-mono tracking-wider font-bold">24341A0502</strong>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span>Number zero is slashed:</span>
-                  <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-300 dark:border-emerald-500/20">0</span>
-                  <span>vs Letter</span>
-                  <span className="font-mono text-purple-700 dark:text-purple-300 font-bold bg-purple-100 dark:bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-300 dark:border-purple-500/20">O</span>
-                </span>
-              </div>
             </div>
 
             {/* 2. New Interactive Section Selector (2nd & 3rd Year Only) */}

@@ -62,15 +62,13 @@ export const HeroSection = ({ setActiveTab }) => {
             </span>
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           </div>
-        </div>
-
-        {/* Hero Main Heading */}
+        </div>        {/* Hero Main Heading */}
         <div className="text-center max-w-4xl mx-auto space-y-4">
-          <h1 className="text-3xl xs:text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight leading-[1.15] drop-shadow-sm">
+          <h1 className="text-3xl xs:text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight leading-[1.15] drop-shadow-sm text-slate-900 dark:text-white">
             Honouring Our <span className="gradient-text-gold">CSE Teachers</span> & Mentors
           </h1>
-          <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed px-2">
-            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: {hasPaid ? 'Your contribution is paid & verified! View your Celebration Pass or cast your confidential votes below.' : 'Choose an option below to complete your ₹50 payment or cast your confidential faculty votes!'}
+          <p className="text-sm sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
+            Exclusively for <span className="text-amber-600 dark:text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: {hasPaid ? 'Your contribution is paid & verified! View your Celebration Pass or cast your confidential votes below.' : 'Choose an option below to complete your ₹50 payment or cast your confidential faculty votes!'}
           </p>
         </div>
 
@@ -125,17 +123,17 @@ export const HeroSection = ({ setActiveTab }) => {
         <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-6">
           <button
             onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-amber-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 glass-card hover:border-amber-400/40 hover:bg-slate-50 dark:hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
           >
-            <Trophy className="w-4 h-4 text-amber-400" />
+            <Trophy className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <span>Award Reveal Ceremony</span>
           </button>
 
           <button
             onClick={() => { setActiveTab('memories'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-pink-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 glass-card hover:border-pink-400/40 hover:bg-slate-50 dark:hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
           >
-            <MessageSquare className="w-4 h-4 text-pink-400" />
+            <MessageSquare className="w-4 h-4 text-pink-500 dark:text-pink-400" />
             <span>Read Crazy Stories Wall</span>
           </button>
         </div>
@@ -146,43 +144,43 @@ export const HeroSection = ({ setActiveTab }) => {
           {/* Card 1 */}
           <div 
             onClick={handleGoToPay}
-            className="glass-card p-6 rounded-3xl border border-white/10 hover:border-amber-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
+            className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-white/10 hover:border-amber-400/60 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
           >
             <div className="flex items-center justify-between">
-              <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 font-black text-xs flex items-center justify-center">
                 1
               </span>
-              <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
+              <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-300 dark:border-amber-400/20">
                 Direct Contribution
               </span>
             </div>
-            <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-amber-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Option 1: Payment & Registration</span>
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Enter your Roll Number & Section (`CSE 2A..2D`, `CSE 3A..3D`), choose optional speech interest, and pay ₹50 to get your instant Official Acknowledgement Receipt.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+              Enter your Roll Number & Section (CSE 2A..2D, CSE 3A..3D), choose optional speech interest, and pay ₹50 to get your instant Official Acknowledgement Receipt.
             </p>
           </div>
 
           {/* Card 2 */}
           <div 
             onClick={handleGoToVote}
-            className="glass-card p-6 rounded-3xl border border-white/10 hover:border-purple-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
+            className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-white/10 hover:border-purple-400/60 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
           >
             <div className="flex items-center justify-between">
-              <span className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 font-black text-xs flex items-center justify-center">
+              <span className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 font-black text-xs flex items-center justify-center">
                 2
               </span>
-              <span className="text-[10px] uppercase font-bold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-400/20">
+              <span className="text-[10px] uppercase font-bold text-purple-800 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-300 dark:border-purple-400/20">
                 100% Secret & Anonymous
               </span>
             </div>
-            <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-2">
-              <Vote className="w-4 h-4 text-purple-400" />
-              <span>Option 2: Vote Faculty & Crazy Stories</span>
+            <h3 className="text-base font-black text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors flex items-center gap-2">
+              <Vote className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+              <span>Option 2: Vote Faculty & Stories</span>
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
               Vote across 5 award categories for all 39 faculty members (33 CSE + 6 Allied Professors) under secret ballot, and share 100% anonymous classroom memories!
             </p>
           </div>
