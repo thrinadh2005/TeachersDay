@@ -93,6 +93,44 @@ const defaultFacultyPresets = [
   { filename: "Ms_Vasantha_Lakshmi_K.jpg", path: "/faculty/Ms_Vasantha_Lakshmi_K.jpg", label: "Ms. Vasantha Lakshmi K" }
 ];
 
+// Section and Year normalization helpers
+export const isStudentInYear = (student, targetYear) => {
+  if (!targetYear || targetYear === 'ALL') return true;
+  const sYear = (student.year || '').toUpperCase().trim();
+  const sSec = (student.section || '').toUpperCase().trim();
+  if (targetYear.includes('2')) {
+    return sYear.includes('2') || sSec.includes('2') || sSec.includes('2A') || sSec.includes('2B') || sSec.includes('2C') || sSec.includes('2D');
+  }
+  if (targetYear.includes('3')) {
+    return sYear.includes('3') || sSec.includes('3') || sSec.includes('3A') || sSec.includes('3B') || sSec.includes('3C') || sSec.includes('3D');
+  }
+  return false;
+};
+
+export const isStudentInSection = (student, targetSec) => {
+  if (!targetSec || targetSec === 'ALL') return true;
+  const rawSec = (student.section || '').toUpperCase().trim();
+  const rawYear = (student.year || '').toUpperCase().trim();
+  const targetLetter = targetSec.slice(-1);
+  const targetYearNum = targetSec.includes('2') ? '2' : targetSec.includes('3') ? '3' : '';
+
+  const isYearMatch = targetYearNum === '2'
+    ? (rawYear.includes('2') || rawSec.includes('2'))
+    : targetYearNum === '3'
+    ? (rawYear.includes('3') || rawSec.includes('3'))
+    : true;
+
+  if (!isYearMatch) return false;
+
+  return rawSec === targetSec.toUpperCase() ||
+         rawSec.endsWith(targetLetter) ||
+         rawSec === targetLetter ||
+         rawSec === `SECTION ${targetLetter}` ||
+         rawSec === `SEC ${targetLetter}` ||
+         rawSec === `CSE ${targetYearNum}${targetLetter}` ||
+         rawSec === `CSE ${targetLetter}`;
+};
+
 export const AdminDashboard = () => {
   const [adminPin, setAdminPin] = useState(localStorage.getItem('td_admin_pin') || '');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -494,21 +532,14 @@ export const AdminDashboard = () => {
   }
 
   const filteredSubmissions = submissions.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = !searchTerm ||
+      (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (s.rollNumber && s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (s.ticketNumber && s.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (s.acknowledgementNumber && s.acknowledgementNumber.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'ALL' || s.payment?.status === statusFilter;
-    
-    const sYear = (s.year || '').toUpperCase();
-    const sSec = (s.section || '').toUpperCase();
-    const matchesYear = yearFilter === 'ALL' ||
-      (yearFilter.includes('2') && (sYear.includes('2') || sSec.includes('2'))) ||
-      (yearFilter.includes('3') && (sYear.includes('3') || sSec.includes('3')));
-
-    const matchesSection = sectionFilter === 'ALL' ||
-      sSec === sectionFilter.toUpperCase() ||
-      sSec.includes(sectionFilter.slice(-1));
+    const matchesYear = yearFilter === 'ALL' || isStudentInYear(s, yearFilter);
+    const matchesSection = sectionFilter === 'ALL' || isStudentInSection(s, sectionFilter);
 
     return matchesSearch && matchesStatus && matchesYear && matchesSection;
   });
@@ -1043,11 +1074,7 @@ export const AdminDashboard = () => {
                     ? ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] 
                     : ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'];
 
-                  const yearSubmissions = submissions.filter(s => {
-                    const sYear = (s.year || '').toUpperCase();
-                    const sSec = (s.section || '').toUpperCase();
-                    return isYear2 ? (sYear.includes('2') || sSec.includes('2')) : (sYear.includes('3') || sSec.includes('3'));
-                  });
+                  const yearSubmissions = submissions.filter(s => isStudentInYear(s, year));
                   const yearFunds = yearSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
                   
                   return (
@@ -1064,14 +1091,7 @@ export const AdminDashboard = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                         {sectionsList.map((sec) => {
-                          const letter = sec.slice(-1);
-                          const matching = submissions.filter(s => {
-                            const sYear = (s.year || '').toUpperCase();
-                            const sSec = (s.section || '').toUpperCase();
-                            const isYearMatch = isYear2 ? (sYear.includes('2') || sSec.includes('2')) : (sYear.includes('3') || sSec.includes('3'));
-                            const isSecMatch = sSec === sec || sSec.includes(letter);
-                            return isYearMatch && isSecMatch;
-                          });
+                          const matching = submissions.filter(s => isStudentInSection(s, sec));
                           const verified = matching.filter(s => s.payment?.status === 'verified');
                           const funds = verified.reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
                           const speakers = matching.filter(s => s.interestedInSpeaking === 'Yes').length;

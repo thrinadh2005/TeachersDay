@@ -888,6 +888,43 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
     const { year, section, status, summary } = req.query;
     let subs = db.getSubmissions();
 
+    const isStudentInYear = (student, targetYear) => {
+      if (!targetYear || targetYear === 'ALL') return true;
+      const sYear = (student.year || '').toUpperCase().trim();
+      const sSec = (student.section || '').toUpperCase().trim();
+      if (targetYear.includes('2')) {
+        return sYear.includes('2') || sSec.includes('2') || sSec.includes('2A') || sSec.includes('2B') || sSec.includes('2C') || sSec.includes('2D');
+      }
+      if (targetYear.includes('3')) {
+        return sYear.includes('3') || sSec.includes('3') || sSec.includes('3A') || sSec.includes('3B') || sSec.includes('3C') || sSec.includes('3D');
+      }
+      return false;
+    };
+
+    const isStudentInSection = (student, targetSec) => {
+      if (!targetSec || targetSec === 'ALL') return true;
+      const rawSec = (student.section || '').toUpperCase().trim();
+      const rawYear = (student.year || '').toUpperCase().trim();
+      const targetLetter = targetSec.slice(-1);
+      const targetYearNum = targetSec.includes('2') ? '2' : targetSec.includes('3') ? '3' : '';
+
+      const isYearMatch = targetYearNum === '2'
+        ? (rawYear.includes('2') || rawSec.includes('2'))
+        : targetYearNum === '3'
+        ? (rawYear.includes('3') || rawSec.includes('3'))
+        : true;
+
+      if (!isYearMatch) return false;
+
+      return rawSec === targetSec.toUpperCase() ||
+             rawSec.endsWith(targetLetter) ||
+             rawSec === targetLetter ||
+             rawSec === `SECTION ${targetLetter}` ||
+             rawSec === `SEC ${targetLetter}` ||
+             rawSec === `CSE ${targetYearNum}${targetLetter}` ||
+             rawSec === `CSE ${targetLetter}`;
+    };
+
     // Section-Wise Executive Summary CSV (8 Sections: CSE 2A-2D, CSE 3A-3D)
     if (summary === 'true') {
       const yearSectionConfig = [
@@ -913,14 +950,7 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
 
       yearSectionConfig.forEach(({ year: y, sections: secList }) => {
         secList.forEach(s => {
-          const letter = s.slice(-1);
-          const matching = subs.filter(sub => {
-            const subYear = (sub.year || '').toUpperCase();
-            const subSec = (sub.section || '').toUpperCase();
-            const isYear = y.includes('2') ? (subYear.includes('2') || subSec.includes('2')) : (subYear.includes('3') || subSec.includes('3'));
-            const isSec = subSec === s || subSec.includes(letter);
-            return isYear && isSec;
-          });
+          const matching = subs.filter(sub => isStudentInSection(sub, s));
           const verified = matching.filter(sub => sub.payment?.status === 'verified');
           const pending = matching.filter(sub => sub.payment?.status !== 'verified');
           const funds = verified.reduce((acc, sub) => acc + (sub.payment?.amount || 50), 0);
@@ -962,10 +992,10 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
 
     // Apply Filter Criteria
     if (year && year !== 'ALL') {
-      subs = subs.filter(s => s.year === year);
+      subs = subs.filter(s => isStudentInYear(s, year));
     }
     if (section && section !== 'ALL') {
-      subs = subs.filter(s => s.section === section);
+      subs = subs.filter(s => isStudentInSection(s, section));
     }
     if (status && status !== 'ALL') {
       subs = subs.filter(s => s.payment?.status === status);
