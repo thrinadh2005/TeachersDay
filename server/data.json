@@ -532,7 +532,7 @@
       "id": "80409",
       "name": "Mr. M. Santhosh Kumar",
       "degree": "M.Tech.",
-      "department": "Electrical & Electronics Engineering (EEE)",
+      "department": "Computer Science & Engineering",
       "designation": "Assistant Professor (AS)",
       "avatar": "/faculty/Mr_M_Santhosh_Kumar.jpg",
       "categoryVotes": {
@@ -548,7 +548,7 @@
       "id": "52324",
       "name": "Dr. B. Sanyasi Rao",
       "degree": "M.A., B.Ed., M.Phil., Ph.D.",
-      "department": "Basic Science & Humanities (BS&H)",
+      "department": "Computer Science & Engineering",
       "designation": "Assistant Professor (SS)",
       "avatar": "/faculty/Dr_B_Sanyasi_Rao.jpg",
       "categoryVotes": {
@@ -564,7 +564,7 @@
       "id": "52095",
       "name": "Dr. A. Ganapathi Rao",
       "degree": "M.Phil., Ph.D.",
-      "department": "Basic Science & Humanities (BS&H)",
+      "department": "Computer Science & Engineering",
       "designation": "Assistant Professor (DMS)",
       "avatar": "/faculty/Dr_A_Ganapathi_Rao.jpg",
       "categoryVotes": {
@@ -580,7 +580,7 @@
       "id": "51888",
       "name": "Dr. Y. Aditya",
       "degree": "M.Sc., Ph.D.",
-      "department": "Basic Science & Humanities (BS&H)",
+      "department": "Computer Science & Engineering",
       "designation": "Assistant Professor (DMS)",
       "avatar": "/faculty/Dr_Y_Aditya.jpg",
       "categoryVotes": {
@@ -596,7 +596,7 @@
       "id": "50299",
       "name": "Dr. D. Srinivasa Kumar",
       "degree": "MBA, Ph.D.",
-      "department": "Basic Science & Humanities (BS&H)",
+      "department": "Computer Science & Engineering",
       "designation": "Professor (EEPM)",
       "avatar": "/faculty/Dr_D_Srinivasa_Kumar.jpg",
       "categoryVotes": {
@@ -612,7 +612,7 @@
       "id": "50310",
       "name": "Dr. KVS Prasad",
       "degree": "MBA, M.Com., M.Phil., B.L., Ph.D.",
-      "department": "Basic Science & Humanities (BS&H)",
+      "department": "Computer Science & Engineering",
       "designation": "Professor (EEPM)",
       "avatar": "/faculty/Dr_KVS_Prasad.jpg",
       "categoryVotes": {
@@ -625,14 +625,9 @@
       "totalVotes": 0
     }
   ],
-  "anecdotes": [],
   "submissions": [],
+  "anecdotes": [],
   "voters": {},
   "revealVotingResults": false,
-  "adminPin": "2026",
-  "paymentConfig": {
-    "upiId": "9663355000@ybl",
-    "payeeName": "ADABALA VENKATA THRINADH",
-    "enableUpi": true
-  }
+  "adminPin": ""
 }

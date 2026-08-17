@@ -10,7 +10,8 @@ import {
   Moon,
   CreditCard,
   MessageSquare,
-  Home
+  Home,
+  Vote
 } from 'lucide-react';
 import { fireFestiveConfetti } from '../utils/confetti';
 import { getInitialTheme, applyTheme } from '../utils/theme';
@@ -31,13 +32,14 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'register', label: 'Contribute (₹50)', icon: CreditCard, isHighlight: true },
-    { id: 'vote', label: 'Grand Awards', icon: Trophy },
-    { id: 'memories', label: 'Crazy Things', icon: MessageSquare },
+    { id: 'pay', label: '1. Payment (₹50)', icon: CreditCard, isHighlight: true },
+    { id: 'vote-faculty', label: '2. Vote Faculty', icon: Vote },
+    { id: 'memories', label: 'Crazy Stories', icon: MessageSquare },
+    { id: 'vote', label: 'Awards Ceremony', icon: Trophy },
   ];
 
   const handleNavClick = (id) => {
-    if (id === 'register') {
+    if (id === 'pay') {
       fireFestiveConfetti();
     }
     setActiveTab(id);
@@ -109,7 +111,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] font-medium text-slate-400 hidden xs:block">
-                  CSE 2nd, 3rd, 4th Year (Sections A-D)
+                  CSE 2nd & 3rd Year (Sections 2A-2D, 3A-3D)
                 </p>
               </div>
             </div>
@@ -177,9 +179,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-purple-400" />}
               </button>
 
-              {/* Quick Contribute Button */}
+              {/* Quick Pay Button */}
               <button
-                onClick={() => handleNavClick('register')}
+                onClick={() => handleNavClick('pay')}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 shadow-md touch-press"
               >
                 <CreditCard className="w-3.5 h-3.5" />
@@ -239,7 +241,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all touch-press ${
+                className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all touch-press ${
                   item.isHighlight && isActive
                     ? 'bg-amber-400 text-slate-950 font-black shadow-md scale-105'
                     : item.isHighlight
@@ -250,8 +252,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 }`}
               >
                 <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-amber-400' : ''}`} />
-                <span className="text-[10px] font-bold mt-0.5 leading-none">
-                  {item.id === 'home' ? 'Home' : item.id === 'register' ? 'Contribute' : item.id === 'vote' ? 'Awards' : 'Stories'}
+                <span className="text-[9px] font-bold mt-0.5 leading-none">
+                  {item.id === 'home' ? 'Home' : item.id === 'pay' ? 'Payment' : item.id === 'vote-faculty' ? 'Vote' : item.id === 'memories' ? 'Stories' : 'Awards'}
                 </span>
               </button>
             );

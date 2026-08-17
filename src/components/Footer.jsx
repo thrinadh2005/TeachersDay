@@ -29,7 +29,7 @@ export const Footer = ({ setActiveTab }) => {
               </span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Official platform for CSE Department (2nd, 3rd & 4th Years, Sections A-D). Celebrating our faculty with gratitude, awards, and tributes.
+              Official platform for CSE Department (2nd & 3rd Years, Sections 2A-2D, 3A-3D). Celebrating our faculty with gratitude, awards, and tributes.
             </p>
             <div className="pt-1">
               <button
@@ -52,18 +52,23 @@ export const Footer = ({ setActiveTab }) => {
                 </button>
               </li>
               <li>
-                <button onClick={() => { setActiveTab('register'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors flex items-center gap-1">
-                  <span>Contribute (₹50)</span>
+                <button onClick={() => { setActiveTab('pay'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors flex items-center gap-1">
+                  <span>1. Payment (₹50)</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
-                  Grand Award Results
+                <button onClick={() => { setActiveTab('vote-faculty'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
+                  <span>2. Vote Faculty & Stories</span>
                 </button>
               </li>
               <li>
                 <button onClick={() => { setActiveTab('memories'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
-                  Crazy Things About Faculty
+                  Crazy Stories Wall
+                </button>
+              </li>
+              <li>
+                <button onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">
+                  Award Ceremony Results
                 </button>
               </li>
             </ul>
@@ -73,7 +78,7 @@ export const Footer = ({ setActiveTab }) => {
           <div className="space-y-2">
             <h4 className="text-white font-bold text-sm uppercase tracking-wider">CSE Contribution</h4>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Official celebration contribution for all CSE 2nd, 3rd & 4th Year students across Sections A, B, C, and D for Teachers' Day 2026.
+              Official celebration contribution for all CSE 2nd & 3rd Year students across Sections 2A-2D, 3A-3D for Teachers' Day 2026.
             </p>
             <div className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -94,7 +99,7 @@ export const Footer = ({ setActiveTab }) => {
                 <span>GMRIT • CSE Department</span>
               </div>
               <div className="flex items-center gap-2 text-slate-400 text-[11px] pt-1">
-                <span>CSE 2nd, 3rd & 4th Year Coordinators</span>
+                <span>CSE 2nd & 3rd Year Coordinators</span>
               </div>
             </div>
           </div>

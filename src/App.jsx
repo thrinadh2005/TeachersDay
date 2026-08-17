@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
-import { SubmissionForm } from './components/SubmissionForm';
+import { PaymentSection } from './components/PaymentSection';
+import { VotingSection } from './components/VotingSection';
 import { VotingWall } from './components/VotingWall';
 import { FunWall } from './components/FunWall';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -9,7 +10,8 @@ import { Footer } from './components/Footer';
 import { api } from './utils/api';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'register' | 'vote' | 'memories' | 'admin'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'pay' | 'vote-faculty' | 'vote' | 'memories' | 'admin'
+  const [voterRoll, setVoterRoll] = useState('');
   const [showcaseData, setShowcaseData] = useState(null);
   const [stats, setStats] = useState({
     totalParticipants: 0,
@@ -49,16 +51,17 @@ export default function App() {
 
     if (hash === 'admin' || tabParam === 'admin' || path.includes('/admin')) {
       setActiveTab('admin');
-    } else if (['register', 'vote', 'memories'].includes(hash)) {
-      setActiveTab(hash);
-    } else if (['register', 'vote', 'memories'].includes(tabParam)) {
-      setActiveTab(tabParam);
+    } else if (['pay', 'register', 'vote-faculty', 'vote', 'awards', 'memories'].includes(hash)) {
+      setActiveTab(hash === 'register' ? 'pay' : hash === 'awards' ? 'vote' : hash);
+    } else if (['pay', 'register', 'vote-faculty', 'vote', 'awards', 'memories'].includes(tabParam)) {
+      setActiveTab(tabParam === 'register' ? 'pay' : tabParam === 'awards' ? 'vote' : tabParam);
     }
   }, []);
 
   const handleTabSwitch = (tab) => {
-    setActiveTab(tab);
-    if (tab === 'admin') {
+    const targetTab = tab === 'register' ? 'pay' : tab === 'awards' ? 'vote' : tab;
+    setActiveTab(targetTab);
+    if (targetTab === 'admin') {
       window.location.hash = 'admin';
     } else if (window.location.hash === '#admin') {
       history.pushState(null, '', window.location.pathname);
@@ -68,6 +71,14 @@ export default function App() {
 
   const handleSubmissionCompleted = () => {
     loadShowcaseData();
+  };
+
+  const handleProceedToVoting = (roll) => {
+    if (roll) {
+      setVoterRoll(roll);
+    }
+    setActiveTab('vote-faculty');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -86,28 +97,41 @@ export default function App() {
           </div>
         )}
 
-        {/* PAGE 2: MULTI-STEP REGISTRATION, VOTING & PAYMENT (FULL PAGE) */}
-        {activeTab === 'register' && (
+        {/* OPTION 1: DEDICATED PAYMENT & CONTRIBUTION (CSE 2nd & 3rd Year) */}
+        {activeTab === 'pay' && (
           <div className="animate-fadeIn py-4">
-            <SubmissionForm onSubmissionCompleted={handleSubmissionCompleted} />
+            <PaymentSection 
+              onSubmissionCompleted={handleSubmissionCompleted} 
+              onProceedToVoting={handleProceedToVoting}
+            />
           </div>
         )}
 
-        {/* PAGE 3: GRAND AWARD RESULTS CEREMONY */}
+        {/* OPTION 2: DEDICATED FACULTY VOTING & ANONYMOUS STORIES */}
+        {activeTab === 'vote-faculty' && (
+          <div className="animate-fadeIn py-4">
+            <VotingSection 
+              initialRollNumber={voterRoll}
+              setActiveTab={handleTabSwitch}
+            />
+          </div>
+        )}
+
+        {/* PAGE 4: GRAND AWARD RESULTS CEREMONY */}
         {activeTab === 'vote' && (
           <div className="animate-fadeIn">
             <VotingWall setActiveTab={handleTabSwitch} />
           </div>
         )}
 
-        {/* PAGE 4: CRAZY THINGS ABOUT FACULTY (ADMIN APPROVED & ANONYMOUS) */}
+        {/* PAGE 5: CRAZY THINGS ABOUT FACULTY (APPROVED STORIES WALL) */}
         {activeTab === 'memories' && (
           <div className="animate-fadeIn">
             <FunWall setActiveTab={handleTabSwitch} />
           </div>
         )}
 
-        {/* PAGE 5: ADMIN PORTAL */}
+        {/* PAGE 6: ADMIN PORTAL */}
         {activeTab === 'admin' && (
           <div className="animate-fadeIn">
             <AdminDashboard />

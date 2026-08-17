@@ -147,7 +147,7 @@ export const VotingWall = ({ setActiveTab }) => {
             </h2>
 
             <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed mb-6">
-              Every vote cast by CSE 2nd, 3rd & 4th Year students during registration is held under strict secret ballot. The grand winners will be crowned live on stage during the Teachers' Day Celebration ceremony!
+              Every vote cast by CSE 2nd & 3rd Year students is held under strict confidential secret ballot. The grand winners will be crowned live on stage during the Teachers' Day Celebration ceremony!
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-300">
@@ -166,15 +166,15 @@ export const VotingWall = ({ setActiveTab }) => {
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <span className="text-xs text-slate-400">Haven't registered or cast your secret vote yet?</span>
+              <span className="text-xs text-slate-400">Haven't cast your secret vote yet?</span>
               <button
                 onClick={() => {
-                  if (setActiveTab) setActiveTab('register');
+                  if (setActiveTab) setActiveTab('vote-faculty');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/25 transition-all hover:scale-105"
               >
-                <span>Register & Vote Faculty Now</span>
+                <span>Vote for Faculty (Secret Ballot)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

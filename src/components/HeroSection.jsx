@@ -4,18 +4,25 @@ import {
   Vote, 
   MessageSquare, 
   Code,
-  Play,
+  CreditCard,
   ChevronRight,
   GraduationCap,
-  Award
+  Trophy,
+  ShieldCheck
 } from 'lucide-react';
 import { CountdownTimer } from './CountdownTimer';
-import { fireFestiveConfetti } from '../utils/confetti';
+import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
 
 export const HeroSection = ({ setActiveTab }) => {
-  const handleStart = () => {
+  const handleGoToPay = () => {
     fireFestiveConfetti();
-    setActiveTab('register');
+    setActiveTab('pay');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGoToVote = () => {
+    fireTrophyConfetti();
+    setActiveTab('vote-faculty');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -38,7 +45,7 @@ export const HeroSection = ({ setActiveTab }) => {
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
             <Code className="w-4 h-4 text-amber-400" />
             <span className="text-xs sm:text-sm font-black text-amber-400 group-hover:text-amber-300">
-              CSE Department • 2nd, 3rd & 4th Years (Sec A, B, C, D)
+              CSE Department • 2nd & 3rd Years (Sections 2A-2D, 3A-3D)
             </span>
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           </div>
@@ -50,112 +57,112 @@ export const HeroSection = ({ setActiveTab }) => {
             Honouring Our <span className="gradient-text-gold">CSE Teachers</span> & Mentors
           </h1>
           <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed px-2">
-            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd, 3rd & 4th Year Students (Sections A, B, C, D)</span>: Vote for your favorite faculty, share classroom memories, and complete your <span className="text-amber-400 font-bold">₹50 celebration contribution</span>!
+            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: Choose an option below to complete your <span className="text-amber-400 font-bold">₹50 payment</span> or cast your <span className="text-purple-300 font-bold">confidential faculty votes</span>!
           </p>
         </div>
 
-        {/* ULTRA-PROMINENT START BUTTON & ACTION BAR */}
-        <div className="mt-8 sm:mt-10 flex flex-col items-center justify-center gap-4">
+        {/* DUAL PROMINENT ACTION BUTTONS */}
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
           
+          {/* OPTION 1: PAYMENT */}
           <button
-            onClick={handleStart}
-            className="relative group inline-flex items-center gap-3.5 sm:gap-4 px-8 sm:px-11 py-4 sm:py-5 rounded-3xl text-base sm:text-xl font-black text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all duration-300 ring-4 ring-amber-400/30 touch-press"
+            onClick={handleGoToPay}
+            className="w-full sm:w-1/2 relative group inline-flex items-center justify-between p-4 sm:p-5 rounded-3xl text-left text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all duration-300 ring-4 ring-amber-400/30 touch-press"
           >
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-slate-950/15 flex items-center justify-center text-slate-950 group-hover:scale-110 transition-transform">
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
-            </div>
-            <div className="text-left">
-              <div className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900/80">
-                Click to Contribute
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-slate-950/15 flex items-center justify-center text-slate-950 group-hover:scale-110 transition-transform">
+                <CreditCard className="w-5 h-5" />
               </div>
-              <div className="text-sm sm:text-lg font-black tracking-tight leading-tight">
-                CONTRIBUTE YOUR PART (₹50)
+              <div>
+                <div className="text-[10px] uppercase font-black tracking-wider text-slate-900/80">Option 1</div>
+                <div className="text-sm sm:text-base font-black leading-tight">Payment (₹50)</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 group-hover:translate-x-1.5 transition-transform" />
+            <ChevronRight className="w-5 h-5 text-slate-950 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          {/* Secondary Quick Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2">
-            <button
-              onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-amber-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
-            >
-              <Vote className="w-4 h-4 text-amber-400" />
-              <span>View Voting Results</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveTab('memories'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-amber-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
-            >
-              <MessageSquare className="w-4 h-4 text-amber-400" />
-              <span>Read Crazy Things About Faculty</span>
-            </button>
-          </div>
+          {/* OPTION 2: VOTING & STORIES */}
+          <button
+            onClick={handleGoToVote}
+            className="w-full sm:w-1/2 relative group inline-flex items-center justify-between p-4 sm:p-5 rounded-3xl text-left text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-2xl shadow-purple-500/30 hover:scale-105 transition-all duration-300 ring-4 ring-purple-500/30 touch-press"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <Vote className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase font-black tracking-wider text-purple-200">Option 2</div>
+                <div className="text-sm sm:text-base font-black leading-tight">Vote Faculty & Stories</div>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+          </button>
 
         </div>
 
-        {/* 3-STEP QUICK FLOW CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 max-w-5xl mx-auto mt-10">
-          
-          <div 
-            onClick={handleStart}
-            className="glass-card p-5 rounded-3xl border border-white/10 hover:border-amber-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group"
+        {/* Secondary Quick Action Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-6">
+          <button
+            onClick={() => { setActiveTab('vote'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-amber-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">
+            <Trophy className="w-4 h-4 text-amber-400" />
+            <span>Award Reveal Ceremony</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('memories'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 glass-card hover:border-pink-400/40 hover:bg-white/5 transition-all touch-press hover:scale-[1.02]"
+          >
+            <MessageSquare className="w-4 h-4 text-pink-400" />
+            <span>Read Crazy Stories Wall</span>
+          </button>
+        </div>
+
+        {/* 2 MAIN DEDICATED OPTION CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mt-10">
+          
+          {/* Card 1 */}
+          <div 
+            onClick={handleGoToPay}
+            className="glass-card p-6 rounded-3xl border border-white/10 hover:border-amber-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">
                 1
               </span>
-              <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-400/20">
-                CSE 2nd, 3rd, 4th Year
+              <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
+                Direct Contribution
               </span>
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-              Step 1: Enter CSE Details
+            <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-amber-400" />
+              <span>Option 1: Payment & Registration</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Select your Year (2nd, 3rd, 4th) and Section (A, B, C, D) with your college roll number.
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Enter your Roll Number & Section (`CSE 2A..2D`, `CSE 3A..3D`), choose optional speech interest, and pay ₹50 to get your instant Official Acknowledgement Receipt.
             </p>
           </div>
 
+          {/* Card 2 */}
           <div 
-            onClick={handleStart}
-            className="glass-card p-5 rounded-3xl border border-white/10 hover:border-indigo-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group"
+            onClick={handleGoToVote}
+            className="glass-card p-6 rounded-3xl border border-white/10 hover:border-purple-400/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group space-y-3"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-7 h-7 rounded-xl bg-indigo-500/20 text-indigo-400 font-black text-xs flex items-center justify-center">
+            <div className="flex items-center justify-between">
+              <span className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 font-black text-xs flex items-center justify-center">
                 2
               </span>
-              <span className="text-[10px] uppercase font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-lg border border-indigo-400/20">
-                Secret Ballot
+              <span className="text-[10px] uppercase font-bold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-400/20">
+                100% Secret & Anonymous
               </span>
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
-              Step 2: Faculty Superlative Voting
+            <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-2">
+              <Vote className="w-4 h-4 text-purple-400" />
+              <span>Option 2: Vote Faculty & Crazy Stories</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Vote across 5 award categories for 33 CSE faculty members under strict secret ballot.
-            </p>
-          </div>
-
-          <div 
-            onClick={handleStart}
-            className="glass-card p-5 rounded-3xl border border-white/10 hover:border-emerald-500/40 cursor-pointer transition-all hover:scale-[1.02] touch-press group"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center">
-                3
-              </span>
-              <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
-                ₹50 Pay
-              </span>
-            </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-              Step 3: ₹50 Contribution & Done
-            </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Complete your ₹50 contribution securely via Instant Universal UPI Link & QR Code.
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Vote across 5 award categories for 33 CSE faculty members under confidential secret ballot, and share 100% anonymous classroom memories!
             </p>
           </div>
 

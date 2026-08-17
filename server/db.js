@@ -317,6 +317,40 @@ class Database {
     return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '') === roll) || null;
   }
 
+  addAnonymousAnecdote(payload) {
+    const anecdoteText = (payload.anecdote || '').trim();
+    if (!anecdoteText) {
+      return { success: false, error: 'Please enter a story or classroom memory.' };
+    }
+
+    const teacherName = (payload.teacherName || 'CSE Faculty').trim();
+    const anecdoteId = `a-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const anecdoteEntry = {
+      id: anecdoteId,
+      studentName: 'Anonymous CSE Student',
+      department: "CSE",
+      year: payload.year || 'CSE Student',
+      section: payload.section || 'CSE',
+      teacherName: teacherName,
+      anecdote: anecdoteText,
+      status: 'pending',
+      reactions: { funny: 0, heart: 0, clap: 0 },
+      createdAt: new Date().toISOString()
+    };
+
+    this.data.anecdotes.unshift(anecdoteEntry);
+    this.save();
+
+    this.getMongoDb().then(mongoDb => {
+      if (mongoDb) {
+        mongoDb.collection('anecdotes').insertOne(anecdoteEntry).catch(console.error);
+      }
+    });
+
+    return { success: true, message: 'Your anonymous memory has been submitted for review!', anecdote: anecdoteEntry };
+  }
+
   addSubmission(payload) {
     const roll = (payload.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
     
@@ -325,16 +359,27 @@ class Database {
     if (existing) {
       return { 
         success: false, 
-        error: `Student with JNTU Roll Number ${roll} is already registered (${existing.name}, Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Duplicate registration is not permitted.`, 
+        error: `Student with JNTU Roll Number ${roll} is already registered (${existing.name || roll}, Receipt: ${existing.acknowledgementNumber || existing.ticketNumber}). Duplicate registration is not permitted.`, 
         isDuplicate: true,
         submission: existing 
       };
     }
 
-    const secCode = (payload.section || 'A').replace(/Section /i, '').trim();
+    // Derive section and year cleanly
+    let secRaw = payload.section || 'CSE 3A';
+    let year = payload.year;
+    let section = payload.section;
+
+    if (!year) {
+      if (secRaw.includes('2')) year = '2nd Year';
+      else if (secRaw.includes('3')) year = '3rd Year';
+      else year = 'CSE';
+    }
+
+    const secCode = secRaw.replace(/[^A-Za-z0-9]/g, '').slice(-2) || '3A';
     const randNum = Math.floor(1000 + Math.random() * 9000);
     const acknowledgementNumber = `GMRIT-CSE-ACK-${secCode}${randNum}`;
-    const ticketNumber = `TD26-CSE${secCode}-${randNum}`;
+    const ticketNumber = `TD26-${secCode}-${randNum}`;
     const submissionId = `sub-${Date.now()}`;
     const anecdoteId = `a-${Date.now()}`;
 
@@ -342,10 +387,10 @@ class Database {
     if (payload.anecdote && payload.anecdote.trim().length > 0) {
       anecdoteEntry = {
         id: anecdoteId,
-        studentName: payload.name,
+        studentName: 'Anonymous CSE Student',
         department: "CSE",
-        year: payload.year,
-        section: payload.section,
+        year: year,
+        section: section,
         teacherName: payload.favoriteTeacher || 'CSE Faculty',
         anecdote: payload.anecdote.trim(),
         status: 'pending',
@@ -368,11 +413,11 @@ class Database {
       ticketNumber,
       acknowledgementNumber,
       receiptNumber: acknowledgementNumber,
-      name: payload.name,
+      name: payload.name && payload.name.trim() ? payload.name.trim() : `Student (${roll})`,
       rollNumber: roll,
       department: "Computer Science & Engineering (CSE)",
-      year: payload.year,
-      section: payload.section,
+      year: year,
+      section: section,
       email: payload.email || '',
       phone: payload.phone || '',
       interestedInSpeaking: payload.interestedInSpeaking || 'No',

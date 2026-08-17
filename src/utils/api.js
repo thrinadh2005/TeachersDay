@@ -46,6 +46,17 @@ export const api = {
     return res.json();
   },
 
+  async submitAnonymousAnecdote({ teacherName, anecdote, rollNumber, section }) {
+    const res = await fetch(`${API_BASE}/anecdotes/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teacherName, anecdote, rollNumber, section })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit story');
+    return data;
+  },
+
   async reactAnecdote(id, type) {
     const res = await fetch(`${API_BASE}/anecdotes/${id}/react`, {
       method: 'POST',

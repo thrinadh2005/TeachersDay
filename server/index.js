@@ -225,6 +225,32 @@ app.get('/api/anecdotes', (req, res) => {
   }
 });
 
+// POST /api/anecdotes/submit - Submit 100% Anonymous "Crazy Things About Faculty" Story
+app.post('/api/anecdotes/submit', submitLimiter, (req, res) => {
+  try {
+    const { teacherName, anecdote, rollNumber, section } = req.body;
+    const sanitizedTeacher = sanitizeString(teacherName, 80) || 'CSE Faculty';
+    const sanitizedAnecdote = sanitizeString(anecdote, 800);
+    const sanitizedRoll = sanitizeString(rollNumber, 30).toUpperCase();
+    const sanitizedSection = sanitizeString(section, 30);
+
+    if (!sanitizedAnecdote) {
+      return res.status(400).json({ success: false, error: 'Please enter your classroom memory or story.' });
+    }
+
+    const result = db.addAnonymousAnecdote({
+      teacherName: sanitizedTeacher,
+      anecdote: sanitizedAnecdote,
+      rollNumber: sanitizedRoll,
+      section: sanitizedSection
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to submit memory.' });
+  }
+});
+
 // POST /api/anecdotes/:id/react - Add reaction
 app.post('/api/anecdotes/:id/react', (req, res) => {
   try {
@@ -483,13 +509,13 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
       amount
     } = req.body;
 
-    const sanitizedName = sanitizeString(name, 80);
     const sanitizedRoll = sanitizeString(rollNumber, 30).toUpperCase();
-    const sanitizedYear = sanitizeString(year, 20);
-    const sanitizedSection = sanitizeString(section, 20);
+    const sanitizedSection = sanitizeString(section, 30);
+    const sanitizedName = sanitizeString(name, 80) || `Student (${sanitizedRoll})`;
+    const sanitizedYear = sanitizeString(year, 20) || (sanitizedSection.includes('2') ? '2nd Year' : sanitizedSection.includes('3') ? '3rd Year' : 'CSE');
     const sanitizedEmail = sanitizeString(email, 100);
     const sanitizedPhone = sanitizeString(phone, 25);
-    const sanitizedSpeaking = interestedInSpeaking === 'Yes' ? 'Yes' : 'No';
+    const sanitizedSpeaking = interestedInSpeaking === 'Yes' || interestedInSpeaking === true ? 'Yes' : 'No';
     const sanitizedSpeechTeacher = sanitizeString(speechTeacher, 80);
     const sanitizedSpeechTopic = sanitizeString(speechTopic, 400);
     const sanitizedFavoriteTeacher = sanitizeString(favoriteTeacher, 80);
@@ -499,10 +525,10 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
     const sanitizedStatus = paymentStatus === 'verified' ? 'verified' : 'pending';
     const finalAmount = Math.max(50, Math.floor(Number(paymentAmount) || Number(amount) || 50));
 
-    if (!sanitizedName || !sanitizedRoll || !sanitizedYear || !sanitizedSection) {
+    if (!sanitizedRoll || !sanitizedSection) {
       return res.status(400).json({
         success: false,
-        error: 'Please fill in Name, JNTU Roll Number, Year (2nd, 3rd, 4th), and Section (A, B, C, D).'
+        error: 'Please provide your JNTU Roll Number and select your Section (CSE 2A..2D, CSE 3A..3D).'
       });
     }
 

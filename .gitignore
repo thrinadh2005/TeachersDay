@@ -32,3 +32,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Videos and Media (Ignored from Git)
+videos/
+videos/*
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.flv
+*.wmv
+
+# Temporary Scratch Directory
+scratch/
+
