@@ -181,7 +181,7 @@ app.get('/api/teachers', (req, res) => {
   }
 });
 
-// POST /api/vote - Cast a category-specific vote with rate limiting & duplicate guard
+// POST /api/vote - Cast a category-specific vote with strict 1-time voting rule
 app.post('/api/vote', voteLimiter, (req, res) => {
   try {
     const { teacherId, voterKey, categoryId = 'starFaculty' } = req.body;
@@ -191,12 +191,12 @@ app.post('/api/vote', voteLimiter, (req, res) => {
     const sanitizedCategoryId = sanitizeString(categoryId, 40);
 
     if (!sanitizedTeacherId || !sanitizedVoterKey) {
-      return res.status(400).json({ success: false, error: 'Teacher ID and Roll Number are required.' });
+      return res.status(400).json({ success: false, error: 'Teacher ID and JNTU Roll Number are required.' });
     }
 
     const result = db.voteTeacher(sanitizedTeacherId, sanitizedVoterKey, sanitizedCategoryId);
     if (!result.success) {
-      return res.status(400).json(result);
+      return res.status(result.alreadyVoted ? 409 : 400).json(result);
     }
     res.json(result);
   } catch (err) {
@@ -204,12 +204,43 @@ app.post('/api/vote', voteLimiter, (req, res) => {
   }
 });
 
-// GET /api/voter-status/:roll - Get list of categories student has already voted in
+// POST /api/vote-batch - Submit complete multi-category ballot (Strict 1-Time Rule)
+app.post('/api/vote-batch', voteLimiter, (req, res) => {
+  try {
+    const { voterKey, votes } = req.body;
+    const sanitizedVoterKey = sanitizeString(voterKey, 30).toUpperCase();
+
+    if (!sanitizedVoterKey) {
+      return res.status(400).json({ success: false, error: 'JNTU Roll Number is required to vote.' });
+    }
+
+    if (!votes || typeof votes !== 'object' || Object.keys(votes).length === 0) {
+      return res.status(400).json({ success: false, error: 'Please select at least one faculty award category.' });
+    }
+
+    const cleanVotes = {};
+    for (const [catId, teacherId] of Object.entries(votes)) {
+      if (teacherId) {
+        cleanVotes[sanitizeString(catId, 40)] = sanitizeString(teacherId, 50);
+      }
+    }
+
+    const result = db.submitBallot(sanitizedVoterKey, cleanVotes);
+    if (!result.success) {
+      return res.status(result.alreadyVoted ? 409 : 400).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to submit ballot.' });
+  }
+});
+
+// GET /api/voter-status/:roll - Check if roll has already voted (Zero choice exposure)
 app.get('/api/voter-status/:roll', (req, res) => {
   try {
     const sanitizedRoll = sanitizeString(req.params.roll, 30).toUpperCase();
-    const history = db.getStudentVoteHistory(sanitizedRoll);
-    res.json({ success: true, data: history });
+    const status = db.getStudentVoteHistory(sanitizedRoll);
+    res.json({ success: true, data: status });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to retrieve voter status.' });
   }

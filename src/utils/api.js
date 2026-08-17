@@ -15,17 +15,21 @@ export const api = {
   },
 
   async getVoterHistory(roll) {
-    if (!roll) return { success: true, data: {} };
-    const res = await fetch(`${API_BASE}/voter-status/${encodeURIComponent(roll)}`);
-    if (!res.ok) return { success: true, data: {} };
+    if (!roll) return { success: true, data: { hasVoted: false } };
+    const res = await fetch(`${API_BASE}/voter-status/${encodeURIComponent(roll.trim().toUpperCase())}`);
+    if (!res.ok) return { success: true, data: { hasVoted: false } };
     return res.json();
   },
 
-  async checkRegistration(roll) {
-    if (!roll) return { success: true, alreadyRegistered: false };
-    const res = await fetch(`${API_BASE}/check-registration/${encodeURIComponent(roll.trim())}`);
-    if (!res.ok) return { success: true, alreadyRegistered: false };
-    return res.json();
+  async submitBallot(voterKey, votes) {
+    const res = await fetch(`${API_BASE}/vote-batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ voterKey, votes })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit secret ballot');
+    return data;
   },
 
   async voteTeacher(teacherId, voterKey, categoryId = 'starFaculty') {

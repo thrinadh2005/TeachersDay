@@ -203,95 +203,111 @@ class Database {
     });
   }
 
-  voteTeacher(teacherId, voterRoll, categoryId = 'starFaculty') {
+  // Submit full secret ballot with strict 1-time voting rule
+  submitBallot(voterRoll, votes = {}) {
     const roll = (voterRoll || '').trim().toUpperCase();
     if (!roll) {
-      return { success: false, error: 'Please enter a valid CSE Roll Number to cast your vote.' };
+      return { success: false, error: 'Please enter a valid JNTU Roll Number to cast your vote.' };
     }
 
-    if (!this.data.voters[roll]) {
-      this.data.voters[roll] = {};
-    }
-
-    const previousTeacherId = this.data.voters[roll][categoryId];
-
-    // If voter already voted for this same teacher in this category, return success
-    if (previousTeacherId === teacherId) {
+    // STRICT 1-TIME VOTE CHECK: If roll has already voted, reject immediately
+    if (this.data.voters[roll] && (this.data.voters[roll].hasVoted || Object.keys(this.data.voters[roll].votes || {}).length > 0)) {
       return { 
-        success: true, 
-        message: 'Vote already recorded.',
-        voterRoll: roll,
-        categoryId,
-        teacherId
+        success: false, 
+        alreadyVoted: true,
+        error: `Student with JNTU Roll Number "${roll}" has already cast their secret ballot. Each roll number is strictly allowed to vote only ONCE.` 
       };
     }
 
-    // If changing vote from previous teacher to a new teacher, decrement old teacher
-    if (previousTeacherId && previousTeacherId !== teacherId) {
-      const prevTeacher = this.data.teachers.find(t => t.id === previousTeacherId);
-      if (prevTeacher && prevTeacher.categoryVotes && prevTeacher.categoryVotes[categoryId] > 0) {
-        prevTeacher.categoryVotes[categoryId] -= 1;
-        prevTeacher.totalVotes = Object.values(prevTeacher.categoryVotes).reduce((sum, v) => sum + v, 0);
+    const voteEntries = Object.entries(votes).filter(([catId, teacherId]) => Boolean(teacherId));
+    if (voteEntries.length === 0) {
+      return { success: false, error: 'Please select at least one faculty award category.' };
+    }
 
+    // Process and record each category vote securely
+    const recordedVotesMap = {};
+    for (const [catId, teacherId] of voteEntries) {
+      const teacher = this.data.teachers.find(t => t.id === teacherId);
+      if (teacher) {
+        if (!teacher.categoryVotes) {
+          teacher.categoryVotes = { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 };
+        }
+        teacher.categoryVotes[catId] = (teacher.categoryVotes[catId] || 0) + 1;
+        teacher.totalVotes = Object.values(teacher.categoryVotes).reduce((sum, v) => sum + v, 0);
+        recordedVotesMap[catId] = teacherId;
+
+        // Async update to MongoDB
         this.getMongoDb().then(mongoDb => {
           if (mongoDb) {
             mongoDb.collection('teachers').updateOne(
-              { id: previousTeacherId },
-              { $set: { categoryVotes: prevTeacher.categoryVotes, totalVotes: prevTeacher.totalVotes } }
+              { id: teacherId },
+              { $set: { categoryVotes: teacher.categoryVotes, totalVotes: teacher.totalVotes } }
             ).catch(console.error);
           }
         });
       }
     }
 
-    const teacher = this.data.teachers.find(t => t.id === teacherId);
-    if (!teacher) {
-      return { success: false, error: 'Teacher not found' };
-    }
-
-    if (!teacher.categoryVotes) {
-      teacher.categoryVotes = { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 };
-    }
-
-    teacher.categoryVotes[categoryId] = (teacher.categoryVotes[categoryId] || 0) + 1;
-    teacher.totalVotes = Object.values(teacher.categoryVotes).reduce((sum, v) => sum + v, 0);
-
-    this.data.voters[roll][categoryId] = teacherId;
+    // Seal voter record so they cannot vote again
+    this.data.voters[roll] = {
+      hasVoted: true,
+      votedAt: new Date().toISOString(),
+      votesCount: voteEntries.length,
+      votes: recordedVotesMap
+    };
     this.save();
 
-    // Persist to MongoDB Atlas
+    // Persist locked voter record to MongoDB Atlas
     this.getMongoDb().then(mongoDb => {
       if (mongoDb) {
-        mongoDb.collection('teachers').updateOne(
-          { id: teacherId },
-          { 
-            $set: { 
-              categoryVotes: teacher.categoryVotes,
-              totalVotes: teacher.totalVotes
-            } 
-          }
-        ).catch(console.error);
-
         mongoDb.collection('voters').updateOne(
           { roll: roll },
-          { $set: { roll: roll, votes: this.data.voters[roll] } },
+          { $set: { roll: roll, hasVoted: true, votedAt: new Date().toISOString(), votesCount: voteEntries.length, votes: recordedVotesMap } },
           { upsert: true }
         ).catch(console.error);
       }
     });
 
-    return { 
-      success: true, 
-      message: `Your secret ballot vote for ${teacher.name} has been securely recorded!`,
+    return {
+      success: true,
+      message: `Your confidential secret ballot votes across ${voteEntries.length} categories have been securely recorded!`,
       voterRoll: roll,
-      categoryId,
-      teacherId
+      votesCount: voteEntries.length
     };
   }
 
+  // Single Category Vote (Strict 1-Time Rule)
+  voteTeacher(teacherId, voterRoll, categoryId = 'starFaculty') {
+    const roll = (voterRoll || '').trim().toUpperCase();
+    if (!roll) {
+      return { success: false, error: 'Please enter a valid JNTU Roll Number to cast your vote.' };
+    }
+
+    // STRICT 1-TIME VOTE CHECK:
+    if (this.data.voters[roll] && this.data.voters[roll].hasVoted) {
+      return { 
+        success: false, 
+        alreadyVoted: true,
+        error: `Student with JNTU Roll Number "${roll}" has already cast their secret ballot. Multiple voting is not permitted.` 
+      };
+    }
+
+    return this.submitBallot(roll, { [categoryId]: teacherId });
+  }
+
+  // Zero-Knowledge Voter Status (Never exposes who student voted for to protect privacy)
   getStudentVoteHistory(voterRoll) {
     const roll = (voterRoll || '').trim().toUpperCase();
-    return this.data.voters[roll] || {};
+    const record = this.data.voters[roll];
+    if (!record) {
+      return { hasVoted: false, votesCount: 0 };
+    }
+    const hasVoted = Boolean(record.hasVoted || (record.votes && Object.keys(record.votes).length > 0));
+    return {
+      hasVoted,
+      votedAt: record.votedAt || null,
+      votesCount: record.votesCount || (record.votes ? Object.keys(record.votes).length : 0)
+    };
   }
 
   getApprovedAnecdotes() {
