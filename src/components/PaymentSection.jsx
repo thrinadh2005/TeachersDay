@@ -12,7 +12,11 @@ import {
   Check,
   Vote,
   Search,
-  RefreshCw
+  RefreshCw,
+  Printer,
+  Calendar,
+  MapPin,
+  Lock
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { PaymentModal } from './PaymentModal';
@@ -252,11 +256,11 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
   };
 
   return (
-    <section id="payment-section" className="relative py-6 sm:py-12 max-w-3xl mx-auto px-4">
+    <section id="payment-section" className="relative py-6 sm:py-12 max-w-3xl mx-auto px-4 animate-fadeIn">
       
       {/* Header Banner */}
       <div className="mb-6 text-center space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
           <GraduationCap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           <span>CSE Department Exclusive • 2nd & 3rd Years Only</span>
         </div>
@@ -281,7 +285,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
             <button
               type="button"
               onClick={() => setShowLookupBox(!showLookupBox)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-slate-800 dark:text-amber-300 border border-slate-300 dark:border-white/10 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-800 dark:text-amber-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
             >
               <Search className="w-3.5 h-3.5" />
               <span>Already paid? Lookup & Print your Official Receipt</span>
@@ -299,23 +303,21 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                       maxLength={10}
                       placeholder="e.g. 24341A0502"
                       value={lookupRoll}
-                      onChange={(e) => setLookupRoll(cleanJntuRoll(e.target.value).slice(0, 10))}
-                      className="flex-1 px-3.5 py-2 rounded-xl text-sm font-mono font-bold tracking-wider uppercase border border-slate-300 dark:border-white/20 focus:outline-none focus:border-amber-500"
+                      onChange={(e) => setLookupRoll(cleanJntuRoll(e.target.value).slice(0, JNTU_ROLL_LENGTH))}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-mono font-bold uppercase focus:outline-none focus:border-amber-400 border border-slate-300 dark:border-white/10"
                     />
                     <button
                       type="submit"
                       disabled={lookupLoading}
-                      className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md flex items-center gap-1.5 touch-press"
+                      className="px-4 py-2 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shrink-0 hover:bg-amber-300 shadow-sm transition-all"
                     >
-                      {lookupLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-                      <span>Lookup</span>
+                      {lookupLoading ? 'Checking...' : 'Find Pass'}
                     </button>
                   </div>
                 </div>
+
                 {lookupError && (
-                  <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold text-left">
-                    {lookupError}
-                  </p>
+                  <p className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold">{lookupError}</p>
                 )}
               </form>
             )}
@@ -323,449 +325,337 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         )}
       </div>
 
+      {/* Error Alert Box */}
+      {error && (
+        <div className="mb-6 p-4 rounded-2xl bg-rose-500/15 border-2 border-rose-400 text-rose-800 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* ========================================================================= */}
-      {/* CASE 0: ALREADY PAID CARD (BLOCK DUPLICATE PAYMENTS) */}
+      {/* CASE A: ALREADY PAID - CELEBRATION PASS SCREEN */}
       {/* ========================================================================= */}
-      {existingSubmission && !completedRecord && (
-        <div className="mb-8 glass-card-glow rounded-3xl p-6 sm:p-8 border-2 border-emerald-500 bg-white dark:bg-slate-950 shadow-2xl space-y-5 animate-scaleUp text-center">
+      {(completedRecord || existingSubmission) ? (
+        <div className="glass-card-glow rounded-3xl p-6 sm:p-8 border-2 border-emerald-500 shadow-2xl space-y-6 animate-scaleUp text-center bg-white dark:bg-slate-950">
           
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shadow-lg shadow-emerald-500/20">
-            <ShieldCheck className="w-9 h-9 text-emerald-500 dark:text-emerald-400" />
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border-2 border-emerald-400 shadow-lg shadow-emerald-500/30">
+            <CheckCircle2 className="w-8 h-8 animate-pulse" />
           </div>
 
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500 text-white dark:text-slate-950 px-3.5 py-1 rounded-full shadow-sm inline-block">
-              ✓ Celebration Pass Activated & Paid
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-mono font-black tracking-widest bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-full border border-emerald-400/40 inline-block">
+              CELEBRATION PASS ACTIVE & VERIFIED
             </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
-              Payment Already Received!
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+              Contribution Already Received!
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto font-medium">
-              This JNTU Roll Number has already contributed. Once paid, the portal strictly does not allow duplicate payments.
+              Student with JNTU Roll Number <strong className="text-amber-700 dark:text-amber-300 font-mono">{(completedRecord || existingSubmission)?.rollNumber}</strong> has already contributed.
             </p>
           </div>
 
-          {/* Student Pass Summary Card */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-left space-y-2.5 text-xs shadow-inner">
+          {/* Pass Details Summary */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-left text-xs space-y-2.5 shadow-inner">
             <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">JNTU Roll Number</span>
-              <span className="text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded font-mono font-black text-xs shadow-sm">
-                {existingSubmission.rollNumber}
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Acknowledgement No</span>
+              <span className="text-amber-700 dark:text-amber-400 font-mono font-black select-all">
+                {(completedRecord || existingSubmission)?.acknowledgementNumber || (completedRecord || existingSubmission)?.ticketNumber}
               </span>
             </div>
+
             <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Department & Section</span>
-              <span className="text-teal-700 dark:text-teal-300 font-bold">
-                {existingSubmission.year || 'CSE'} • {existingSubmission.section}
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Class & Section</span>
+              <span className="text-teal-800 dark:text-teal-300 font-bold">
+                {(completedRecord || existingSubmission)?.year || 'CSE'} • {(completedRecord || existingSubmission)?.section}
               </span>
             </div>
+
             <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Acknowledgement Number</span>
-              <span className="text-amber-700 dark:text-amber-300 font-mono font-bold">
-                {existingSubmission.acknowledgementNumber || existingSubmission.receiptNumber || existingSubmission.ticketNumber}
-              </span>
-            </div>
-            <div className="flex justify-between pt-0.5">
               <span className="text-slate-600 dark:text-slate-400 font-bold">Amount Paid</span>
-              <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black text-sm">
-                ₹{existingSubmission.amount || existingSubmission.payment?.amount || 50}.00 (Verified)
+              <span className="text-emerald-700 dark:text-emerald-400 font-black text-sm">
+                ₹{(completedRecord || existingSubmission)?.amount || (completedRecord || existingSubmission)?.payment?.amount || 50}.00 (PAID)
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Status</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Official Razorpay Captured & Verified
               </span>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions: View Slip & Proceed to Voting */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <button
               type="button"
               onClick={() => setShowAckModal(true)}
-              className="w-full py-3.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] touch-press"
+              className="w-full py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border-2 border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm touch-press"
             >
-              <FileText className="w-4 h-4 text-slate-950" />
-              <span>View & Print Official Receipt</span>
+              <Printer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span>Print / View Digital Slip</span>
             </button>
 
             <button
               type="button"
               onClick={handleGoToVoting}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] touch-press"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/25 touch-press"
             >
-              <Vote className="w-4 h-4 text-amber-300" />
-              <span>Proceed to Faculty Voting</span>
-              <ArrowRight className="w-4 h-4" />
+              <Vote className="w-4 h-4" />
+              <span>Proceed to Secret Ballot Voting</span>
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setRollNumber('');
-              setExistingSubmission(null);
-              setError(null);
-            }}
-            className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline pt-1 block mx-auto font-medium"
-          >
-            Enter a different Roll Number
-          </button>
-        </div>
-      )}
-
-      {/* Error Alert */}
-      {error && !existingSubmission && (
-        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-500/15 border-2 border-rose-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-800 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
-            <div>
-              <span>{error}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* CASE 1: PAYMENT FORM (IF NOT COMPLETED AND NOT ALREADY PAID) */}
-      {/* ========================================================================= */}
-      {!completedRecord && !existingSubmission ? (
-        <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-8 animate-fadeIn bg-white dark:bg-slate-950">
-          
-          <form onSubmit={handleStartPayment} className="space-y-7">
-            
-            {/* 1. JNTU Roll Number Input with 10-Digit Live Verification Badge */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                  1. JNTU Roll Number (10 Digits) <span className="text-rose-500">*</span>
-                </label>
-                
-                {/* 10-Digit Format Progress Badge */}
-                <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold">
-                  {cleanRoll.length === 0 && (
-                    <span className="text-slate-500 dark:text-slate-400">e.g. 24341A0502</span>
-                  )}
-                  {cleanRoll.length > 0 && cleanRoll.length < JNTU_ROLL_LENGTH && (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                      {cleanRoll.length}/{JNTU_ROLL_LENGTH} digits
-                    </span>
-                  )}
-                  {cleanRoll.length === JNTU_ROLL_LENGTH && rollValidation.isValid && (
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                      <Check className="w-3 h-3" />
-                      <span>{checkingRoll ? 'Checking...' : '✓ 10/10 Valid JNTU ID'}</span>
-                    </span>
-                  )}
-                  {cleanRoll.length === JNTU_ROLL_LENGTH && !rollValidation.isValid && (
-                    <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40">
-                      Invalid Format
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  maxLength={10}
-                  placeholder="Enter 10-Digit Roll Number (e.g. 24341A0502)"
-                  value={rollNumber}
-                  onChange={handleRollChange}
-                  className={`w-full px-4 py-3.5 rounded-2xl text-base sm:text-lg font-mono font-bold tracking-wider uppercase focus:outline-none transition-all shadow-inner ${
-                    rollValidation.isValid && cleanRoll.length === JNTU_ROLL_LENGTH
-                      ? 'border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-400/30'
-                      : 'border border-slate-300 dark:border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'
-                  }`}
-                />
-              </div>
-
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Must be exactly 10 alphanumeric characters (Year + College Code + Degree + Branch + Sequence).
-              </p>
-            </div>
-
-            {/* 2. Interactive Section Selector (2nd & 3rd Year Only) */}
-            <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                2. Select Your CSE Section <span className="text-rose-500">*</span>
-              </label>
-
-              {/* 2nd Year Grid */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-purple-700 dark:text-purple-300 tracking-wider">
-                    📘 2nd Year CSE
-                  </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Sections A, B, C, D</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {cse2ndYearSections.map((sec) => {
-                    const isSelected = selectedSection === sec;
-                    return (
-                      <button
-                        key={sec}
-                        type="button"
-                        onClick={() => setSelectedSection(sec)}
-                        className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 touch-press ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-2 ring-purple-400 shadow-lg shadow-purple-500/25 scale-[1.03]'
-                            : 'bg-white dark:bg-slate-950 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-purple-400 hover:bg-slate-100 dark:hover:bg-slate-900'
-                        }`}
-                      >
-                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-400" />}
-                        <span>{sec}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3rd Year Grid */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-amber-700 dark:text-amber-300 tracking-wider">
-                    📙 3rd Year CSE
-                  </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Sections A, B, C, D</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {cse3rdYearSections.map((sec) => {
-                    const isSelected = selectedSection === sec;
-                    return (
-                      <button
-                        key={sec}
-                        type="button"
-                        onClick={() => setSelectedSection(sec)}
-                        className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 touch-press ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 ring-2 ring-amber-400 shadow-lg shadow-amber-500/25 scale-[1.03]'
-                            : 'bg-white dark:bg-slate-950 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900'
-                        }`}
-                      >
-                        {isSelected && <Check className="w-3.5 h-3.5 text-slate-950" />}
-                        <span>{sec}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Stage Speech Interest (Optional Toggle) */}
-            <div className="space-y-3 pt-2">
-              <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 cursor-pointer hover:border-amber-400/40 transition-colors group">
-                <input
-                  type="checkbox"
-                  checked={wantsToSpeak}
-                  onChange={(e) => setWantsToSpeak(e.target.checked)}
-                  className="w-5 h-5 rounded-md text-amber-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-white/20 focus:ring-amber-400 mt-0.5 cursor-pointer"
-                />
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
-                    <Mic className="w-4 h-4 text-amber-500" />
-                    <span>Interested in stage speech / sharing words for faculty (Optional)</span>
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-                    Check this box if you would like a speaking slot during the Teachers' Day ceremony.
-                  </span>
-                </div>
-              </label>
-
-              {wantsToSpeak && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3 animate-fadeIn">
-                  <div>
-                    <label className="block text-xs font-bold text-amber-800 dark:text-amber-300 mb-1.5">
-                      Which Teacher / Faculty would you like to speak about?
-                    </label>
-                    <select
-                      value={speechTeacher}
-                      onChange={(e) => setSpeechTeacher(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-amber-400/30 text-sm focus:outline-none focus:border-amber-400"
-                    >
-                      {teachers.map(t => (
-                        <option key={t.id} value={t.name}>
-                          {t.name} ({t.designation})
-                        </option>
-                      ))}
-                      <option value="All CSE Department Faculty">
-                        🌟 All CSE Department Faculty
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-amber-800 dark:text-amber-300 mb-1.5">
-                      What would you like to speak / tell about? (Brief Concept)
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Expressing gratitude for lab guidance, sharing a memorable classroom lesson..."
-                      value={speechTopic}
-                      onChange={(e) => setSpeechTopic(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-amber-400/30 text-sm focus:outline-none focus:border-amber-400 resize-none"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 4. Contribution Amount & Direct Payment Trigger */}
-            <div className="pt-3 border-t border-slate-200 dark:border-white/10 space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gradient-to-r dark:from-purple-950/70 dark:via-slate-900 dark:to-indigo-950/70 border border-slate-200 dark:border-purple-500/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs uppercase tracking-wider font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Contribution Amount</span>
-                    </span>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Official CSE Teachers' Day 2026 celebration pass & felicitation.
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-black text-amber-600 dark:text-amber-400 text-2xl font-display">₹{effectiveContributionAmount}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-5 gap-2">
-                  {presetAmounts.map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => { setContributionAmount(amt); setIsCustomAmount(false); }}
-                      className={`py-2 rounded-xl text-xs font-bold border transition-all touch-press ${
-                        !isCustomAmount && contributionAmount === amt 
-                          ? 'bg-purple-600 text-white border-purple-500 shadow-md scale-[1.02]' 
-                          : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-purple-400'
-                      }`}
-                    >
-                      ₹{amt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Direct Payment Action Button */}
-              <button
-                type="submit"
-                disabled={loading || !rollValidation.isValid}
-                className={`w-full px-8 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg shadow-xl transition-all flex items-center justify-center gap-2.5 touch-press ${
-                  rollValidation.isValid
-                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-amber-500/25 hover:scale-[1.01]'
-                    : 'bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                <CreditCard className="w-5 h-5" />
-                <span>Confirm & Pay ₹{effectiveContributionAmount} Directly</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-
-              <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Instant Verified Official Receipt Generated After Payment</span>
-              </div>
-            </div>
-
-          </form>
 
         </div>
       ) : (
         /* ========================================================================= */
-        /* CASE 2: PAYMENT SUCCESS & OFFICIAL RECEIPT DISPLAY */
+        /* CASE B: ACTIVE PAYMENT & REGISTRATION FORM */
         /* ========================================================================= */
-        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border-2 border-emerald-500 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto bg-white dark:bg-slate-950">
+        <form onSubmit={handleStartPayment} className="glass-card-glow rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 bg-white dark:bg-slate-950">
           
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/25 animate-float-soft">
-            <CheckCircle2 className="w-12 h-12 text-slate-950" />
+          {/* STEP 1: JNTU ROLL NUMBER (10 DIGITS) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-black flex items-center justify-center">1</span>
+                <span>JNTU Roll Number (10 Digits)</span>
+                <span className="text-rose-500 font-bold">*</span>
+              </label>
+
+              {/* 10-Digit Character Badge */}
+              <div className="text-[11px] font-mono font-bold">
+                {cleanRoll.length === 0 && <span className="text-slate-400">e.g. 24341A0502</span>}
+                {cleanRoll.length > 0 && cleanRoll.length < JNTU_ROLL_LENGTH && (
+                  <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                    {cleanRoll.length}/{JNTU_ROLL_LENGTH} digits
+                  </span>
+                )}
+                {cleanRoll.length === JNTU_ROLL_LENGTH && rollValidation.isValid && (
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    <span>{checkingRoll ? 'Checking...' : '✓ 10/10 Valid'}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <input
+              type="text"
+              required
+              maxLength={10}
+              placeholder="Enter 10-Digit Roll Number (e.g. 24341A0502)"
+              value={rollNumber}
+              onChange={handleRollChange}
+              className={`w-full px-4 py-3.5 rounded-2xl text-base sm:text-lg font-mono font-bold tracking-widest uppercase focus:outline-none transition-all shadow-inner ${
+                rollValidation.isValid && cleanRoll.length === JNTU_ROLL_LENGTH
+                  ? 'border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-400/30'
+                  : 'border border-slate-300 dark:border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'
+              }`}
+            />
           </div>
 
-          <div>
-            <span className="text-[10px] uppercase font-mono font-bold tracking-widest bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-3.5 py-1 rounded-full border border-emerald-500/30 inline-block mb-2">
-              OFFICIAL CONTRIBUTION ACKNOWLEDGEMENT
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
-              Payment Successful!
-            </h3>
-            <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md mx-auto mt-2 font-medium">
-              Your celebration contribution of <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹{completedRecord?.payment?.amount || completedRecord?.amount || effectiveContributionAmount || 50}.00</span> has been verified and recorded.
-            </p>
+          {/* STEP 2: CLASS & SECTION SELECTOR */}
+          <div className="space-y-3">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-black flex items-center justify-center">2</span>
+              <span>Select CSE Class & Section</span>
+              <span className="text-rose-500 font-bold">*</span>
+            </label>
+
+            {/* 2nd Year CSE */}
+            <div>
+              <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+                CSE 2nd Year Sections
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {cse2ndYearSections.map(sec => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setSelectedSection(sec)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all touch-press ${
+                      selectedSection === sec
+                        ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-md scale-[1.02]'
+                        : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-400'
+                    }`}
+                  >
+                    {sec}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 3rd Year CSE */}
+            <div className="pt-1">
+              <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+                CSE 3rd Year Sections
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {cse3rdYearSections.map(sec => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setSelectedSection(sec)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all touch-press ${
+                      selectedSection === sec
+                        ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-md scale-[1.02]'
+                        : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-400'
+                    }`}
+                  >
+                    {sec}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Receipt Details Box */}
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-left space-y-3 text-xs shadow-inner">
-            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Acknowledgement No</span>
-              <span className="text-amber-700 dark:text-amber-300 font-mono font-bold">
-                {completedRecord?.acknowledgementNumber || completedRecord?.receiptNumber || completedRecord?.ticketNumber}
+          {/* STEP 3: CONTRIBUTION AMOUNT */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-black flex items-center justify-center">3</span>
+                <span>Celebration Contribution Amount</span>
+              </label>
+              <span className="text-xs font-black text-amber-700 dark:text-amber-400">
+                ₹{effectiveContributionAmount} Selected
               </span>
             </div>
-            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">JNTU Roll Number</span>
-              <span className="text-slate-950 bg-amber-400 px-2 py-0.5 rounded font-mono font-black text-xs">
-                {completedRecord?.rollNumber}
-              </span>
+
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {presetAmounts.map(amt => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => {
+                    setContributionAmount(amt);
+                    setIsCustomAmount(false);
+                    setCustomAmountText('');
+                  }}
+                  className={`py-2 px-2 rounded-xl text-xs font-black border transition-all touch-press ${
+                    !isCustomAmount && contributionAmount === amt
+                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-md scale-[1.03]'
+                      : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-300 hover:border-emerald-400'
+                  }`}
+                >
+                  ₹{amt}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCustomAmount(true);
+                  if (!customAmountText) setCustomAmountText('100');
+                }}
+                className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all touch-press ${
+                  isCustomAmount
+                    ? 'bg-emerald-500 text-white border-emerald-600 shadow-md scale-[1.03]'
+                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-300 hover:border-emerald-400'
+                }`}
+              >
+                Custom
+              </button>
             </div>
-            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Section</span>
-              <span className="text-teal-700 dark:text-teal-300 font-bold">{completedRecord?.section}</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Contribution Amount</span>
-              <span className="text-emerald-700 dark:text-emerald-400 font-black text-sm">
-                ₹{completedRecord?.payment?.amount || completedRecord?.amount || effectiveContributionAmount || 50}.00 (PAID & VERIFIED)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600 dark:text-slate-400 font-bold">Event Date & Venue</span>
-              <span className="text-slate-800 dark:text-slate-200 font-medium">Sept 5, 2026 • CSE Quadrangle Stage</span>
-            </div>
+
+            {isCustomAmount && (
+              <div className="pt-1">
+                <input
+                  type="number"
+                  min="50"
+                  placeholder="Enter custom amount (Min ₹50)"
+                  value={customAmountText}
+                  onChange={(e) => setCustomAmountText(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 text-xs font-mono font-bold focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+            )}
           </div>
 
-          {/* NEXT STEP CTA TO VOTING */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-100 via-amber-50 to-purple-100 dark:from-purple-900/40 dark:via-amber-900/30 dark:to-purple-900/40 border border-amber-400 space-y-3">
-            <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Next Step: Vote & Share Crazy Stories</span>
+          {/* STEP 4: OPTIONAL STAGE SPEECH REGISTRATION */}
+          <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xs font-bold">
+                  <Mic className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Speak on Stage for Teachers</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Share gratitude or deliver speech (Optional)</p>
+                </div>
+              </div>
+
+              <input
+                type="checkbox"
+                checked={wantsToSpeak}
+                onChange={(e) => setWantsToSpeak(e.target.checked)}
+                className="w-5 h-5 accent-pink-500 rounded cursor-pointer"
+              />
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-300">
-              Cast your confidential secret ballot votes for CSE faculty and share anonymous classroom memories!
-            </p>
+
+            {wantsToSpeak && (
+              <div className="p-4 rounded-2xl bg-pink-500/10 border border-pink-500/20 space-y-3 animate-fadeIn">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Select Faculty Member You Wish to Speak About:
+                  </label>
+                  <select
+                    value={speechTeacher}
+                    onChange={(e) => setSpeechTeacher(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 text-xs focus:outline-none focus:border-pink-500"
+                  >
+                    {teachers.map(t => (
+                      <option key={t.id} value={t.name}>
+                        {t.name} ({t.designation})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Brief Speech Topic / Message:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Expressing gratitude for Algorithms guidance..."
+                    value={speechTopic}
+                    onChange={(e) => setSpeechTopic(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 text-xs focus:outline-none focus:border-pink-500"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* GRAND PAY & GET CELEBRATION PASS BUTTON */}
+          <div className="pt-2">
             <button
-              onClick={handleGoToVoting}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-amber-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 touch-press"
+              type="submit"
+              disabled={loading || !rollValidation.isValid || cleanRoll.length !== JNTU_ROLL_LENGTH}
+              className={`w-full py-4 sm:py-5 px-8 rounded-2xl font-black text-base sm:text-lg shadow-2xl transition-all flex items-center justify-center gap-3 touch-press ${
+                !rollValidation.isValid || cleanRoll.length !== JNTU_ROLL_LENGTH
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-amber-500/30 hover:scale-[1.01]'
+              }`}
             >
-              <Vote className="w-5 h-5" />
-              <span>Proceed to Faculty Voting & Crazy Stories (100% Anonymous)</span>
-              <ArrowRight className="w-5 h-5" />
+              <CreditCard className="w-5 h-5 text-slate-950" />
+              <span>{loading ? 'Initializing Gateway...' : `Proceed to Pay ₹${effectiveContributionAmount} & Get Pass`}</span>
+              <Sparkles className="w-5 h-5 text-slate-950" />
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <button
-              onClick={() => setShowAckModal(true)}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md touch-press"
-            >
-              <FileText className="w-4 h-4" />
-              <span>Open & Print Official Acknowledgement</span>
-            </button>
-
-            <button
-              onClick={() => { setCompletedRecord(null); setRollNumber(''); }}
-              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-400 text-xs font-semibold transition-all"
-            >
-              <span>Contribute for Another Roll Number</span>
-            </button>
-          </div>
-
-        </div>
+        </form>
       )}
 
-      {/* Payment Modal */}
+      {/* MODAL 1: LIVE RAZORPAY GATEWAY MODAL */}
       {showPaymentModal && (
         <PaymentModal
           studentData={{
-            name: `Student (${cleanRoll})`,
             rollNumber: cleanRoll,
-            section: selectedSection,
-            year: selectedSection.includes('2') ? '2nd Year' : '3rd Year'
+            name: `Student (${cleanRoll})`,
+            year: selectedSection.includes('2') ? '2nd Year' : '3rd Year',
+            section: selectedSection
           }}
           initialAmount={effectiveContributionAmount}
           onPaymentSuccess={handlePaymentSuccess}
@@ -773,8 +663,8 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         />
       )}
 
-      {/* Official Acknowledgement Receipt Modal */}
-      {(showAckModal && (completedRecord || existingSubmission)) && (
+      {/* MODAL 2: PRINTABLE OFFICIAL ACKNOWLEDGEMENT SLIP */}
+      {showAckModal && (completedRecord || existingSubmission) && (
         <AcknowledgementModal
           submission={completedRecord || existingSubmission}
           onClose={() => setShowAckModal(false)}

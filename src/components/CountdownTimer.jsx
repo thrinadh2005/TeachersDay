@@ -32,32 +32,32 @@ export const CountdownTimer = () => {
   }, []);
 
   const timeUnits = [
-    { label: 'DAYS', value: timeLeft.days, color: 'from-amber-400 to-amber-600' },
-    { label: 'HOURS', value: timeLeft.hours, color: 'from-rose-400 to-rose-600' },
-    { label: 'MINUTES', value: timeLeft.minutes, color: 'from-purple-400 to-purple-600' },
-    { label: 'SECONDS', value: timeLeft.seconds, color: 'from-indigo-400 to-indigo-600' },
+    { label: 'DAYS', value: timeLeft.days, color: 'from-amber-500 to-amber-600' },
+    { label: 'HOURS', value: timeLeft.hours, color: 'from-rose-500 to-rose-600' },
+    { label: 'MINUTES', value: timeLeft.minutes, color: 'from-purple-500 to-purple-600' },
+    { label: 'SECONDS', value: timeLeft.seconds, color: 'from-indigo-500 to-indigo-600' },
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-6 p-1 rounded-3xl bg-gradient-to-r from-amber-500/30 via-pink-500/30 to-purple-500/30 shadow-2xl">
-      <div className="bg-slate-900/90 backdrop-blur-xl rounded-[22px] p-6 sm:p-8 border border-white/10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4">
+    <div className="w-full max-w-4xl mx-auto my-6 p-1 rounded-3xl bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 shadow-2xl">
+      <div className="bg-white dark:bg-slate-900/90 backdrop-blur-xl rounded-[22px] p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-lg">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+            <div className="p-2.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl border border-amber-500/30">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs uppercase font-bold tracking-wider text-amber-400 flex items-center gap-1.5">
+              <span className="text-xs uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> Countdown to Teachers' Day
               </span>
-              <h3 className="text-lg font-black text-white font-display">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white font-display">
                 Teachers' Day • September 5, 2026
               </h3>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-xs font-semibold text-purple-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Registrations & Contributions Open
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-purple-500/10 border border-emerald-500/30 dark:border-purple-500/20 rounded-full text-xs font-bold text-emerald-700 dark:text-purple-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Passes & Voting Open
           </div>
         </div>
 
@@ -66,19 +66,19 @@ export const CountdownTimer = () => {
             <h2 className="text-3xl sm:text-4xl font-extrabold gradient-text-festive animate-bounce">
               🎉 HAPPY TEACHERS' DAY 2026! 🎉
             </h2>
-            <p className="text-slate-300 mt-2">Celebrating our beloved CSE Professors!</p>
+            <p className="text-slate-700 dark:text-slate-300 mt-2 font-medium">Celebrating our beloved CSE Professors!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {timeUnits.map((unit, idx) => (
               <div
                 key={idx}
-                className="flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/20 transition-all group"
+                className="flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-white/5 hover:border-amber-400 dark:hover:border-white/20 transition-all group shadow-sm"
               >
                 <div className={`text-3xl sm:text-5xl font-black bg-gradient-to-br ${unit.color} bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300`}>
                   {String(unit.value).padStart(2, '0')}
                 </div>
-                <div className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-widest mt-1.5 uppercase">
+                <div className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 tracking-widest mt-1.5 uppercase">
                   {unit.label}
                 </div>
               </div>

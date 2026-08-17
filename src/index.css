@@ -26,6 +26,8 @@
     --accent-gold: #f59e0b;
     --accent-glow: rgba(245, 158, 11, 0.20);
     --bottom-bar-bg: rgba(6, 9, 19, 0.94);
+    --skeleton-bg: #1e293b;
+    --skeleton-shimmer: #334155;
   }
 
   /* ========================================================
@@ -51,6 +53,8 @@
     --accent-gold: #d97706;
     --accent-glow: rgba(217, 119, 6, 0.15);
     --bottom-bar-bg: #ffffff;
+    --skeleton-bg: #e2e8f0;
+    --skeleton-shimmer: #cbd5e1;
   }
 
   body {
@@ -61,6 +65,8 @@
     color: var(--text-body);
     transition: background-color 0.25s ease, color 0.25s ease;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6, .font-display {
@@ -78,7 +84,7 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -93,7 +99,7 @@ html.light .glass-card {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--card-border-hover);
-  box-shadow: 0 0 30px var(--accent-glow), 0 12px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 30px var(--accent-glow), 0 12px 40px rgba(0, 0, 0, 0.25);
 }
 
 html.light .glass-card-glow {
@@ -155,7 +161,7 @@ html.light .gradient-text-purple {
 }
 
 /* ========================================================
-   💫 REFINED SUBTLE ANIMATIONS
+   💫 60 FPS MICRO-ANIMATIONS & TRANSITIONS
    ======================================================== */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -165,6 +171,11 @@ html.light .gradient-text-purple {
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px) scale(1); }
   50% { transform: translateY(-10px) scale(1.02); }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
 }
 
 @keyframes pulse-glow {
@@ -178,12 +189,36 @@ html.light .gradient-text-purple {
   40%, 80% { transform: translateX(4px); }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
 
 .animate-float-slow {
   animation: float-slow 7s ease-in-out infinite;
+}
+
+.animate-float-soft {
+  animation: floatSoft 3s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
@@ -194,9 +229,30 @@ html.light .gradient-text-purple {
   animation: shake 0.4s ease-in-out;
 }
 
+.animate-fadeIn {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Skeleton Loading Shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--skeleton-bg) 25%, var(--skeleton-shimmer) 50%, var(--skeleton-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.75rem;
+}
+
 /* Touch & Mobile Active Feedback */
 .touch-press {
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s ease;
+  will-change: transform;
 }
 .touch-press:active {
   transform: scale(0.97);
@@ -265,114 +321,33 @@ button[class*="from-emerald-"] *,
   color: #ffffff !important;
 }
 
-/* ========================================================
-   ☀️ PRECISE LIGHT THEME READABILITY UTILITIES
-   ======================================================== */
-html.light .themed-heading {
-  color: #0f172a !important;
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
 }
 
-html.light .themed-body {
-  color: #1e293b !important;
-}
-
-html.light .themed-muted {
-  color: #475569 !important;
-}
-
-/* Background overrides in light theme */
-html.light .bg-slate-950,
-html.light .bg-slate-950\/90,
-html.light .bg-slate-950\/80,
-html.light .bg-slate-950\/60 {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-}
-
-html.light .bg-slate-900,
-html.light .bg-slate-900\/90,
-html.light .bg-slate-900\/80,
-html.light .bg-slate-900\/60 {
-  background-color: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-}
-
-/* Light mode text contrast enhancements */
-html.light .text-slate-100,
-html.light .text-slate-200,
-html.light .text-slate-300 {
-  color: #1e293b;
-}
-
-html.light .text-slate-400 {
-  color: #475569;
-}
-
-html.light .text-slate-500 {
-  color: #64748b;
-}
-
-/* Badge colors in light mode */
-html.light .bg-amber-500\/10,
-html.light .bg-amber-500\/15,
-html.light .bg-amber-500\/20,
-html.light .bg-amber-400\/15,
-html.light .bg-amber-400\/20 {
-  background-color: #fef3c7 !important;
-  border-color: #fde68a !important;
-  color: #92400e !important;
-}
-
-html.light .bg-purple-500\/10,
-html.light .bg-purple-500\/15,
-html.light .bg-purple-500\/20,
-html.light .bg-purple-600\/20,
-html.light .bg-purple-600\/30 {
-  background-color: #ede9fe !important;
-  border-color: #ddd6fe !important;
-  color: #5b21b6 !important;
-}
-
-html.light .bg-emerald-500\/10,
-html.light .bg-emerald-500\/15,
-html.light .bg-emerald-500\/20,
-html.light .bg-emerald-500\/30 {
-  background-color: #d1fae5 !important;
-  border-color: #a7f3d0 !important;
-  color: #065f46 !important;
-}
-
-html.light .bg-rose-500\/10,
-html.light .bg-rose-500\/15,
-html.light .bg-rose-500\/20 {
-  background-color: #ffe4e6 !important;
-  border-color: #fecdd3 !important;
-  color: #9f1239 !important;
-}
-
-/* Mobile bottom bar in light mode */
-html.light .md\:hidden .glass-card {
-  background-color: rgba(255, 255, 255, 0.98) !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* ========================================================
-   ⚡ ANIMATIONS & PRINT
-   ======================================================== */
-@keyframes floatSoft {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
+/* Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-.animate-float-soft {
-  animation: floatSoft 3s ease-in-out infinite;
-}
-
+/* Print Styles */
 @media print {
   body * {
     visibility: hidden;
