@@ -103,14 +103,14 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg sm:text-2xl font-black font-display tracking-tight text-slate-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">
+                  <span className="text-lg sm:text-2xl font-black font-display tracking-tight text-white group-hover:text-purple-300 transition-colors">
                     GURU<span className="gradient-text-festive font-black">UTSAV</span>
                   </span>
-                  <span className="px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black bg-amber-100 dark:bg-amber-400/15 text-amber-900 dark:text-amber-400 border border-amber-300 dark:border-amber-400/30 rounded-md">
+                  <span className="px-1.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold bg-amber-400/15 text-amber-400 border border-amber-400/30 rounded-md">
                     CSE 2026
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] font-semibold text-slate-600 dark:text-slate-400 hidden xs:block">
+                <p className="text-[10px] sm:text-[11px] font-medium text-slate-400 hidden xs:block">
                   CSE 2nd & 3rd Year (Sections 2A-2D, 3A-3D)
                 </p>
               </div>
@@ -130,7 +130,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                       className={`relative inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm transition-all touch-press active:scale-95 ${
                         isActive
                           ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/50 scale-105'
-                          : 'bg-amber-100 dark:bg-amber-400/15 hover:bg-amber-200 dark:hover:bg-amber-400/25 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-400/30'
+                          : 'bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 border border-amber-400/30'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -143,13 +143,13 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 touch-press ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 touch-press ${
                       isActive
-                        ? 'bg-purple-100 dark:bg-white/10 text-purple-950 dark:text-white border border-purple-300 dark:border-white/15 shadow-sm'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                        ? 'bg-white/10 text-white border border-white/15 shadow-sm'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </button>
                 );
@@ -159,12 +159,12 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <button
                 onClick={toggleTheme}
                 title={`Switch to ${theme === 'dark' ? 'Light Royal' : 'Midnight Dark'} Mode`}
-                className="p-2.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-all touch-press hover:scale-105 ml-1"
+                className="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-400 hover:text-amber-300 transition-all touch-press hover:scale-105 ml-1"
               >
                 {theme === 'dark' ? (
                   <Sun className="w-4 h-4 text-amber-400 hover:rotate-90 transition-transform duration-500" />
                 ) : (
-                  <Moon className="w-4 h-4 text-purple-600 hover:-rotate-12 transition-transform duration-500" />
+                  <Moon className="w-4 h-4 text-purple-400 hover:-rotate-12 transition-transform duration-500" />
                 )}
               </button>
             </nav>
@@ -174,9 +174,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               {/* Theme Toggle (Mobile) */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 touch-press"
+                className="p-2 rounded-xl bg-white/5 border border-white/10 text-amber-400 touch-press"
               >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-purple-600" />}
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-purple-400" />}
               </button>
 
               {/* Quick Pay Button */}
@@ -191,7 +191,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               {/* Drawer Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 touch-press"
+                className="p-2 rounded-xl bg-slate-900 border border-white/10 text-slate-300 touch-press"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -202,7 +202,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
         {/* Mobile Dropdown Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden glass-nav border-b border-slate-200 dark:border-white/10 px-4 pt-2 pb-6 space-y-2 animate-fadeIn bg-white dark:bg-slate-950">
+          <div className="md:hidden glass-nav border-b border-white/10 px-4 pt-2 pb-6 space-y-2 animate-fadeIn">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -215,8 +215,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                     item.isHighlight && isActive
                       ? 'bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-500/20'
                       : isActive
-                        ? 'bg-purple-100 dark:bg-purple-600/30 text-purple-950 dark:text-white border border-purple-300 dark:border-purple-500/30'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                        ? 'bg-purple-600/30 text-white border border-purple-500/30'
+                        : 'text-slate-300 hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -232,7 +232,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           📱 FLOATING MOBILE BOTTOM NAVIGATION BAR (Instant 1-Thumb Touch)
           ========================================================== */}
       <div className="md:hidden fixed bottom-3 left-3 right-3 z-40">
-        <div className="glass-card rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl flex items-center justify-around bg-white/90 dark:bg-slate-950/90 border-2 border-slate-200 dark:border-white/10">
+        <div className="glass-card rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl flex items-center justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -245,13 +245,13 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   item.isHighlight && isActive
                     ? 'bg-amber-400 text-slate-950 font-black shadow-md scale-105'
                     : item.isHighlight
-                      ? 'text-amber-600 dark:text-amber-400 font-black hover:bg-amber-400/10'
+                      ? 'text-amber-400 font-bold hover:bg-amber-400/10'
                       : isActive
-                        ? 'bg-purple-100 dark:bg-purple-600/30 text-purple-950 dark:text-white border border-purple-300 dark:border-purple-500/30'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                        ? 'bg-purple-600/30 text-white border border-purple-500/30'
+                        : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-amber-500 dark:text-amber-400' : ''}`} />
+                <Icon className={`w-4 h-4 ${item.isHighlight && isActive ? 'text-slate-950' : isActive ? 'text-amber-400' : ''}`} />
                 <span className="text-[9px] font-bold mt-0.5 leading-none">
                   {item.id === 'home' ? 'Home' : item.id === 'pay' ? 'Payment' : item.id === 'vote-faculty' ? 'Vote' : item.id === 'memories' ? 'Stories' : 'Awards'}
                 </span>

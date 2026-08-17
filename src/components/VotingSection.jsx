@@ -15,15 +15,14 @@ import {
   CheckCircle2, 
   ArrowRight,
   Eye,
-  Lock,
-  UserCheck
+  Lock
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
-import { normalizeRollNumber, isValidJntuRoll } from '../utils/rollNumber';
+import { cleanJntuRoll, validateJntuRoll, JNTU_ROLL_LENGTH } from '../utils/jntuValidation';
 
 export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
-  const [voterRoll, setVoterRoll] = useState(initialRollNumber ? normalizeRollNumber(initialRollNumber) : '');
+  const [voterRoll, setVoterRoll] = useState(cleanJntuRoll(initialRollNumber).slice(0, JNTU_ROLL_LENGTH));
   const [teachers, setTeachers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('starFaculty');
@@ -41,17 +40,20 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
   const [alreadyVoted, setAlreadyVoted] = useState(false);
   const [checkingVoterStatus, setCheckingVoterStatus] = useState(false);
 
+  const rollValidation = validateJntuRoll(voterRoll);
+  const cleanRoll = rollValidation.clean;
+
   const categoryIcons = {
-    inspiring: <Trophy className="w-4 h-4 text-amber-400" />,
-    explainer: <Lightbulb className="w-4 h-4 text-yellow-400" />,
-    friendly: <Smile className="w-4 h-4 text-emerald-400" />,
-    techGuru: <Cpu className="w-4 h-4 text-cyan-400" />,
-    starFaculty: <Star className="w-4 h-4 text-pink-400" />
+    inspiring: <Trophy className="w-4 h-4 text-amber-500" />,
+    explainer: <Lightbulb className="w-4 h-4 text-yellow-500" />,
+    friendly: <Smile className="w-4 h-4 text-emerald-500" />,
+    techGuru: <Cpu className="w-4 h-4 text-cyan-500" />,
+    starFaculty: <Star className="w-4 h-4 text-pink-500" />
   };
 
   useEffect(() => {
     if (initialRollNumber) {
-      setVoterRoll(normalizeRollNumber(initialRollNumber));
+      setVoterRoll(cleanJntuRoll(initialRollNumber).slice(0, JNTU_ROLL_LENGTH));
     }
   }, [initialRollNumber]);
 
@@ -74,10 +76,9 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       .catch(err => console.error('Failed to load voting data:', err));
   }, []);
 
-  // Check if roll number has already voted (Trigger strictly when 10 digits typed)
+  // Check if roll number has already voted (Zero choice exposure)
   useEffect(() => {
-    const cleanRoll = normalizeRollNumber(voterRoll);
-    if (cleanRoll.length === 10) {
+    if (cleanRoll.length === JNTU_ROLL_LENGTH) {
       setCheckingVoterStatus(true);
       api.getVoterHistory(cleanRoll)
         .then(res => {
@@ -94,7 +95,13 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
     } else {
       setAlreadyVoted(false);
     }
-  }, [voterRoll]);
+  }, [cleanRoll]);
+
+  const handleRollChange = (e) => {
+    const raw = e.target.value;
+    const sanitized = cleanJntuRoll(raw).slice(0, JNTU_ROLL_LENGTH);
+    setVoterRoll(sanitized);
+  };
 
   const handleSelectVote = (teacherId) => {
     if (alreadyVoted) return;
@@ -107,16 +114,9 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
   const handleSubmitVotesAndStories = async (e) => {
     if (e) e.preventDefault();
-    const cleanRoll = normalizeRollNumber(voterRoll);
 
-    if (!cleanRoll) {
-      setError('Please enter your 10-digit JNTU Roll Number to cast your confidential votes.');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    if (cleanRoll.length !== 10) {
-      setError(`JNTU Roll Number must be exactly 10 digits/characters (Currently ${cleanRoll.length}/10: "${cleanRoll}"). Example: 24341A0502.`);
+    if (!rollValidation.isValid) {
+      setError(rollValidation.error || 'Please enter your 10-digit JNTU Roll Number (e.g. 24341A0502).');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -148,9 +148,8 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       }
 
       // 2. Submit Anonymous Story if present
-      let storyResult = null;
       if (hasStory) {
-        storyResult = await api.submitAnonymousAnecdote({
+        await api.submitAnonymousAnecdote({
           teacherName: storyTeacher || 'CSE Faculty',
           anecdote: storyText.trim(),
           rollNumber: cleanRoll,
@@ -185,12 +184,12 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
 
   return (
-    <section id="voting-section" className="relative py-6 sm:py-12 max-w-4xl mx-auto px-4 space-y-8 animate-fadeIn text-slate-900 dark:text-slate-100">
+    <section id="voting-section" className="relative py-6 sm:py-12 max-w-4xl mx-auto px-4 space-y-8 animate-fadeIn">
       
       {/* Header Banner */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
-          <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
+          <Trophy className="w-4 h-4 text-amber-500" />
           <span>CSE Department 2026 • Secret Ballot Superlative Voting</span>
         </div>
 
@@ -211,7 +210,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-rose-50 dark:bg-rose-500/15 border-2 border-rose-400 dark:border-rose-500/30 flex items-center gap-3 text-rose-900 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
+        <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/15 border-2 border-rose-400 flex items-center gap-3 text-rose-800 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
           <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
           <span>{error}</span>
         </div>
@@ -223,75 +222,90 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       {!successData ? (
         <div className="space-y-8">
           
-          {/* Roll Number Voter Identity Bar */}
-          <div className="glass-card-glow rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-xl space-y-3">
+          {/* Roll Number Voter Identity Bar with 10-Digit Validation */}
+          <div className="glass-card-glow rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-white/10 shadow-xl space-y-3 bg-white dark:bg-slate-950">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
                   1
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">Voter Authentication</h3>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Enter your 10-digit JNTU Roll Number to cast your 1-vote-per-category ballot.</p>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Voter Authentication (10-Digit JNTU Roll)</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Enter your 10-digit JNTU Roll Number to cast your 1-vote-per-category ballot.</p>
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-slate-900/80 border border-emerald-400 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-400 text-xs font-bold shrink-0">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-slate-900/80 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold shrink-0">
+                <ShieldCheck className="w-4 h-4" />
                 <span>100% Secret Ballot</span>
               </div>
             </div>
-            <div className="max-w-md space-y-2">
+
+            <div className="max-w-md space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1">
-                  <span>JNTU Roll Number</span>
-                  <span className="text-rose-500">*</span>
-                </label>
-                {checkingVoterStatus && (
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400 animate-pulse font-mono font-bold">Checking voter record...</p>
-                )}
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase">JNTU Roll Number</span>
+                
+                {/* 10-Digit Badge */}
+                <div className="text-[11px] font-mono font-bold">
+                  {cleanRoll.length === 0 && <span className="text-slate-400">e.g. 24341A0502</span>}
+                  {cleanRoll.length > 0 && cleanRoll.length < JNTU_ROLL_LENGTH && (
+                    <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                      {cleanRoll.length}/{JNTU_ROLL_LENGTH} digits
+                    </span>
+                  )}
+                  {cleanRoll.length === JNTU_ROLL_LENGTH && rollValidation.isValid && (
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                      <Check className="w-3 h-3" />
+                      <span>{checkingVoterStatus ? 'Verifying...' : '✓ 10/10 Valid'}</span>
+                    </span>
+                  )}
+                </div>
               </div>
 
               <input
                 type="text"
                 required
                 maxLength={10}
-                placeholder="Enter JNTU Roll Number (e.g. 24341A0502)"
+                placeholder="Enter 10-Digit Roll Number (e.g. 24341A0502)"
                 value={voterRoll}
-                onChange={(e) => setVoterRoll(normalizeRollNumber(e.target.value))}
-                className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-300 dark:border-white/15 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-base sm:text-lg font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
+                onChange={handleRollChange}
+                className={`w-full px-4 py-3 rounded-2xl text-sm sm:text-base font-mono font-bold tracking-wider uppercase focus:outline-none transition-all shadow-inner ${
+                  rollValidation.isValid && cleanRoll.length === JNTU_ROLL_LENGTH
+                    ? 'border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-400/30'
+                    : 'border border-slate-300 dark:border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'
+                }`}
               />
             </div>
           </div>
 
           {/* If Roll Number Has Already Voted - Show Sealed Ballot Screen */}
           {alreadyVoted ? (
-            <div className="glass-card-glow rounded-3xl p-8 sm:p-10 border-2 border-amber-400 bg-white dark:bg-slate-950/80 shadow-2xl text-center space-y-5 animate-fadeIn">
-              <div className="w-16 h-16 rounded-3xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border-2 border-amber-300 dark:border-amber-500/30">
+            <div className="glass-card-glow rounded-3xl p-8 sm:p-10 border border-amber-500/40 shadow-2xl text-center space-y-5 animate-fadeIn bg-white dark:bg-slate-950">
+              <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/30">
                 <Lock className="w-8 h-8" />
               </div>
 
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4" />
                   <span>Confidential Ballot Sealed</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                  Vote Already Cast for {voterRoll}
+                  Vote Already Cast for {cleanRoll}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed font-medium">
-                  You have already submitted your secret ballot for Teachers' Day 2026. As per GMRIT CSE official regulations:
+                  You have already submitted your secret ballot for Teachers' Day 2026. As per official CSE regulations:
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left text-xs">
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border-2 border-slate-200 dark:border-white/10 flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span className="text-slate-700 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Single-Vote Rule:</strong> Each JNTU Roll Number is strictly permitted to vote only once.</span>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border-2 border-slate-200 dark:border-white/10 flex items-start gap-2.5">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 flex items-start gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-                  <span className="text-slate-700 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Strict Secrecy:</strong> Your votes are 100% confidential and hidden from all other users.</span>
+                  <span className="text-slate-700 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Strict Secrecy:</strong> Your votes are 100% confidential and never exposed.</span>
                 </div>
               </div>
 
@@ -302,20 +316,20 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
             </div>
           ) : (
             /* Category Voting Box */
-            <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-2xl space-y-6">
+            <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 bg-white dark:bg-slate-950">
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-center font-black text-xs">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center font-black text-xs">
                       2
                     </div>
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Select Faculty for 5 Award Superlatives</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Select Faculty for 5 Award Superlatives</h3>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 ml-10 font-medium">Choose a faculty member for each award category below.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-10">Choose a faculty member for each award category below.</p>
                 </div>
 
-                <span className="text-xs text-amber-700 dark:text-amber-400 font-black px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-400/10 border border-amber-300 dark:border-amber-400/20 self-start sm:self-auto">
+                <span className="text-xs text-amber-700 dark:text-amber-400 font-bold px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/20 self-start sm:self-auto">
                   Categories Voted: {Object.keys(selectedVotes).length} / {categories.length}
                 </span>
               </div>
@@ -331,10 +345,10 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                       key={cat.id}
                       type="button"
                       onClick={() => setActiveCategory(cat.id)}
-                      className={`p-3 rounded-2xl text-left border-2 transition-all flex flex-col justify-between touch-press ${
+                      className={`p-3 rounded-2xl text-left border transition-all flex flex-col justify-between touch-press ${
                         isSelected
-                          ? 'bg-purple-100/80 dark:bg-gradient-to-br dark:from-purple-600/30 dark:via-pink-600/20 dark:to-amber-500/20 border-purple-500 dark:border-amber-400 shadow-md scale-[1.02]'
-                          : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-purple-300'
+                          ? 'bg-gradient-to-br from-purple-100 via-pink-50 to-amber-50 dark:from-purple-600/30 dark:via-pink-600/20 dark:to-amber-500/20 border-purple-400 dark:border-amber-400 shadow-md scale-[1.02]'
+                          : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
@@ -342,17 +356,17 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                           {categoryIcons[cat.id] || <Trophy className="w-3.5 h-3.5" />}
                         </div>
                         {hasVoted && (
-                          <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-0.5">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5">
                             <Check className="w-3 h-3" /> Selected
                           </span>
                         )}
                       </div>
 
                       <div>
-                        <h4 className={`text-xs font-black ${isSelected ? 'text-purple-900 dark:text-white' : 'text-slate-800 dark:text-slate-300'}`}>
+                        <h4 className={`text-xs font-bold ${isSelected ? 'text-purple-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                           {cat.title}
                         </h4>
-                        <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-1 mt-0.5 font-medium">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                           {cat.desc}
                         </p>
                       </div>
@@ -363,17 +377,17 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
               {/* Active Category Banner */}
               {currentCategoryObj && (
-                <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-purple-200 dark:border-purple-500/30 flex items-center justify-between text-xs">
+                <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-amber-100 dark:bg-amber-400/20 text-amber-800 dark:text-amber-300 rounded-lg">
+                    <div className="p-2 bg-amber-400/20 text-amber-700 dark:text-amber-300 rounded-lg">
                       {categoryIcons[currentCategoryObj.id] || <Trophy className="w-4 h-4" />}
                     </div>
                     <div>
-                      <div className="text-[10px] text-amber-700 dark:text-amber-400 font-black uppercase">Active Award Category</div>
-                      <div className="text-sm font-black text-slate-900 dark:text-white">{currentCategoryObj.title}</div>
+                      <div className="text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase">Active Award Category</div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">{currentCategoryObj.title}</div>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">1 vote allowed</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">1 vote allowed</span>
                 </div>
               )}
 
@@ -385,7 +399,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                   placeholder="Search faculty name or designation..."
                   value={teacherSearch}
                   onChange={(e) => setTeacherSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:outline-none focus:border-amber-500 shadow-inner"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -398,14 +412,14 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                     <div
                       key={teacher.id}
                       onClick={() => handleSelectVote(teacher.id)}
-                      className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                         isSelectedForActiveCat
-                          ? 'bg-purple-100 dark:bg-purple-600/30 border-purple-500 dark:border-amber-400 shadow-lg scale-[1.02]'
-                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-purple-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          ? 'bg-purple-100 dark:bg-purple-600/30 border-purple-500 dark:border-amber-400 shadow-md scale-[1.02]'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-purple-300 dark:hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0 border border-slate-300 dark:border-white/10">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-white/10">
                           <img
                             src={teacher.avatar}
                             alt={teacher.name}
@@ -417,18 +431,18 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                           />
                         </div>
                         <div>
-                          <h4 className="text-xs font-black text-slate-900 dark:text-white line-clamp-1">{teacher.name}</h4>
-                          <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-1 font-medium">{teacher.designation}</p>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{teacher.name}</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">{teacher.designation}</p>
                         </div>
                       </div>
 
                       <div className="shrink-0">
                         {isSelectedForActiveCat ? (
-                          <div className="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow-sm">
+                          <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shadow-sm">
                             <Check className="w-4 h-4" />
                           </div>
                         ) : (
-                          <div className="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-white/20 hover:border-purple-500"></div>
+                          <div className="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-white/20 hover:border-purple-400"></div>
                         )}
                       </div>
                     </div>
@@ -439,23 +453,23 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
           )}
 
           {/* 100% Anonymous "Crazy Things About Faculty" Section */}
-          <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-2xl space-y-5">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-5 bg-white dark:bg-slate-950">
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-pink-100 dark:bg-pink-500/20 text-pink-700 dark:text-pink-400 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center font-black text-xs">
                   3
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-pink-500 dark:text-pink-400" />
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-pink-500" />
                     <span>"Crazy Things About Faculty" (100% Anonymous)</span>
                   </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Share unforgettable lab moments, hilarious classroom dialogues, or teacher tributes.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Share unforgettable lab moments, hilarious classroom dialogues, or teacher tributes.</p>
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-pink-100 dark:bg-pink-500/10 border border-pink-300 dark:border-pink-500/20 text-pink-800 dark:text-pink-300 text-xs font-black self-start sm:self-auto">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-700 dark:text-pink-300 text-xs font-bold self-start sm:self-auto">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>100% Anonymous</span>
               </div>
@@ -463,19 +477,19 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-300 mb-1.5">
-                  Select Faculty Member <span className="text-xs font-normal text-slate-500 dark:text-slate-400">(Optional)</span>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Select Faculty Member <span className="text-xs font-normal text-slate-500">(Optional)</span>
                 </label>
                 <select
                   value={storyTeacher}
                   onChange={(e) => setStoryTeacher(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-pink-500 transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-white/10 text-sm focus:outline-none focus:border-pink-400 transition-colors"
                 >
-                  <option value="All CSE Faculty Members" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                  <option value="All CSE Faculty Members">
                     🌟 All CSE Faculty Members
                   </option>
                   {teachers.map(t => (
-                    <option key={t.id} value={t.name} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                    <option key={t.id} value={t.name}>
                       {t.name} ({t.designation})
                     </option>
                   ))}
@@ -483,16 +497,16 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
                   <span>Share Your Crazy Memory / Funny Incident</span>
-                  <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400">Your name will never be displayed</span>
+                  <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 font-semibold">Your name will never be displayed</span>
                 </label>
                 <textarea
                   rows={3}
                   placeholder="e.g. Share a funny lab incident, Sir's famous dialogue in Section A/B/C/D, or an unforgettable CSE lecture moment..."
                   value={storyText}
                   onChange={(e) => setStoryText(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-300 dark:border-white/10 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-pink-500 transition-colors resize-none shadow-inner"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-white/10 text-sm focus:outline-none focus:border-pink-400 transition-colors resize-none shadow-inner"
                 />
               </div>
             </div>
@@ -503,10 +517,10 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
           <div className="pt-2">
             <button
               onClick={handleSubmitVotesAndStories}
-              disabled={loading || (alreadyVoted && !storyText.trim())}
+              disabled={loading || !rollValidation.isValid || (alreadyVoted && !storyText.trim())}
               className={`w-full py-4 sm:py-5 px-8 rounded-2xl font-black text-base sm:text-lg shadow-2xl transition-all flex items-center justify-center gap-3 touch-press ${
-                alreadyVoted && !storyText.trim()
-                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 border border-slate-300 dark:border-white/10 cursor-not-allowed'
+                !rollValidation.isValid || (alreadyVoted && !storyText.trim())
+                  ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed'
                   : 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-pink-500 text-white shadow-purple-500/30 hover:scale-[1.01]'
               }`}
             >
@@ -520,7 +534,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 ) : (
                   <>
                     <Lock className="w-5 h-5 text-amber-400" />
-                    <span>Secret Ballot Already Submitted for {voterRoll}</span>
+                    <span>Secret Ballot Already Submitted for {cleanRoll}</span>
                   </>
                 )
               ) : (
@@ -538,43 +552,43 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
         /* ========================================================================= */
         /* CASE 2: SUCCESS CELEBRATION SCREEN */
         /* ========================================================================= */
-        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border-2 border-purple-400 bg-white dark:bg-slate-950/80 shadow-2xl text-center space-y-6 max-w-2xl mx-auto animate-fadeIn text-slate-900 dark:text-white">
+        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border-2 border-purple-500/40 shadow-2xl text-center space-y-6 max-w-2xl mx-auto animate-fadeIn bg-white dark:bg-slate-950">
           
           <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-purple-500 via-pink-500 to-amber-400 flex items-center justify-center shadow-xl shadow-purple-500/25 animate-float-soft text-white">
             <Trophy className="w-10 h-10" />
           </div>
 
           <div>
-            <span className="text-[10px] uppercase font-mono font-black tracking-widest bg-purple-100 dark:bg-purple-400/20 text-purple-800 dark:text-purple-300 px-3.5 py-1 rounded-full border border-purple-300/40 inline-block mb-2 shadow-sm">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-widest bg-purple-500/20 text-purple-700 dark:text-purple-300 px-3.5 py-1 rounded-full border border-purple-400/30 inline-block mb-2">
               CONFIDENTIAL VOTES RECORDED
             </span>
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
               Thank You, Voter ({successData.voterRoll})!
             </h3>
             <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md mx-auto mt-2 font-medium">
-              Your secret ballot votes across <span className="text-amber-600 dark:text-amber-400 font-black">{successData.votesCount} categories</span> have been securely saved.
+              Your secret ballot votes across <span className="text-amber-600 dark:text-amber-400 font-bold">{successData.votesCount} categories</span> have been securely saved.
               {successData.hasStory && ' Your anonymous classroom story has been submitted for moderation!'}
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-200 dark:border-white/10 text-left space-y-3 text-xs shadow-inner">
-            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-left space-y-3 text-xs shadow-inner">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
               <span className="text-slate-600 dark:text-slate-400 font-bold">JNTU Roll Number</span>
-              <span className="text-amber-700 dark:text-amber-300 font-mono font-black">{successData.voterRoll}</span>
+              <span className="text-amber-700 dark:text-amber-300 font-mono font-bold">{successData.voterRoll}</span>
             </div>
-            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
               <span className="text-slate-600 dark:text-slate-400 font-bold">Award Categories Voted</span>
-              <span className="text-emerald-700 dark:text-emerald-400 font-black">{successData.votesCount} Categories</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">{successData.votesCount} Categories</span>
             </div>
             {successData.hasStory && (
-              <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+              <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span className="text-slate-600 dark:text-slate-400 font-bold">Crazy Story Submitted</span>
-                <span className="text-pink-700 dark:text-pink-400 font-black">100% Anonymous (About {successData.storyTeacher})</span>
+                <span className="text-pink-600 dark:text-pink-400 font-bold">100% Anonymous (About {successData.storyTeacher})</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-slate-600 dark:text-slate-400 font-bold">Award Ceremony</span>
-              <span className="text-slate-800 dark:text-slate-200 font-semibold">Grand Winner Reveal Live on Stage!</span>
+              <span className="text-slate-800 dark:text-slate-200 font-medium">Grand Winner Reveal Live on Stage!</span>
             </div>
           </div>
 
@@ -584,7 +598,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 if (setActiveTab) setActiveTab('vote');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 hover:scale-105 transition-all"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 hover:scale-105 transition-all touch-press"
             >
               <Eye className="w-4 h-4" />
               <span>View Award Reveal Ceremony</span>
@@ -595,7 +609,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 if (setActiveTab) setActiveTab('memories');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-transparent text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md touch-press"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Read Crazy Stories Wall</span>

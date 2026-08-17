@@ -8,11 +8,12 @@ import {
   CheckCircle2,
   Info,
   Lock,
-  RefreshCw
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import { api } from '../utils/api';
 import { fireFestiveConfetti } from '../utils/confetti';
-import { normalizeRollNumber } from '../utils/rollNumber';
+import { cleanJntuRoll, validateJntuRoll, JNTU_ROLL_LENGTH } from '../utils/jntuValidation';
 
 export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,15 +23,15 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
   // Automatically lock the exact amount chosen in the previous screen (Min ₹50)
   const lockedAmount = Math.max(50, Math.floor(Number(initialAmount) || 50));
+  const rawRoll = studentData?.rollNumber || '';
+  const cleanRoll = cleanJntuRoll(rawRoll).slice(0, JNTU_ROLL_LENGTH);
 
   const razorpayButtonRef = useRef(null);
-
   const [alreadyPaidData, setAlreadyPaidData] = useState(null);
 
   // Check if roll number has already paid
   useEffect(() => {
-    const cleanRoll = normalizeRollNumber(studentData?.rollNumber);
-    if (cleanRoll) {
+    if (cleanRoll.length === JNTU_ROLL_LENGTH) {
       api.checkRegistration(cleanRoll)
         .then(res => {
           if (res.alreadyRegistered) {
@@ -41,7 +42,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         })
         .catch(err => console.warn('Check roll modal notice:', err));
     }
-  }, [studentData?.rollNumber]);
+  }, [cleanRoll]);
 
   // 1. Embed official Razorpay Payment Button (pl_TQWuIlJaMefrde)
   useEffect(() => {
@@ -78,8 +79,8 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       const res = await api.verifyRazorpayLiveStatus({
         email: studentData?.email || '',
         phone: studentData?.phone || '',
-        rollNumber: studentData?.rollNumber || '',
-        name: studentData?.name || '',
+        rollNumber: cleanRoll,
+        name: studentData?.name || `Student (${cleanRoll})`,
         amount: lockedAmount
       });
 
@@ -132,7 +133,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
       window.removeEventListener('message', handleRazorpayMessage);
       window.removeEventListener('focus', handleWindowFocus);
     };
-  }, [paymentInitiated, isProcessing, studentData, lockedAmount]);
+  }, [paymentInitiated, isProcessing, cleanRoll, lockedAmount]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-xl animate-fadeIn">
@@ -169,7 +170,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/20 transition-colors border border-white/20"
+            className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/20 transition-colors border border-white/20 touch-press"
             title="Cancel"
           >
             <X className="w-5 h-5" />
@@ -194,10 +195,10 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
               <span className="text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1.5 text-xs sm:text-sm">
                 <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                JNTU Roll Number
+                JNTU Roll Number (10 Digits)
               </span>
               <span className="font-mono font-black text-slate-950 text-sm sm:text-base bg-amber-400 px-3 py-1 rounded-lg border border-amber-500 shadow-sm">
-                {studentData?.rollNumber}
+                {cleanRoll}
               </span>
             </div>
 
@@ -227,7 +228,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               </div>
               <h4 className="text-lg font-black text-slate-900 dark:text-white">Payment Already Received</h4>
               <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-semibold">
-                This JNTU Roll Number (<strong className="text-amber-700 dark:text-amber-300 font-mono">{studentData?.rollNumber}</strong>) already has a verified celebration contribution on record. Multiple payments are not permitted.
+                This JNTU Roll Number (<strong className="text-amber-700 dark:text-amber-300 font-mono">{cleanRoll}</strong>) already has a verified celebration contribution on record. Multiple payments are strictly prohibited.
               </p>
               <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 text-xs font-mono text-emerald-800 dark:text-emerald-300 font-bold">
                 Receipt: {alreadyPaidData.acknowledgementNumber || alreadyPaidData.ticketNumber} • Paid: ₹{alreadyPaidData.amount || alreadyPaidData.payment?.amount || 50}
@@ -235,7 +236,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition-all shadow-md"
+                className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition-all shadow-md touch-press"
               >
                 Close & Return
               </button>
@@ -285,7 +286,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                   <button
                     type="button"
                     onClick={() => verifyWithLiveServer(true)}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105 touch-press"
                   >
                     <RefreshCw className="w-4 h-4" />
                     <span>Paid on Razorpay? Click to Verify & Get Pass</span>

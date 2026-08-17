@@ -15,13 +15,11 @@ import {
   Code,
   ShieldCheck,
   Check,
-  Copy,
-  Heart,
-  Award
+  Copy
 } from 'lucide-react';
 import { fireFestiveConfetti } from '../utils/confetti';
 
-export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
+export const AcknowledgementModal = ({ submission, onClose }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const receiptRef = useRef(null);
@@ -29,16 +27,17 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
   useEffect(() => {
     if (submission) {
       fireFestiveConfetti();
+      const receiptNum = submission.acknowledgementNumber || submission.receiptNumber || submission.ticketNumber || `GMRIT-CSE-ACK-${submission.id || Date.now()}`;
       const qrData = JSON.stringify({
-        ackNo: submission.acknowledgementNumber || submission.ticketNumber || `GMRIT-CSE-ACK-${submission.id}`,
-        name: submission.name,
+        ackNo: receiptNum,
+        name: submission.name || `Student (${submission.rollNumber})`,
         roll: submission.rollNumber,
         dept: 'CSE',
-        year: submission.year,
-        section: submission.section,
-        amount: submission.payment?.amount || 50,
-        status: submission.payment?.status || 'verified',
-        txn: submission.payment?.transactionId || 'N/A',
+        year: submission.year || 'CSE',
+        section: submission.section || 'CSE',
+        amount: submission.payment?.amount || submission.amount || 50,
+        status: submission.payment?.status || submission.paymentStatus || 'verified',
+        txn: submission.payment?.transactionId || submission.transactionId || 'Verified',
         event: 'TeachersDay2026_CSE_Celebration'
       });
 
@@ -51,7 +50,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
         },
       })
         .then((url) => setQrCodeUrl(url))
-        .catch((err) => console.error(err));
+        .catch((err) => console.error('QR code generation error:', err));
     }
   }, [submission]);
 
@@ -61,14 +60,16 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
     window.print();
   };
 
+  const receiptId = submission.acknowledgementNumber || submission.receiptNumber || submission.ticketNumber || `GMRIT-CSE-ACK-${submission.id || Date.now()}`;
+  const amountPaid = submission.payment?.amount || submission.amount || 50;
+  const transactionId = submission.payment?.transactionId || submission.transactionId || 'Verified';
+
   const handleCopyReceipt = () => {
-    const text = `🎓 CSE Teachers' Day 2026 Contribution Acknowledgement\nReceipt No: ${submission.acknowledgementNumber || submission.ticketNumber}\nStudent: ${submission.name} (${submission.rollNumber})\nAmount: ₹${submission.payment?.amount || 50} (PAID & VERIFIED)\nDept: Computer Science & Engineering - GMRIT`;
+    const text = `🎓 CSE Teachers' Day 2026 Contribution Acknowledgement\nReceipt No: ${receiptId}\nStudent: ${submission.name || submission.rollNumber} (${submission.rollNumber})\nAmount: ₹${amountPaid} (PAID & VERIFIED)\nDept: Computer Science & Engineering - GMRIT`;
     navigator.clipboard.writeText(text);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
-
-  const receiptId = submission.acknowledgementNumber || submission.receiptNumber || submission.ticketNumber || `GMRIT-CSE-ACK-${submission.id}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-md overflow-y-auto animate-fadeIn">
@@ -79,7 +80,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
         <div className="bg-slate-950 p-4 sm:p-6 text-white text-center relative border-b border-emerald-500/30">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white rounded-full transition-colors border border-white/15"
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white rounded-full transition-colors border border-white/15 touch-press"
             title="Close"
           >
             <X className="w-5 h-5" />
@@ -127,7 +128,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
 
               <div className="text-left sm:text-right">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-mono font-bold">Acknowledgement No</span>
-                <span className="text-xs font-mono font-black text-amber-600 dark:text-amber-400 select-all">
+                <span className="text-xs font-mono font-black text-amber-700 dark:text-amber-400 select-all">
                   {receiptId}
                 </span>
               </div>
@@ -137,24 +138,24 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold">Student Name</span>
-                <span className="font-bold text-slate-900 dark:text-white text-sm truncate block mt-0.5">{submission.name}</span>
+                <span className="font-bold text-slate-900 dark:text-white text-sm truncate block mt-0.5">{submission.name || `Student (${submission.rollNumber})`}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold">JNTU Roll Number</span>
-                <span className="font-mono font-black text-slate-950 bg-amber-400 px-2 py-0.5 rounded text-xs inline-block mt-0.5">{submission.rollNumber}</span>
+                <span className="font-mono font-black text-slate-950 bg-amber-400 px-2 py-0.5 rounded text-xs inline-block mt-0.5 shadow-sm">{submission.rollNumber}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold">Class & Section</span>
-                <span className="font-bold text-teal-800 dark:text-teal-300 block mt-0.5">{submission.year} • {submission.section}</span>
+                <span className="font-bold text-teal-800 dark:text-teal-300 block mt-0.5">{submission.year || 'CSE'} • {submission.section || 'CSE'}</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border-2 border-emerald-400 dark:border-emerald-500/40">
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border-2 border-emerald-500/40">
                 <span className="text-[10px] text-emerald-800 dark:text-emerald-300 block uppercase font-bold">Contribution Status</span>
                 <span className="font-black text-emerald-700 dark:text-emerald-300 text-sm block mt-0.5 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  ₹{submission.payment?.amount || 50}.00 (PAID)
+                  ₹{amountPaid}.00 (PAID)
                 </span>
               </div>
             </div>
@@ -167,7 +168,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
                   <span>Payment Gateway: <strong className="text-slate-900 dark:text-white">Official Razorpay Gateway</strong></span>
                 </div>
                 <div className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
-                  Payment Ref: <span className="text-amber-700 dark:text-amber-300 font-bold select-all">{submission.payment?.transactionId || 'Verified'}</span>
+                  Payment Ref: <span className="text-amber-700 dark:text-amber-300 font-bold select-all">{transactionId}</span>
                 </div>
               </div>
 
@@ -215,7 +216,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
               <button
                 type="button"
                 onClick={handlePrint}
-                className="px-4 py-2.5 rounded-xl bg-purple-100 dark:bg-purple-600/30 hover:bg-purple-200 dark:hover:bg-purple-600/50 border border-purple-300 dark:border-purple-500/40 text-purple-900 dark:text-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                className="px-4 py-2.5 rounded-xl bg-purple-100 dark:bg-purple-600/30 hover:bg-purple-200 dark:hover:bg-purple-600/50 border border-purple-300 dark:border-purple-500/40 text-purple-900 dark:text-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm touch-press"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print / Save Slip</span>
@@ -224,7 +225,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
               <button
                 type="button"
                 onClick={handleCopyReceipt}
-                className="px-3.5 py-2.5 rounded-xl bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                className="px-3.5 py-2.5 rounded-xl bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all touch-press"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedLink ? 'Copied Details!' : 'Copy Info'}</span>
@@ -234,7 +235,7 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg transition-all"
+              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg transition-all touch-press"
             >
               Done & Close
             </button>
@@ -247,4 +248,3 @@ export const AcknowledgementModal = ({ submission, onClose, onDelete }) => {
     </div>
   );
 };
-

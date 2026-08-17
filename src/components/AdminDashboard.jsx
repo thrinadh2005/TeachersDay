@@ -487,13 +487,13 @@ export const AdminDashboard = () => {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto my-16 px-4">
-        <div className="glass-card-glow rounded-3xl p-8 text-center space-y-6 bg-white dark:bg-slate-950/90 border-2 border-slate-200 dark:border-white/10 shadow-2xl">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 flex items-center justify-center">
+        <div className="glass-card-glow rounded-3xl p-8 text-center space-y-6 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 shadow-2xl">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center">
             <ShieldCheck className="w-8 h-8" />
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 mb-1">
+            <div className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-1">
               <Code className="w-3.5 h-3.5" /> CSE DEPARTMENT 2026
             </div>
             <h2 className="text-2xl font-black text-slate-900 dark:text-white font-display">Committee Portal</h2>
@@ -501,7 +501,7 @@ export const AdminDashboard = () => {
           </div>
 
           {authError && (
-            <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-500/10 border border-rose-300 dark:border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs font-bold">
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs font-semibold">
               {authError}
             </div>
           )}
@@ -514,16 +514,16 @@ export const AdminDashboard = () => {
                 placeholder="Enter Security PIN"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border-2 border-slate-300 dark:border-white/10 text-slate-950 dark:text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-purple-500 shadow-inner"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-white/10 font-mono text-center tracking-widest text-lg focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-sm shadow-lg transition-all"
+              disabled={loading || !pinInput}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 touch-press"
             >
-              {loading ? 'Authenticating...' : 'Access Dashboard'}
+              {loading ? 'Authenticating...' : 'Unlock Management Portal'}
             </button>
           </form>
         </div>
@@ -557,17 +557,17 @@ export const AdminDashboard = () => {
   );
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn text-slate-900 dark:text-slate-100">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 text-xs font-bold uppercase">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
               CSE Department 2nd & 3rd Year (Sections 2A–2D, 3A–3D)
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display mt-1">
+          <h2 className="text-2xl sm:text-3xl font-black text-white font-display mt-1">
             CSE Teachers' Day 2026 Control Center
           </h2>
         </div>
@@ -578,17 +578,17 @@ export const AdminDashboard = () => {
             onClick={handleToggleReveal}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${isRevealed
                 ? 'bg-amber-500 text-slate-950 hover:bg-amber-400'
-                : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-white/10 hover:bg-slate-300'
+                : 'bg-slate-800 text-slate-300 border border-white/10 hover:bg-slate-700'
               }`}
             title="Toggle public disclosure of voting results"
           >
-            {isRevealed ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4 text-amber-500 dark:text-amber-400" />}
+            {isRevealed ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4 text-amber-400" />}
             <span>{isRevealed ? 'Public Results: REVEALED' : 'Public Results: HIDDEN (Secret)'}</span>
           </button>
 
           <button
             onClick={() => loadData(adminPin)}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
+            className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 transition-colors"
             title="Refresh Data"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -605,7 +605,7 @@ export const AdminDashboard = () => {
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-slate-700 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300 text-xs font-semibold transition-colors border border-slate-300 dark:border-transparent"
+            className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-900/40 hover:text-rose-300 text-slate-400 text-xs font-semibold transition-colors"
           >
             Logout
           </button>
@@ -613,47 +613,47 @@ export const AdminDashboard = () => {
       </div>
 
       {notification && (
-        <div className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between ${notification.type === 'success' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30' : 'bg-rose-100 dark:bg-rose-500/10 text-rose-900 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30'
+        <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between ${notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
           }`}>
           <span>{notification.message}</span>
-          <button onClick={() => setNotification(null)} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">✕</button>
+          <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-white">✕</button>
         </div>
       )}
 
       {/* KPI METRICS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-        <div className="glass-card p-5 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-sm">
-          <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-white/10">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">CSE Registrations</span>
-            <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <Users className="w-4 h-4 text-purple-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
+          <div className="text-2xl sm:text-3xl font-black text-white font-display">
             {overview?.totalSubmissions || 0}
           </div>
-          <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">2nd & 3rd Years (A-D)</span>
+          <span className="text-[11px] text-slate-400">2nd, 3rd & 4th Years (A-D)</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-sm">
-          <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-white/10">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Stage Speakers</span>
-            <Mic className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <Mic className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-display">
+          <div className="text-2xl sm:text-3xl font-black text-amber-400 font-display">
             {overview?.speakersCount || registeredSpeakers.length}
           </div>
-          <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">Registered on stage</span>
+          <span className="text-[11px] text-amber-300">Registered on stage</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-sm">
-          <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-white/10">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Funds Raised (₹)</span>
-            <Coins className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <Coins className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-display">
             ₹{overview?.totalFundsCollected || 0}
           </div>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+          <span className="text-[11px] text-emerald-300">
             {overview?.verifiedPayments || 0} Verified Contributions
           </span>
         </div>

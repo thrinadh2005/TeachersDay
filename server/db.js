@@ -8,29 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, 'data.json');
 
-export function normalizeRollNumber(raw) {
-  if (!raw) return '';
-  let roll = String(raw).trim().toUpperCase().replace(/\s+/g, '');
-  roll = roll.replace(/A[O|o]5/g, 'A05');
-  roll = roll.replace(/A[O|o](\d)/g, 'A0$1');
-
-  if (roll.length === 10) {
-    const chars = roll.split('');
-    if (chars[0] === 'O') chars[0] = '0';
-    if (chars[1] === 'O') chars[1] = '0';
-    if (chars[2] === 'O') chars[2] = '0';
-    if (chars[3] === 'O') chars[3] = '0';
-    if (chars[4] === 'O') chars[4] = '0';
-    if (chars[6] === 'O') chars[6] = '0';
-    if (chars[7] === 'O') chars[7] = '0';
-    if (chars[8] === 'O' && /\d/.test(chars[9])) chars[8] = '0';
-    if (chars[8] === 'O' && chars[9] === 'O') { chars[8] = '0'; chars[9] = '0'; }
-    if (/\d/.test(chars[8]) && chars[9] === 'O') chars[9] = '0';
-    roll = chars.join('');
-  }
-  return roll.slice(0, 10);
-}
-
 class Database {
   constructor() {
     this.data = {
@@ -228,9 +205,9 @@ class Database {
 
   // Submit full secret ballot with strict 1-time voting rule
   submitBallot(voterRoll, votes = {}) {
-    const roll = normalizeRollNumber(voterRoll);
+    const roll = (voterRoll || '').trim().toUpperCase();
     if (!roll) {
-      return { success: false, error: 'Please enter a valid 10-digit JNTU Roll Number to cast your vote.' };
+      return { success: false, error: 'Please enter a valid JNTU Roll Number to cast your vote.' };
     }
 
     // STRICT 1-TIME VOTE CHECK: If roll has already voted, reject immediately
@@ -352,8 +329,8 @@ class Database {
 
   getSubmissionByRoll(rollNumber) {
     if (!rollNumber) return null;
-    const roll = normalizeRollNumber(rollNumber);
-    return this.data.submissions.find(s => normalizeRollNumber(s.rollNumber) === roll) || null;
+    const roll = (rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    return this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '') === roll) || null;
   }
 
   addAnonymousAnecdote(payload) {
@@ -391,10 +368,10 @@ class Database {
   }
 
   addSubmission(payload) {
-    const roll = normalizeRollNumber(payload.rollNumber);
+    const roll = (payload.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '');
     
-    // Strict JNTU Roll Number Uniqueness Check (normalized)
-    const existing = this.getSubmissionByRoll(roll);
+    // Strict JNTU Roll Number Uniqueness Check
+    const existing = this.data.submissions.find(s => (s.rollNumber || '').trim().toUpperCase().replace(/\s+/g, '') === roll);
     if (existing) {
       return { 
         success: false, 
