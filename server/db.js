@@ -307,6 +307,49 @@ class Database {
     return this.submitBallot(roll, { [categoryId]: teacherId });
   }
 
+  // Reset all faculty votes and voter records to zero
+  async resetAllVotes() {
+    // 1. Reset in-memory voters registry
+    this.data.voters = {};
+
+    // 2. Reset all votes on faculty members to zero
+    this.data.teachers = this.data.teachers.map(t => ({
+      ...t,
+      votes: 0,
+      totalVotes: 0,
+      categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 }
+    }));
+
+    // 3. Save to local data.json
+    this.saveLocal();
+
+    // 4. Reset in MongoDB Atlas Cloud Database if connected
+    const mongoDb = await this.getMongoDb();
+    if (mongoDb) {
+      try {
+        await mongoDb.collection('voters').deleteMany({});
+        await mongoDb.collection('teachers').updateMany(
+          {},
+          {
+            $set: {
+              votes: 0,
+              totalVotes: 0,
+              categoryVotes: { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 }
+            }
+          }
+        );
+        console.log('🍃 Reset all votes and voters to ZERO in MongoDB Atlas!');
+      } catch (err) {
+        console.error('Error resetting MongoDB Atlas votes:', err);
+      }
+    }
+
+    return { 
+      success: true, 
+      message: 'All voting tallies and voter records have been successfully reset to ZERO.' 
+    };
+  }
+
   // Zero-Knowledge Voter Status (Never exposes who student voted for to protect privacy)
   getStudentVoteHistory(voterRoll) {
     const roll = (voterRoll || '').trim().toUpperCase();

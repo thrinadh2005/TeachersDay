@@ -820,6 +820,15 @@ app.get('/api/admin/teachers-results', checkAdminAuth, (req, res) => {
   }
 });
 
+app.post('/api/admin/reset-votes', checkAdminAuth, async (req, res) => {
+  try {
+    const result = await db.resetAllVotes();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/admin/toggle-reveal-results', checkAdminAuth, (req, res) => {
   try {
     const { reveal } = req.body;
