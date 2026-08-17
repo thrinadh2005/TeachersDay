@@ -309,6 +309,56 @@ export const api = {
     return data;
   },
 
+  async resetAllVotes(pin) {
+    const res = await fetch(`${API_BASE}/admin/reset-votes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': pin
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to reset all votes and voters');
+    return data;
+  },
+
+  async resetSingleVoter(pin, roll) {
+    const res = await fetch(`${API_BASE}/admin/reset-voter`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': pin
+      },
+      body: JSON.stringify({ roll })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to clear voter lock');
+    return data;
+  },
+
+  clearLocalVoterCache(roll) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      if (roll) {
+        const clean = String(roll).trim().toUpperCase();
+        localStorage.removeItem(`td_voted_roll_${clean}`);
+        if (localStorage.getItem('td_voted_roll') === clean) {
+          localStorage.removeItem('td_voted_roll');
+        }
+      }
+      // Also scan and remove any td_voted_roll_* keys if no roll provided
+      if (!roll) {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('td_voted_roll')) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Error clearing local voter cache:', e);
+    }
+  },
+
   getExportCsvUrl(pin, filters = {}) {
     const params = new URLSearchParams({ pin });
     if (filters.year && filters.year !== 'ALL') params.append('year', filters.year);

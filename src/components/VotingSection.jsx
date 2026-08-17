@@ -84,15 +84,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
   // Continuous Verification: Check if roll number has already voted
   useEffect(() => {
-    if (cleanRoll.length === JNTU_ROLL_LENGTH) {
-      // 1. Instant client-side verification
-      const localVoted = localStorage.getItem(`td_voted_roll_${cleanRoll}`);
-      if (localVoted === 'true') {
-        setAlreadyVoted(true);
-        setError(`JNTU Roll Number "${cleanRoll}" has already cast their secret ballot. As per official rules, multiple voting is strictly prohibited.`);
-      }
-
-      // 2. Authoritative server verification
+    if (cleanRoll.length === JNTU_ROLL_LENGTH && rollValidation.isValid) {
       setCheckingVoterStatus(true);
       api.getVoterHistory(cleanRoll)
         .then(res => {
@@ -101,25 +93,46 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
             try {
               localStorage.setItem(`td_voted_roll_${cleanRoll}`, 'true');
             } catch (e) {}
-            setError(`JNTU Roll Number "${cleanRoll}" has already voted. Each student is strictly permitted to vote only ONCE.`);
-          } else if (localVoted !== 'true') {
+            setError(`JNTU Roll Number "${cleanRoll}" has already cast their secret ballot. As per official rules, multiple voting is strictly prohibited.`);
+          } else {
+            // Authoritative server state: Student has NOT voted (or votes/voters were reset)
+            setAlreadyVoted(false);
+            setError(null);
+            try {
+              localStorage.removeItem(`td_voted_roll_${cleanRoll}`);
+              if (localStorage.getItem('td_voted_roll') === cleanRoll) {
+                localStorage.removeItem('td_voted_roll');
+              }
+            } catch (e) {}
+          }
+        })
+        .catch(err => {
+          console.warn('Voter status check note:', err);
+          // Only fallback to local storage if offline/network error
+          const localVoted = localStorage.getItem(`td_voted_roll_${cleanRoll}`);
+          if (localVoted === 'true') {
+            setAlreadyVoted(true);
+            setError(`JNTU Roll Number "${cleanRoll}" has already cast their secret ballot. As per official rules, multiple voting is strictly prohibited.`);
+          } else {
             setAlreadyVoted(false);
             setError(null);
           }
         })
-        .catch(err => console.warn('Voter status check note:', err))
         .finally(() => setCheckingVoterStatus(false));
     } else {
       setAlreadyVoted(false);
       setError(null);
     }
-  }, [cleanRoll]);
+  }, [cleanRoll, rollValidation.isValid]);
 
   const handleRollChange = (e) => {
     const raw = e.target.value;
     const sanitized = cleanJntuRoll(raw).slice(0, JNTU_ROLL_LENGTH);
     setVoterRoll(sanitized);
     setError(null);
+    if (sanitized.length < JNTU_ROLL_LENGTH) {
+      setAlreadyVoted(false);
+    }
   };
 
   const handleSelectVote = (teacherId) => {

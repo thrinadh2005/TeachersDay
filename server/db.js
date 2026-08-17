@@ -350,6 +350,35 @@ class Database {
     };
   }
 
+  // Remove/release voting lock for a specific roll number
+  async removeVoterRecord(voterRoll) {
+    const roll = (voterRoll || '').trim().toUpperCase().replace(/\s+/g, '');
+    if (!roll) {
+      return { success: false, error: 'Please provide a valid JNTU Roll Number to reset.' };
+    }
+
+    if (this.data.voters) {
+      delete this.data.voters[roll];
+    }
+    this.saveLocal();
+
+    const mongoDb = await this.getMongoDb();
+    if (mongoDb) {
+      try {
+        await mongoDb.collection('voters').deleteMany({ roll: roll });
+        await mongoDb.collection('voters').deleteMany({ rollNumber: roll });
+        await mongoDb.collection('voters').deleteMany({ roll: { $regex: new RegExp(`^${roll}$`, 'i') } });
+      } catch (err) {
+        console.error('Error deleting single voter from MongoDB Atlas:', err);
+      }
+    }
+
+    return { 
+      success: true, 
+      message: `Voter memory and lock for roll "${roll}" have been completely cleared. Student can vote again.` 
+    };
+  }
+
   // Zero-Knowledge Voter Status (Never exposes who student voted for to protect privacy)
   getStudentVoteHistory(voterRoll) {
     const roll = (voterRoll || '').trim().toUpperCase();
@@ -642,6 +671,7 @@ class Database {
       .reduce((sum, s) => sum + (Number(s.payment?.amount) || 50), 0);
     const pendingAnecdotes = this.data.anecdotes.filter(a => a.status === 'pending').length;
     const totalVotes = this.data.teachers.reduce((acc, t) => acc + (t.totalVotes || 0), 0);
+    const totalVoters = Object.keys(this.data.voters || {}).length;
     const speakersCount = this.data.submissions.filter(s => s.interestedInSpeaking === 'Yes').length;
 
     const categoryWinners = {};
@@ -665,6 +695,7 @@ class Database {
       pendingAnecdotes,
       totalAnecdotes: this.data.anecdotes.length,
       totalVotes,
+      totalVoters,
       speakersCount,
       totalFaculty: this.data.teachers.length,
       revealVotingResults: this.data.revealVotingResults || false,

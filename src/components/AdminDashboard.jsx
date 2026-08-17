@@ -41,11 +41,13 @@ import {
   FileSpreadsheet,
   Layers,
   Table,
-  FileText
+  FileText,
+  RotateCcw
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { api } from '../utils/api';
 import { AcknowledgementModal } from './AcknowledgementModal';
+import { cleanJntuRoll } from '../utils/jntuValidation';
 
 const defaultFacultyPresets = [
   { filename: "Dr_A_V_Ramana.jpg", path: "/faculty/Dr_A_V_Ramana.jpg", label: "Dr. A.V. Ramana" },
@@ -188,6 +190,8 @@ export const AdminDashboard = () => {
   });
   const [isSavingPaymentSettings, setIsSavingPaymentSettings] = useState(false);
   const [adminQrPreview, setAdminQrPreview] = useState('');
+  const [singleRollToReset, setSingleRollToReset] = useState('');
+  const [isResettingVotes, setIsResettingVotes] = useState(false);
 
   // Client-side Canvas Image Compression Helper (400x400 max, 85% JPEG)
   const compressImageFile = (file) => {
@@ -424,6 +428,55 @@ export const AdminDashboard = () => {
       }
     } catch (err) {
       setNotification({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleResetAllVotes = async () => {
+    const confirmation = window.prompt('⚠️ CAUTION: You are about to RESET ALL FACULTY VOTES AND CLEAR ALL VOTER RECORDS to 0!\n\nType "RESET" below to confirm and proceed:');
+    if (confirmation !== 'RESET') {
+      return;
+    }
+
+    try {
+      setIsResettingVotes(true);
+      const res = await api.resetAllVotes(adminPin);
+      if (res.success) {
+        api.clearLocalVoterCache();
+        setNotification({ type: 'success', message: '🎉 All faculty votes and voter records have been successfully reset to ZERO.' });
+        loadData(adminPin);
+      } else {
+        setNotification({ type: 'error', message: res.error || 'Failed to reset votes.' });
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message || 'Error resetting votes.' });
+    } finally {
+      setIsResettingVotes(false);
+    }
+  };
+
+  const handleResetSingleVoter = async (e) => {
+    if (e) e.preventDefault();
+    const clean = cleanJntuRoll(singleRollToReset);
+    if (!clean) {
+      setNotification({ type: 'error', message: 'Please enter a valid 10-digit JNTU Roll Number (e.g. 24341A0501).' });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.resetSingleVoter(adminPin, clean);
+      if (res.success) {
+        api.clearLocalVoterCache(clean);
+        setNotification({ type: 'success', message: `✅ Voter lock for roll "${clean}" successfully cleared! Student can now cast a ballot again.` });
+        setSingleRollToReset('');
+        loadData(adminPin);
+      } else {
+        setNotification({ type: 'error', message: res.error || 'Failed to clear voter lock.' });
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message || 'Error clearing voter lock.' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -666,7 +719,9 @@ export const AdminDashboard = () => {
           <div className="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400 font-display">
             {overview?.totalVotes || 0}
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">Cast across categories</span>
+          <span className="text-[11px] text-pink-700 dark:text-pink-300 font-medium">
+            {overview?.totalVoters ?? 0} Students cast ballots
+          </span>
         </div>
 
       </div>
@@ -793,6 +848,61 @@ export const AdminDashboard = () => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Admin Ballot & Voter Management Controls */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-slate-950 border border-purple-500/30 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/30">
+                <Vote className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <span>Secret Ballot Administration</span>
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">Admin Only</span>
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Total Votes Recorded: <strong className="text-amber-400">{overview?.totalVotes || 0}</strong> • Total Active Voters: <strong className="text-purple-300">{overview?.totalVoters ?? 0}</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              {/* Clear Single Voter Lock Form */}
+              <form onSubmit={handleResetSingleVoter} className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  maxLength={10}
+                  placeholder="Roll No. (e.g. 24341A0501)"
+                  value={singleRollToReset}
+                  onChange={(e) => setSingleRollToReset(e.target.value.toUpperCase())}
+                  className="px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400 w-full sm:w-48"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !singleRollToReset.trim()}
+                  className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold whitespace-nowrap shadow transition-all disabled:opacity-50 touch-press flex items-center gap-1.5"
+                  title="Unlock this student roll number so they can vote again"
+                >
+                  <Unlock className="w-3.5 h-3.5" />
+                  <span>Unlock Roll</span>
+                </button>
+              </form>
+
+              <div className="hidden sm:block h-6 w-px bg-white/10" />
+
+              {/* Reset All Votes & Voters */}
+              <button
+                type="button"
+                onClick={handleResetAllVotes}
+                disabled={isResettingVotes || loading}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all touch-press disabled:opacity-50"
+                title="Reset all faculty votes and clear all voter lock records to ZERO"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 ${isResettingVotes ? 'animate-spin' : ''}`} />
+                <span>Reset All Votes to ZERO</span>
+              </button>
+            </div>
           </div>
 
           {/* Search Faculty Results */}

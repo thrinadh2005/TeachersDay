@@ -829,6 +829,19 @@ app.post('/api/admin/reset-votes', checkAdminAuth, async (req, res) => {
   }
 });
 
+app.post('/api/admin/reset-voter', checkAdminAuth, async (req, res) => {
+  try {
+    const { roll } = req.body;
+    if (!roll) {
+      return res.status(400).json({ success: false, error: 'Roll number is required to reset voter status.' });
+    }
+    const result = await db.removeVoterRecord(roll);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/admin/toggle-reveal-results', checkAdminAuth, (req, res) => {
   try {
     const { reveal } = req.body;
