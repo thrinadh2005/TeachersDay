@@ -116,33 +116,33 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
   }, [paymentInitiated, isProcessing, studentData, lockedAmount]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-lg animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/95 backdrop-blur-xl animate-fadeIn">
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-lg glass-card rounded-3xl border border-emerald-500/40 shadow-2xl shadow-emerald-500/10 overflow-hidden animate-scaleUp max-h-[94vh] flex flex-col">
+      <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl border-2 border-emerald-400/60 shadow-2xl shadow-emerald-500/20 overflow-hidden animate-scaleUp max-h-[94vh] flex flex-col">
         
         {/* Animated Glow Top Bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-500 animate-pulse"></div>
+        <div className="h-2 w-full bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-400 animate-pulse"></div>
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-emerald-950/80 via-slate-950 to-indigo-950/80 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 border-b border-white/15 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20 shrink-0">
-              <ShieldCheck className="w-6 h-6 text-emerald-400 animate-pulse" />
+            <div className="relative w-11 h-11 rounded-2xl bg-emerald-500/25 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/30 shrink-0">
+              <ShieldCheck className="w-6 h-6 text-emerald-300 animate-pulse" />
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950 flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping"></span>
               </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
+                <h3 className="text-lg sm:text-xl font-black text-white font-display leading-tight">
                   ₹{lockedAmount} Contribution Pass
                 </h3>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[10px] font-black uppercase shadow-sm">
                   Official Gateway
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300 mt-0.5">
+              <p className="text-xs font-semibold text-emerald-200/90 mt-0.5">
                 Official Razorpay Live Checkout • GMRIT CSE
               </p>
             </div>
@@ -150,7 +150,7 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/15 transition-colors border border-white/10"
             title="Cancel"
           >
             <X className="w-5 h-5" />
@@ -158,77 +158,80 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
+        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto bg-slate-900/90">
           
           {paymentError && (
-            <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs animate-shake shadow-lg">
+            <div className="p-4 rounded-2xl bg-rose-500/20 border-2 border-rose-400 text-rose-100 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
               <div className="flex items-start gap-2.5">
-                <Info className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+                <Info className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
                 <span>{paymentError}</span>
               </div>
             </div>
           )}
 
-          {/* Student Details Summary Card */}
-          <div className="p-4 rounded-2xl bg-slate-950/90 border border-white/10 text-xs space-y-2.5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none"></div>
+          {/* Student Details Summary Card with High Contrast */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border-2 border-slate-700/80 text-xs space-y-3 relative overflow-hidden shadow-xl">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
             
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-purple-400" />
-                Student Name
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <span className="text-slate-200 font-bold flex items-center gap-1.5 text-xs sm:text-sm">
+                <User className="w-4 h-4 text-purple-400" />
+                JNTU Roll Number
               </span>
-              <span className="font-bold text-white text-sm">{studentData?.name}</span>
-            </div>
-
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-slate-400">JNTU Roll Number</span>
-              <span className="font-mono font-bold text-amber-300 text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              <span className="font-mono font-black text-slate-950 text-sm sm:text-base bg-amber-400 px-3 py-1 rounded-lg border border-amber-300 shadow-md">
                 {studentData?.rollNumber}
               </span>
             </div>
 
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-slate-400">Department & Class</span>
-              <span className="text-slate-200 font-semibold">{studentData?.year} • {studentData?.section} (CSE)</span>
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <span className="text-slate-200 font-bold text-xs sm:text-sm">Department & Class</span>
+              <span className="text-teal-200 font-bold text-xs sm:text-sm bg-teal-950/80 border border-teal-500/40 px-3 py-1 rounded-lg">
+                {studentData?.year} • {studentData?.section} (CSE)
+              </span>
             </div>
 
-            <div className="flex items-center justify-between pt-0.5">
-              <span className="text-slate-400 font-medium">Contribution Pass Amount</span>
-              <span className="font-black text-amber-400 text-lg font-display">₹{lockedAmount}.00</span>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider">
+                Contribution Pass Amount
+              </span>
+              <span className="font-black text-amber-300 text-xl sm:text-2xl font-mono drop-shadow-md">
+                ₹{lockedAmount}.00
+              </span>
             </div>
           </div>
 
-          {/* FINAL RAZORPAY PAYMENT BUTTON (STRICT VERIFICATION) */}
-          <div className="p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/40 space-y-4 shadow-2xl neon-pulse-emerald text-center relative overflow-hidden">
+          {/* FINAL RAZORPAY PAYMENT BUTTON (HIGH VISIBILITY BOX) */}
+          <div className="p-6 rounded-3xl bg-slate-950 border-2 border-emerald-400 space-y-4 shadow-2xl text-center relative overflow-hidden">
             
-            <div className="space-y-1">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-black uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 text-amber-400" />
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-md">
+                <Sparkles className="w-3.5 h-3.5 text-slate-950" />
                 Live Razorpay Checkout
               </span>
-              <p className="text-xs text-slate-300 pt-1 leading-relaxed">
-                Click the official Razorpay button below to pay ₹{lockedAmount}. Your Celebration Pass is <strong>strictly activated only after the payment is successfully captured by Razorpay.</strong>
+              <p className="text-xs sm:text-sm text-slate-100 pt-1 leading-relaxed font-medium">
+                Click the official Razorpay button below to pay <strong className="text-amber-300 font-black">₹{lockedAmount}</strong>. Your Celebration Pass is strictly activated only after the payment is successfully captured by Razorpay.
               </p>
             </div>
 
-            {/* Official Razorpay Pay Button Embed */}
+            {/* Official Razorpay Pay Button Embed Box */}
             <div 
               onClick={() => setPaymentInitiated(true)} 
-              className="py-4 flex flex-col items-center justify-center min-h-[64px]"
+              className="py-5 px-3 rounded-2xl bg-slate-900 border border-emerald-500/30 flex flex-col items-center justify-center min-h-[72px] shadow-inner"
             >
               {isProcessing ? (
                 <div className="flex flex-col items-center gap-2 text-emerald-300 py-2">
                   <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-                  <span className="text-xs font-bold animate-pulse">Connecting to Razorpay live servers to verify real payment...</span>
+                  <span className="text-xs sm:text-sm font-black text-emerald-300 animate-pulse">
+                    Connecting to Razorpay live servers to verify real payment...
+                  </span>
                 </div>
               ) : (
                 <>
                   <div ref={razorpayButtonRef} className="flex justify-center items-center scale-125 hover:scale-130 transition-transform"></div>
                   
                   {buttonLoading && (
-                    <div className="flex items-center gap-2 text-xs text-emerald-300">
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-300 font-bold">
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
                       <span>Loading Official Razorpay Gateway...</span>
                     </div>
                   )}
@@ -242,27 +245,25 @@ export const PaymentModal = ({ studentData, initialAmount = 50, onPaymentSuccess
                 <button
                   type="button"
                   onClick={() => verifyWithLiveServer(true)}
-                  className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 mx-auto transition-all"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
+                  <RefreshCw className="w-4 h-4" />
                   <span>Paid on Razorpay? Click to Verify & Get Pass</span>
                 </button>
               </div>
             )}
 
-            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-center">
-              <p className="text-[11px] text-emerald-200 flex items-center justify-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>256-Bit Encrypted Secure Checkout hosted directly by Razorpay</span>
-              </p>
+            {/* Security Assurance */}
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-center gap-2 text-xs text-emerald-300 font-bold">
+              <Lock className="w-4 h-4 text-emerald-400" />
+              <span>256-Bit Encrypted Secure Checkout hosted directly by Razorpay</span>
             </div>
 
           </div>
 
-          {/* Security Guarantee Footer */}
-          <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Official GMRIT CSE Teachers' Day 2026 Celebration Portal</span>
+          {/* Footer note */}
+          <div className="text-center text-xs text-slate-300 font-semibold pt-1">
+            Official GMRIT CSE Teachers' Day 2026 Celebration Portal
           </div>
 
         </div>
