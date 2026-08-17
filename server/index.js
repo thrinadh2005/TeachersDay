@@ -202,6 +202,8 @@ app.get('/api/teachers', (req, res) => {
   }
 });
 
+const activeVotingLocks = new Set();
+
 // POST /api/vote - Cast a category-specific vote with strict 1-time voting rule
 app.post('/api/vote', voteLimiter, (req, res) => {
   try {
@@ -218,11 +220,24 @@ app.post('/api/vote', voteLimiter, (req, res) => {
       return res.status(400).json({ success: false, error: 'Please select a faculty member to cast your vote.' });
     }
 
-    const result = db.voteTeacher(sanitizedTeacherId, cleanRoll, sanitizedCategoryId);
-    if (!result.success) {
-      return res.status(result.alreadyVoted ? 409 : 400).json(result);
+    if (activeVotingLocks.has(cleanRoll)) {
+      return res.status(409).json({
+        success: false,
+        alreadyVoted: true,
+        error: `A vote for JNTU Roll Number "${cleanRoll}" is already being processed. Multiple voting is strictly prohibited.`
+      });
     }
-    res.json(result);
+
+    activeVotingLocks.add(cleanRoll);
+    try {
+      const result = db.voteTeacher(sanitizedTeacherId, cleanRoll, sanitizedCategoryId);
+      if (!result.success) {
+        return res.status(result.alreadyVoted ? 409 : 400).json(result);
+      }
+      res.json(result);
+    } finally {
+      activeVotingLocks.delete(cleanRoll);
+    }
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to record vote.' });
   }
@@ -242,6 +257,14 @@ app.post('/api/vote-batch', voteLimiter, (req, res) => {
       return res.status(400).json({ success: false, error: 'Please select at least one faculty award category.' });
     }
 
+    if (activeVotingLocks.has(cleanRoll)) {
+      return res.status(409).json({
+        success: false,
+        alreadyVoted: true,
+        error: `A ballot submission for JNTU Roll Number "${cleanRoll}" is currently processing. Each student is strictly permitted to vote only ONCE.`
+      });
+    }
+
     const cleanVotes = {};
     for (const [catId, teacherId] of Object.entries(votes)) {
       if (teacherId) {
@@ -249,11 +272,16 @@ app.post('/api/vote-batch', voteLimiter, (req, res) => {
       }
     }
 
-    const result = db.submitBallot(cleanRoll, cleanVotes);
-    if (!result.success) {
-      return res.status(result.alreadyVoted ? 409 : 400).json(result);
+    activeVotingLocks.add(cleanRoll);
+    try {
+      const result = db.submitBallot(cleanRoll, cleanVotes);
+      if (!result.success) {
+        return res.status(result.alreadyVoted ? 409 : 400).json(result);
+      }
+      res.json(result);
+    } finally {
+      activeVotingLocks.delete(cleanRoll);
     }
-    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to submit ballot.' });
   }
