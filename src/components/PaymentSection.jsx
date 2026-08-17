@@ -214,12 +214,12 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       
       {/* Header Banner */}
       <div className="mb-8 text-center space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider shadow-md">
-          <GraduationCap className="w-4 h-4 text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
+          <GraduationCap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           <span>CSE Department Exclusive • 2nd & 3rd Years Only</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
+        <h2 className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white tracking-tight">
           {completedRecord || existingSubmission ? (
             <>Payment & Contribution <span className="gradient-text-festive">Completed!</span></>
           ) : (
@@ -227,10 +227,10 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
           )}
         </h2>
 
-        <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium">
           {completedRecord || existingSubmission
             ? 'Your celebration contribution has been verified and recorded. You cannot pay again.'
-            : 'Enter your JNTU Roll Number and select your CSE Section to make your celebration contribution directly.'}
+            : 'Enter your 10-digit JNTU Roll Number and select your CSE Section to make your celebration contribution directly.'}
         </p>
       </div>
 
@@ -238,46 +238,46 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       {/* CASE 0: ALREADY PAID CARD (BLOCK DUPLICATE PAYMENTS) */}
       {/* ========================================================================= */}
       {existingSubmission && !completedRecord && (
-        <div className="mb-8 glass-card-glow rounded-3xl p-6 sm:p-8 border-2 border-emerald-400/80 bg-slate-950/90 shadow-2xl space-y-5 animate-scaleUp text-center">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/20">
-            <ShieldCheck className="w-9 h-9 text-emerald-400" />
+        <div className="mb-8 glass-card-glow rounded-3xl p-6 sm:p-8 border-2 border-emerald-500 bg-white dark:bg-slate-950/90 shadow-2xl space-y-5 animate-scaleUp text-center text-slate-900 dark:text-white">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-500/40 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shadow-lg shadow-emerald-500/20">
+            <ShieldCheck className="w-9 h-9 text-emerald-600 dark:text-emerald-400" />
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-400 text-slate-950 px-3 py-1 rounded-full shadow-sm inline-block">
+            <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500 text-slate-950 px-3.5 py-1 rounded-full shadow-sm inline-block">
               ✓ Celebration Pass Activated & Paid
             </span>
-            <h3 className="text-xl sm:text-2xl font-black text-white font-display">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
               Payment Already Received!
             </h3>
-            <p className="text-xs text-slate-300 max-w-md mx-auto">
+            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto font-medium">
               This JNTU Roll Number has already contributed. Once paid, the portal strictly does not allow duplicate payments.
             </p>
           </div>
 
           {/* Student Pass Summary Card */}
-          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-2.5 text-xs">
-            <div className="flex justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400 font-bold">JNTU Roll Number</span>
-              <span className="text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded font-mono font-black text-xs">
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-left space-y-2.5 text-xs shadow-inner">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">JNTU Roll Number</span>
+              <span className="text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded font-mono font-black text-xs shadow-sm">
                 {existingSubmission.rollNumber}
               </span>
             </div>
-            <div className="flex justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400 font-bold">Department & Section</span>
-              <span className="text-teal-300 font-bold">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Department & Section</span>
+              <span className="text-teal-700 dark:text-teal-300 font-bold">
                 {existingSubmission.year || 'CSE'} • {existingSubmission.section}
               </span>
             </div>
-            <div className="flex justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400 font-bold">Acknowledgement Number</span>
-              <span className="text-amber-300 font-mono font-bold">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Acknowledgement Number</span>
+              <span className="text-amber-600 dark:text-amber-300 font-mono font-black">
                 {existingSubmission.acknowledgementNumber || existingSubmission.receiptNumber || existingSubmission.ticketNumber}
               </span>
             </div>
             <div className="flex justify-between pt-0.5">
-              <span className="text-slate-400 font-bold">Amount Paid</span>
-              <span className="text-emerald-400 font-mono font-black text-sm">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Amount Paid</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black text-sm">
                 ₹{existingSubmission.amount || existingSubmission.payment?.amount || 50}.00 (Verified)
               </span>
             </div>
@@ -312,7 +312,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
               setExistingSubmission(null);
               setError(null);
             }}
-            className="text-[11px] text-slate-400 hover:text-white underline pt-1 block mx-auto"
+            className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline pt-1 block mx-auto font-medium"
           >
             Enter a different Roll Number
           </button>
@@ -321,11 +321,11 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
 
       {/* Error Alert */}
       {error && !existingSubmission && (
-        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-200 text-xs sm:text-sm animate-shake shadow-lg">
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-50 dark:bg-rose-500/15 border-2 border-rose-400 dark:border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-900 dark:text-rose-200 text-xs sm:text-sm animate-shake shadow-lg font-semibold">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
             <div>
-              <span className="font-semibold">{error}</span>
+              <span>{error}</span>
             </div>
           </div>
         </div>
@@ -335,28 +335,28 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       {/* CASE 1: PAYMENT FORM (IF NOT COMPLETED AND NOT ALREADY PAID) */}
       {/* ========================================================================= */}
       {!completedRecord && !existingSubmission ? (
-        <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl space-y-8 animate-fadeIn">
+        <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/80 shadow-2xl space-y-8 animate-fadeIn text-slate-900 dark:text-slate-100">
           
           <form onSubmit={handleStartPayment} className="space-y-7">
             
             {/* 1. JNTU Roll Number Input (Strict 10 Digits & Zero vs O Clarity) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                   <span>1. JNTU Roll Number</span>
-                  <span className="text-[10px] text-amber-400 font-bold">(10 Digits Only)</span>
-                  <span className="text-rose-400">*</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">(10 Digits Only)</span>
+                  <span className="text-rose-500">*</span>
                 </label>
                 <div className="flex items-center gap-2">
                   {checkingRoll && (
-                    <span className="text-[10px] text-amber-300 animate-pulse font-mono font-bold">
+                    <span className="text-[10px] text-amber-600 dark:text-amber-300 animate-pulse font-mono font-bold">
                       Checking status...
                     </span>
                   )}
                   <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border tracking-wider transition-all ${
                     rollNumber.length === 10
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40 shadow-sm'
-                      : 'bg-purple-500/10 text-purple-300 border-purple-500/20'
+                      ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 shadow-sm'
+                      : 'bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/20'
                   }`}>
                     {rollNumber.length === 10 ? '✓ 10/10 Digits' : `${rollNumber.length}/10 Digits`}
                   </span>
@@ -370,35 +370,35 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                 placeholder="24341A0502"
                 value={rollNumber}
                 onChange={(e) => setRollNumber(normalizeRollNumber(e.target.value))}
-                className="w-full px-4 py-3.5 rounded-2xl bg-slate-950/90 border border-white/15 text-white placeholder-slate-600 text-lg sm:text-xl font-mono font-bold tracking-[0.18em] uppercase focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
+                className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-300 dark:border-white/15 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-lg sm:text-xl font-mono font-bold tracking-[0.18em] uppercase focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-inner"
               />
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-400 gap-1 px-1 pt-0.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 gap-1 px-1 pt-0.5 font-medium">
                 <span>
-                  Format: <strong className="text-amber-300 font-mono tracking-wider font-bold">24341A0502</strong>
+                  Format: <strong className="text-amber-700 dark:text-amber-300 font-mono tracking-wider font-bold">24341A0502</strong>
                 </span>
-                <span className="text-slate-400 flex items-center gap-1">
+                <span className="flex items-center gap-1">
                   <span>Number zero is slashed:</span>
-                  <span className="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">0</span>
+                  <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-300 dark:border-emerald-500/20">0</span>
                   <span>vs Letter</span>
-                  <span className="font-mono text-purple-300 font-bold bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/20">O</span>
+                  <span className="font-mono text-purple-700 dark:text-purple-300 font-bold bg-purple-100 dark:bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-300 dark:border-purple-500/20">O</span>
                 </span>
               </div>
             </div>
 
             {/* 2. New Interactive Section Selector (2nd & 3rd Year Only) */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                2. Select Your CSE Section <span className="text-rose-400">*</span>
+              <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                2. Select Your CSE Section <span className="text-rose-500">*</span>
               </label>
 
               {/* 2nd Year Grid */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-white/10 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border-2 border-slate-200 dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-purple-300 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-purple-800 dark:text-purple-300 tracking-wider">
                     📘 2nd Year CSE
                   </span>
-                  <span className="text-[10px] text-slate-400">Sections A, B, C, D</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Sections A, B, C, D</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {cse2ndYearSections.map((sec) => {
@@ -411,7 +411,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                         className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 touch-press ${
                           isSelected
                             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-2 ring-purple-400 shadow-lg shadow-purple-500/25 scale-[1.03]'
-                            : 'bg-slate-900 border border-white/10 text-slate-300 hover:border-purple-400/40 hover:bg-slate-800'
+                            : 'bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-slate-800 shadow-sm'
                         }`}
                       >
                         {isSelected && <Check className="w-3.5 h-3.5 text-amber-400" />}
@@ -423,12 +423,12 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
               </div>
 
               {/* 3rd Year Grid */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-white/10 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border-2 border-slate-200 dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-amber-300 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-amber-800 dark:text-amber-300 tracking-wider">
                     📙 3rd Year CSE
                   </span>
-                  <span className="text-[10px] text-slate-400">Sections A, B, C, D</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Sections A, B, C, D</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {cse3rdYearSections.map((sec) => {
@@ -441,7 +441,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                         className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 touch-press ${
                           isSelected
                             ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 ring-2 ring-amber-400 shadow-lg shadow-amber-500/25 scale-[1.03]'
-                            : 'bg-slate-900 border border-white/10 text-slate-300 hover:border-amber-400/40 hover:bg-slate-800'
+                            : 'bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 shadow-sm'
                         }`}
                       >
                         {isSelected && <Check className="w-3.5 h-3.5 text-slate-950" />}
@@ -455,48 +455,48 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
 
             {/* 3. Stage Speech Interest (Optional Toggle) */}
             <div className="space-y-3 pt-2">
-              <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-950/80 border border-white/10 cursor-pointer hover:border-amber-400/40 transition-colors group">
+              <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border-2 border-slate-200 dark:border-white/10 cursor-pointer hover:border-amber-400/60 transition-colors group">
                 <input
                   type="checkbox"
                   checked={wantsToSpeak}
                   onChange={(e) => setWantsToSpeak(e.target.checked)}
-                  className="w-5 h-5 rounded-md text-amber-500 bg-slate-900 border-white/20 focus:ring-amber-400 focus:ring-offset-slate-950 mt-0.5 cursor-pointer"
+                  className="w-5 h-5 rounded-md text-amber-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-white/20 focus:ring-amber-400 focus:ring-offset-slate-950 mt-0.5 cursor-pointer"
                 />
                 <div>
-                  <span className="font-bold text-white text-sm group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
-                    <Mic className="w-4 h-4 text-amber-400" />
+                  <span className="font-black text-slate-900 dark:text-white text-sm group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
+                    <Mic className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                     <span>Interested in stage speech / sharing words for faculty (Optional)</span>
                   </span>
-                  <span className="text-xs text-slate-400 mt-0.5 block">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 block font-medium">
                     Check this box if you would like a speaking slot during the Teachers' Day ceremony.
                   </span>
                 </div>
               </label>
 
               {wantsToSpeak && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-3 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-300 dark:border-amber-500/20 space-y-3 animate-fadeIn">
                   <div>
-                    <label className="block text-xs font-bold text-amber-300 mb-1.5">
+                    <label className="block text-xs font-black text-amber-900 dark:text-amber-300 mb-1.5">
                       Which Teacher / Faculty would you like to speak about?
                     </label>
                     <select
                       value={speechTeacher}
                       onChange={(e) => setSpeechTeacher(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-amber-400/30 text-white text-sm focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border-2 border-amber-300 dark:border-amber-400/30 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-amber-500"
                     >
                       {teachers.map(t => (
-                        <option key={t.id} value={t.name} className="bg-slate-900 text-white">
+                        <option key={t.id} value={t.name} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                           {t.name} ({t.designation})
                         </option>
                       ))}
-                      <option value="All CSE Department Faculty" className="bg-slate-900 text-white">
+                      <option value="All CSE Department Faculty" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                         🌟 All CSE Department Faculty
                       </option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-amber-300 mb-1.5">
+                    <label className="block text-xs font-black text-amber-900 dark:text-amber-300 mb-1.5">
                       What would you like to speak / tell about? (Brief Concept)
                     </label>
                     <textarea
@@ -504,7 +504,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                       placeholder="e.g. Expressing gratitude for lab guidance, sharing a memorable classroom lesson..."
                       value={speechTopic}
                       onChange={(e) => setSpeechTopic(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-amber-400/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400 resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border-2 border-amber-300 dark:border-amber-400/30 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-amber-500 resize-none"
                     />
                   </div>
                 </div>
@@ -512,20 +512,20 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
             </div>
 
             {/* 4. Contribution Amount & Direct Payment Trigger */}
-            <div className="pt-3 border-t border-white/10 space-y-4">
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/30 space-y-3">
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 space-y-4">
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-slate-50 to-indigo-50 dark:from-purple-950/70 dark:via-slate-900 dark:to-indigo-950/70 border-2 border-purple-200 dark:border-purple-500/30 space-y-3 shadow-md">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-xs uppercase tracking-wider font-bold text-purple-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs uppercase tracking-wider font-black text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                       <span>Contribution Amount</span>
                     </span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
                       Official CSE Teachers' Day 2026 celebration pass & felicitation.
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="font-black text-amber-400 text-2xl font-display">₹{effectiveContributionAmount}</span>
+                    <span className="font-black text-amber-600 dark:text-amber-400 text-2xl font-display">₹{effectiveContributionAmount}</span>
                   </div>
                 </div>
 
@@ -535,10 +535,10 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                       key={amt}
                       type="button"
                       onClick={() => { setContributionAmount(amt); setIsCustomAmount(false); }}
-                      className={`py-2 rounded-xl text-xs font-bold border transition-all touch-press ${
+                      className={`py-2 rounded-xl text-xs font-black border-2 transition-all touch-press ${
                         !isCustomAmount && contributionAmount === amt 
-                          ? 'bg-purple-600 border-amber-400 text-white shadow-md' 
-                          : 'bg-slate-950/80 border-white/10 text-slate-300 hover:border-white/20'
+                          ? 'bg-purple-600 border-purple-600 text-white shadow-md' 
+                          : 'bg-white dark:bg-slate-950/80 border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-300 hover:border-purple-400 hover:bg-purple-50'
                       }`}
                     >
                       ₹{amt}
@@ -558,8 +558,8 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                 <ArrowRight className="w-5 h-5" />
               </button>
 
-              <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-semibold">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Instant Verified Official Receipt Generated After Payment</span>
               </div>
             </div>
@@ -571,55 +571,55 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         /* ========================================================================= */
         /* CASE 2: PAYMENT SUCCESS & OFFICIAL RECEIPT DISPLAY */
         /* ========================================================================= */
-        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border border-emerald-500/40 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto">
+        <div className="glass-card-glow rounded-3xl p-8 sm:p-12 border-2 border-emerald-500 bg-white dark:bg-slate-950/90 shadow-2xl text-center space-y-6 animate-fadeIn max-w-2xl mx-auto text-slate-900 dark:text-white">
           
           <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/25 animate-float-soft">
             <CheckCircle2 className="w-12 h-12 text-slate-950" />
           </div>
 
           <div>
-            <span className="text-[10px] uppercase font-mono font-bold tracking-widest bg-emerald-400/20 text-emerald-300 px-3.5 py-1 rounded-full border border-emerald-300/30 inline-block mb-2">
+            <span className="text-[10px] uppercase font-mono font-black tracking-widest bg-emerald-100 dark:bg-emerald-400/20 text-emerald-800 dark:text-emerald-300 px-3.5 py-1 rounded-full border border-emerald-300/40 inline-block mb-2 shadow-sm">
               OFFICIAL CONTRIBUTION ACKNOWLEDGEMENT
             </span>
-            <h3 className="text-2xl sm:text-3xl font-black text-white font-display">
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
               Payment Successful!
             </h3>
-            <p className="text-slate-300 text-sm max-w-md mx-auto mt-2">
-              Your celebration contribution of <span className="text-emerald-400 font-bold">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00</span> has been verified and recorded.
+            <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md mx-auto mt-2 font-medium">
+              Your celebration contribution of <span className="text-emerald-600 dark:text-emerald-400 font-black">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00</span> has been verified and recorded.
             </p>
           </div>
 
           {/* Receipt Details Box */}
-          <div className="p-5 rounded-2xl bg-slate-950/90 border border-white/10 text-left space-y-3 text-xs shadow-inner">
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Acknowledgement No</span>
-              <span className="text-amber-300 font-mono font-bold">{completedRecord.acknowledgementNumber || completedRecord.receiptNumber || completedRecord.ticketNumber}</span>
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border-2 border-slate-200 dark:border-white/10 text-left space-y-3 text-xs shadow-inner">
+            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Acknowledgement No</span>
+              <span className="text-amber-600 dark:text-amber-300 font-mono font-black">{completedRecord.acknowledgementNumber || completedRecord.receiptNumber || completedRecord.ticketNumber}</span>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">JNTU Roll Number</span>
-              <span className="text-white font-mono font-bold">{completedRecord.rollNumber}</span>
+            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">JNTU Roll Number</span>
+              <span className="text-slate-950 dark:text-white font-mono font-black">{completedRecord.rollNumber}</span>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Section</span>
-              <span className="text-amber-300 font-bold">{completedRecord.section}</span>
+            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Section</span>
+              <span className="text-purple-700 dark:text-amber-300 font-black">{completedRecord.section}</span>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-slate-400">Contribution Amount</span>
-              <span className="text-emerald-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (PAID & VERIFIED)</span>
+            <div className="flex justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Contribution Amount</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-black text-sm">₹{completedRecord.payment?.amount || effectiveContributionAmount || 50}.00 (PAID & VERIFIED)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Event Date & Venue</span>
-              <span className="text-slate-200 font-medium">Sept 5, 2026 • CSE Quadrangle Stage</span>
+              <span className="text-slate-600 dark:text-slate-400 font-bold">Event Date & Venue</span>
+              <span className="text-slate-800 dark:text-slate-200 font-semibold">Sept 5, 2026 • CSE Quadrangle Stage</span>
             </div>
           </div>
 
           {/* NEXT STEP HIGHLIGHTED CTA TO VOTING */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/40 via-amber-900/30 to-purple-900/40 border border-amber-400/40 space-y-3">
-            <div className="flex items-center justify-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-amber-50 to-purple-50 dark:from-purple-900/40 dark:via-amber-900/30 dark:to-purple-900/40 border-2 border-amber-300 dark:border-amber-400/40 space-y-3 shadow-md">
+            <div className="flex items-center justify-center gap-2 text-amber-800 dark:text-amber-300 text-xs font-black uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <span>Next Step: Vote & Share Crazy Stories</span>
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
               Cast your confidential secret ballot votes for CSE faculty and share anonymous classroom memories!
             </p>
             <button
@@ -636,7 +636,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
               onClick={() => setShowAckModal(true)}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-2 transition-all"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-transparent text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
             >
               <FileText className="w-4 h-4" />
               <span>Open & Print Official Acknowledgement</span>
@@ -644,7 +644,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
 
             <button
               onClick={() => { setCompletedRecord(null); setRollNumber(''); }}
-              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs font-medium transition-all"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-transparent text-xs font-semibold transition-all"
             >
               <span>Contribute for Another Roll Number</span>
             </button>
@@ -658,7 +658,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         <PaymentModal
           studentData={{
             name: `Student (${rollNumber.trim().toUpperCase()})`,
-            rollNumber: rollNumber.trim().toUpperCase(),
+            rollNumber: normalizeRollNumber(rollNumber),
             section: selectedSection,
             year: selectedSection.includes('2') ? '2nd Year' : '3rd Year'
           }}
@@ -679,3 +679,4 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     </section>
   );
 };
+
