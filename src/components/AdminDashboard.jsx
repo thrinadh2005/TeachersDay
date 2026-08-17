@@ -557,17 +557,17 @@ export const AdminDashboard = () => {
   );
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
               CSE Department 2nd & 3rd Year (Sections 2A–2D, 3A–3D)
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white font-display mt-1">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display mt-1">
             CSE Teachers' Day 2026 Control Center
           </h2>
         </div>
@@ -576,19 +576,19 @@ export const AdminDashboard = () => {
           {/* Toggle Public Reveal Switch */}
           <button
             onClick={handleToggleReveal}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${isRevealed
-                ? 'bg-amber-500 text-slate-950 hover:bg-amber-400'
-                : 'bg-slate-800 text-slate-300 border border-white/10 hover:bg-slate-700'
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md touch-press ${isRevealed
+                ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             title="Toggle public disclosure of voting results"
           >
-            {isRevealed ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4 text-amber-400" />}
+            {isRevealed ? <Eye className="w-4 h-4 text-slate-950" /> : <EyeOff className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
             <span>{isRevealed ? 'Public Results: REVEALED' : 'Public Results: HIDDEN (Secret)'}</span>
           </button>
 
           <button
             onClick={() => loadData(adminPin)}
-            className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 transition-colors"
+            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
             title="Refresh Data"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -597,7 +597,7 @@ export const AdminDashboard = () => {
           <a
             href={api.getExportCsvUrl(adminPin)}
             download
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all touch-press"
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
@@ -605,7 +605,7 @@ export const AdminDashboard = () => {
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-900/40 hover:text-rose-300 text-slate-400 text-xs font-semibold transition-colors"
+            className="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300 text-slate-600 dark:text-slate-400 text-xs font-semibold transition-colors border border-slate-200 dark:border-white/10"
           >
             Logout
           </button>
@@ -613,72 +613,72 @@ export const AdminDashboard = () => {
       </div>
 
       {notification && (
-        <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between ${notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+        <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-md ${notification.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-400 dark:border-rose-500/30'
           }`}>
           <span>{notification.message}</span>
-          <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-white">✕</button>
+          <button onClick={() => setNotification(null)} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">✕</button>
         </div>
       )}
 
       {/* KPI METRICS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">CSE Registrations</span>
-            <Users className="w-4 h-4 text-purple-400" />
+            <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-display">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
             {overview?.totalSubmissions || 0}
           </div>
-          <span className="text-[11px] text-slate-400">2nd, 3rd & 4th Years (A-D)</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">2nd, 3rd & 4th Years (A-D)</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Stage Speakers</span>
-            <Mic className="w-4 h-4 text-amber-400" />
+            <Mic className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-400 font-display">
+          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-display">
             {overview?.speakersCount || registeredSpeakers.length}
           </div>
-          <span className="text-[11px] text-amber-300">Registered on stage</span>
+          <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">Registered on stage</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Funds Raised (₹)</span>
-            <Coins className="w-4 h-4 text-emerald-400" />
+            <Coins className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-display">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
             ₹{overview?.totalFundsCollected || 0}
           </div>
-          <span className="text-[11px] text-emerald-300">
+          <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
             {overview?.verifiedPayments || 0} Verified Contributions
           </span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
+        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Secret Ballot Votes</span>
-            <Vote className="w-4 h-4 text-pink-400" />
+            <Vote className="w-4 h-4 text-pink-600 dark:text-pink-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-pink-400 font-display">
+          <div className="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400 font-display">
             {overview?.totalVotes || 0}
           </div>
-          <span className="text-[11px] text-slate-400">Cast across categories</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Cast across categories</span>
         </div>
 
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2 overflow-x-auto">
 
         <button
           onClick={() => setActiveTab('votes')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'votes'
-              ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-black'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'votes'
+              ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <Trophy className="w-4 h-4" />
@@ -687,9 +687,9 @@ export const AdminDashboard = () => {
 
         <button
           onClick={() => setActiveTab('speakers')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'speakers'
-              ? 'bg-amber-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'speakers'
+              ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <Mic className="w-4 h-4" />
@@ -698,9 +698,9 @@ export const AdminDashboard = () => {
 
         <button
           onClick={() => setActiveTab('submissions')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'submissions'
-              ? 'bg-purple-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'submissions'
+              ? 'bg-purple-600 text-white font-bold shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <Users className="w-4 h-4" />
@@ -709,9 +709,9 @@ export const AdminDashboard = () => {
 
         <button
           onClick={() => setActiveTab('moderation')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'moderation'
-              ? 'bg-purple-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'moderation'
+              ? 'bg-purple-600 text-white font-bold shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <MessageSquare className="w-4 h-4" />
@@ -720,9 +720,9 @@ export const AdminDashboard = () => {
 
         <button
           onClick={() => setActiveTab('teachers')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'teachers'
-              ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'teachers'
+              ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <GraduationCap className="w-4 h-4" />
@@ -731,9 +731,9 @@ export const AdminDashboard = () => {
 
         <button
           onClick={() => setActiveTab('paymentSettings')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeTab === 'paymentSettings'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all touch-press ${activeTab === 'paymentSettings'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
         >
           <Smartphone className="w-4 h-4" />
