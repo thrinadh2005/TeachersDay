@@ -496,10 +496,20 @@ export const AdminDashboard = () => {
   const filteredSubmissions = submissions.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      (s.ticketNumber && s.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (s.acknowledgementNumber && s.acknowledgementNumber.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'ALL' || s.payment?.status === statusFilter;
-    const matchesYear = yearFilter === 'ALL' || s.year === yearFilter;
-    const matchesSection = sectionFilter === 'ALL' || s.section === sectionFilter;
+    
+    const sYear = (s.year || '').toUpperCase();
+    const sSec = (s.section || '').toUpperCase();
+    const matchesYear = yearFilter === 'ALL' ||
+      (yearFilter.includes('2') && (sYear.includes('2') || sSec.includes('2'))) ||
+      (yearFilter.includes('3') && (sYear.includes('3') || sSec.includes('3')));
+
+    const matchesSection = sectionFilter === 'ALL' ||
+      sSec === sectionFilter.toUpperCase() ||
+      sSec.includes(sectionFilter.slice(-1));
+
     return matchesSearch && matchesStatus && matchesYear && matchesSection;
   });
 
@@ -523,7 +533,7 @@ export const AdminDashboard = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
-              CSE Department 2nd, 3rd, 4th Year (Sec A, B, C, D)
+              CSE Department 2nd & 3rd Year (Sections 2A–2D, 3A–3D)
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white font-display mt-1">
@@ -984,7 +994,7 @@ export const AdminDashboard = () => {
                   <h3 className="text-base font-black text-white font-display flex items-center gap-2">
                     <span>Section-Wise Status & Payments</span>
                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                      12 Sections
+                      8 Sections
                     </span>
                   </h3>
                   <p className="text-xs text-slate-400">
@@ -1027,8 +1037,17 @@ export const AdminDashboard = () => {
 
             {showSectionBreakdown && (
               <div className="space-y-4 pt-1">
-                {['2nd Year', '3rd Year', '4th Year'].map((year) => {
-                  const yearSubmissions = submissions.filter(s => s.year === year);
+                {['2nd Year', '3rd Year'].map((year) => {
+                  const isYear2 = year.includes('2');
+                  const sectionsList = isYear2 
+                    ? ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] 
+                    : ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'];
+
+                  const yearSubmissions = submissions.filter(s => {
+                    const sYear = (s.year || '').toUpperCase();
+                    const sSec = (s.section || '').toUpperCase();
+                    return isYear2 ? (sYear.includes('2') || sSec.includes('2')) : (sYear.includes('3') || sSec.includes('3'));
+                  });
                   const yearFunds = yearSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
                   
                   return (
@@ -1044,8 +1063,15 @@ export const AdminDashboard = () => {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        {['Section A', 'Section B', 'Section C', 'Section D'].map((sec) => {
-                          const matching = submissions.filter(s => s.year === year && s.section === sec);
+                        {sectionsList.map((sec) => {
+                          const letter = sec.slice(-1);
+                          const matching = submissions.filter(s => {
+                            const sYear = (s.year || '').toUpperCase();
+                            const sSec = (s.section || '').toUpperCase();
+                            const isYearMatch = isYear2 ? (sYear.includes('2') || sSec.includes('2')) : (sYear.includes('3') || sSec.includes('3'));
+                            const isSecMatch = sSec === sec || sSec.includes(letter);
+                            return isYearMatch && isSecMatch;
+                          });
                           const verified = matching.filter(s => s.payment?.status === 'verified');
                           const funds = verified.reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
                           const speakers = matching.filter(s => s.interestedInSpeaking === 'Yes').length;
@@ -1177,10 +1203,9 @@ export const AdminDashboard = () => {
               onChange={(e) => setYearFilter(e.target.value)}
               className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
             >
-              <option value="ALL">All Years (2nd, 3rd, 4th)</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
+              <option value="ALL">All Years (2nd & 3rd Year)</option>
+              <option value="2nd Year">2nd Year (Sections 2A–2D)</option>
+              <option value="3rd Year">3rd Year (Sections 3A–3D)</option>
             </select>
 
             <select
@@ -1188,11 +1213,19 @@ export const AdminDashboard = () => {
               onChange={(e) => setSectionFilter(e.target.value)}
               className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
             >
-              <option value="ALL">All Sections (A, B, C, D)</option>
-              <option value="Section A">Section A</option>
-              <option value="Section B">Section B</option>
-              <option value="Section C">Section C</option>
-              <option value="Section D">Section D</option>
+              <option value="ALL">All Sections (8 Sections)</option>
+              <optgroup label="2nd Year Sections">
+                <option value="CSE 2A">CSE 2A</option>
+                <option value="CSE 2B">CSE 2B</option>
+                <option value="CSE 2C">CSE 2C</option>
+                <option value="CSE 2D">CSE 2D</option>
+              </optgroup>
+              <optgroup label="3rd Year Sections">
+                <option value="CSE 3A">CSE 3A</option>
+                <option value="CSE 3B">CSE 3B</option>
+                <option value="CSE 3C">CSE 3C</option>
+                <option value="CSE 3D">CSE 3D</option>
+              </optgroup>
             </select>
 
             <select

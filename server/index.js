@@ -888,10 +888,12 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
     const { year, section, status, summary } = req.query;
     let subs = db.getSubmissions();
 
-    // Section-Wise Executive Summary CSV
+    // Section-Wise Executive Summary CSV (8 Sections: CSE 2A-2D, CSE 3A-3D)
     if (summary === 'true') {
-      const years = ['2nd Year', '3rd Year', '4th Year'];
-      const sections = ['Section A', 'Section B', 'Section C', 'Section D'];
+      const yearSectionConfig = [
+        { year: '2nd Year', sections: ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] },
+        { year: '3rd Year', sections: ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'] }
+      ];
       
       const summaryHeaders = [
         'Year',
@@ -909,9 +911,16 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
       let grandTotalFunds = 0;
       let grandTotalSpeakers = 0;
 
-      years.forEach(y => {
-        sections.forEach(s => {
-          const matching = subs.filter(sub => sub.year === y && sub.section === s);
+      yearSectionConfig.forEach(({ year: y, sections: secList }) => {
+        secList.forEach(s => {
+          const letter = s.slice(-1);
+          const matching = subs.filter(sub => {
+            const subYear = (sub.year || '').toUpperCase();
+            const subSec = (sub.section || '').toUpperCase();
+            const isYear = y.includes('2') ? (subYear.includes('2') || subSec.includes('2')) : (subYear.includes('3') || subSec.includes('3'));
+            const isSec = subSec === s || subSec.includes(letter);
+            return isYear && isSec;
+          });
           const verified = matching.filter(sub => sub.payment?.status === 'verified');
           const pending = matching.filter(sub => sub.payment?.status !== 'verified');
           const funds = verified.reduce((acc, sub) => acc + (sub.payment?.amount || 50), 0);
@@ -937,7 +946,7 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
       // Add Grand Total Row
       summaryRows.push([
         '"TOTAL"',
-        '"ALL SECTIONS"',
+        '"8 SECTIONS (CSE 2A-2D, 3A-3D)"',
         grandTotalStudents,
         grandTotalVerified,
         grandTotalStudents - grandTotalVerified,
