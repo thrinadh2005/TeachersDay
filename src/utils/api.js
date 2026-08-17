@@ -111,6 +111,17 @@ export const api = {
     return data;
   },
 
+  async checkRegistration(roll) {
+    if (!roll) return { success: true, alreadyRegistered: false };
+    try {
+      const res = await fetch(`${API_BASE}/check-registration/${encodeURIComponent(roll.trim().toUpperCase())}`);
+      const data = await res.json();
+      return data;
+    } catch (e) {
+      return { success: false, alreadyRegistered: false, error: e.message };
+    }
+  },
+
   async submitStudentIdea(payload) {
     const res = await fetch(`${API_BASE}/submit`, {
       method: 'POST',

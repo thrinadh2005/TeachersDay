@@ -14,6 +14,19 @@ import { CountdownTimer } from './CountdownTimer';
 import { fireFestiveConfetti, fireTrophyConfetti } from '../utils/confetti';
 
 export const HeroSection = ({ setActiveTab }) => {
+  const [hasPaid, setHasPaid] = React.useState(false);
+  const [paidRoll, setPaidRoll] = React.useState('');
+
+  React.useEffect(() => {
+    try {
+      const roll = localStorage.getItem('teachers_day_paid_roll');
+      if (roll) {
+        setPaidRoll(roll);
+        setHasPaid(true);
+      }
+    } catch (e) {}
+  }, []);
+
   const handleGoToPay = () => {
     fireFestiveConfetti();
     setActiveTab('pay');
@@ -57,25 +70,33 @@ export const HeroSection = ({ setActiveTab }) => {
             Honouring Our <span className="gradient-text-gold">CSE Teachers</span> & Mentors
           </h1>
           <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed px-2">
-            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: Choose an option below to complete your <span className="text-amber-400 font-bold">₹50 payment</span> or cast your <span className="text-purple-300 font-bold">confidential faculty votes</span>!
+            Exclusively for <span className="text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: {hasPaid ? 'Your contribution is paid & verified! View your Celebration Pass or cast your confidential votes below.' : 'Choose an option below to complete your ₹50 payment or cast your confidential faculty votes!'}
           </p>
         </div>
 
         {/* DUAL PROMINENT ACTION BUTTONS */}
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
           
-          {/* OPTION 1: PAYMENT */}
+          {/* OPTION 1: PAYMENT OR VIEW PAID PASS */}
           <button
             onClick={handleGoToPay}
-            className="w-full sm:w-1/2 relative group inline-flex items-center justify-between p-4 sm:p-5 rounded-3xl text-left text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all duration-300 ring-4 ring-amber-400/30 touch-press"
+            className={`w-full sm:w-1/2 relative group inline-flex items-center justify-between p-4 sm:p-5 rounded-3xl text-left text-slate-950 shadow-2xl hover:scale-105 transition-all duration-300 ring-4 touch-press ${
+              hasPaid 
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 hover:from-emerald-300 hover:to-teal-300 shadow-emerald-500/30 ring-emerald-400/30'
+                : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 shadow-amber-500/30 ring-amber-400/30'
+            }`}
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-slate-950/15 flex items-center justify-center text-slate-950 group-hover:scale-110 transition-transform">
-                <CreditCard className="w-5 h-5" />
+                {hasPaid ? <ShieldCheck className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
               </div>
               <div>
-                <div className="text-[10px] uppercase font-black tracking-wider text-slate-900/80">Option 1</div>
-                <div className="text-sm sm:text-base font-black leading-tight">Payment (₹50)</div>
+                <div className="text-[10px] uppercase font-black tracking-wider text-slate-900/80">
+                  {hasPaid ? '✓ Paid & Active' : 'Option 1'}
+                </div>
+                <div className="text-sm sm:text-base font-black leading-tight">
+                  {hasPaid ? 'View Celebration Pass' : 'Payment (₹50)'}
+                </div>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-950 group-hover:translate-x-1 transition-transform" />

@@ -59,6 +59,23 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         }
       })
       .catch(err => console.error('Failed to load teachers:', err));
+
+    // Auto-check if this browser has already paid
+    try {
+      const savedRoll = localStorage.getItem('teachers_day_paid_roll');
+      if (savedRoll) {
+        setRollNumber(savedRoll);
+        api.checkRegistration(savedRoll)
+          .then(res => {
+            if (res.alreadyRegistered) {
+              setExistingSubmission(res.data || res.submission);
+            }
+          })
+          .catch(e => console.warn('Saved roll check:', e));
+      }
+    } catch (e) {
+      console.warn('localStorage error:', e);
+    }
   }, []);
 
   const [checkingRoll, setCheckingRoll] = useState(false);
@@ -84,7 +101,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
         } finally {
           setCheckingRoll(false);
         }
-      }, 400);
+      }, 350);
       return () => clearTimeout(timer);
     } else {
       setExistingSubmission(null);
@@ -160,6 +177,12 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       }
 
       setCompletedRecord(response.data);
+      try {
+        localStorage.setItem('teachers_day_paid_roll', cleanRoll);
+        localStorage.setItem('teachers_day_paid_submission', JSON.stringify(response.data));
+      } catch (e) {
+        console.warn('Save localStorage error:', e);
+      }
       fireFestiveConfetti();
       window.scrollTo({ top: 0, behavior: 'smooth' });
 

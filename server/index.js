@@ -307,14 +307,23 @@ app.get(['/api/check-registration/:roll', '/api/check-roll/:roll'], (req, res) =
           id: existing.id,
           name: existing.name,
           rollNumber: existing.rollNumber,
+          department: existing.department || "Computer Science & Engineering (CSE)",
           year: existing.year,
           section: existing.section,
           acknowledgementNumber: existing.acknowledgementNumber || existing.ticketNumber,
           receiptNumber: existing.receiptNumber || existing.acknowledgementNumber || existing.ticketNumber,
           ticketNumber: existing.ticketNumber,
-          amount: existing.payment?.amount || 50,
-          paymentStatus: existing.payment?.status || 'verified',
-          transactionId: existing.payment?.transactionId || 'N/A',
+          amount: existing.payment?.amount || existing.amount || 50,
+          paymentStatus: existing.payment?.status || existing.paymentStatus || 'verified',
+          transactionId: existing.payment?.transactionId || existing.transactionId || 'N/A',
+          payment: existing.payment || {
+            amount: existing.amount || 50,
+            status: existing.paymentStatus || 'verified',
+            transactionId: existing.transactionId || 'N/A'
+          },
+          interestedInSpeaking: existing.interestedInSpeaking || 'No',
+          speechTeacher: existing.speechTeacher || '',
+          speechTopic: existing.speechTopic || '',
           createdAt: existing.createdAt
         },
         submission: existing
