@@ -238,8 +238,7 @@ class Database {
       return { success: false, error: 'Please select at least one faculty award category.' };
     }
 
-    // Process and record each category vote securely
-    const recordedVotesMap = {};
+    // Process and record each category vote securely and anonymously
     for (const [catId, teacherId] of voteEntries) {
       const teacher = this.data.teachers.find(t => t.id === teacherId);
       if (teacher) {
@@ -248,7 +247,6 @@ class Database {
         }
         teacher.categoryVotes[catId] = (teacher.categoryVotes[catId] || 0) + 1;
         teacher.totalVotes = Object.values(teacher.categoryVotes).reduce((sum, v) => sum + v, 0);
-        recordedVotesMap[catId] = teacherId;
 
         // Async update to MongoDB
         this.getMongoDb().then(mongoDb => {
@@ -262,21 +260,20 @@ class Database {
       }
     }
 
-    // Seal voter record so they cannot vote again
+    // Seal voter record so they cannot vote again (ZERO knowledge of who they voted for)
     this.data.voters[roll] = {
       hasVoted: true,
       votedAt: new Date().toISOString(),
-      votesCount: voteEntries.length,
-      votes: recordedVotesMap
+      votesCount: voteEntries.length
     };
     this.save();
 
-    // Persist locked voter record to MongoDB Atlas
+    // Persist locked voter record to MongoDB Atlas (ZERO knowledge of choices)
     this.getMongoDb().then(mongoDb => {
       if (mongoDb) {
         mongoDb.collection('voters').updateOne(
           { roll: roll },
-          { $set: { roll: roll, hasVoted: true, votedAt: new Date().toISOString(), votesCount: voteEntries.length, votes: recordedVotesMap } },
+          { $set: { roll: roll, hasVoted: true, votedAt: new Date().toISOString(), votesCount: voteEntries.length } },
           { upsert: true }
         ).catch(console.error);
       }
