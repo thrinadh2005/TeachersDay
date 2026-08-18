@@ -186,12 +186,28 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
       return;
     }
 
-    const voteEntries = Object.entries(selectedVotes);
-    const hasVotes = voteEntries.length > 0;
+    const totalRequiredCategories = categories.length > 0 ? categories.length : 5;
+    const voteEntries = Object.entries(selectedVotes).filter(([_, teacherId]) => Boolean(teacherId));
+    const missingCats = categories.filter(c => !selectedVotes[c.id]);
+    const hasFullVotes = categories.length > 0 ? missingCats.length === 0 : voteEntries.length >= 5;
     const hasStory = storyText.trim().length > 0;
 
-    if (!hasVotes && !hasStory) {
-      setError('Please select at least one faculty award category above.');
+    // Check 5-category requirement if submitting votes (or when no story is provided)
+    if (!hasFullVotes && !alreadyVoted) {
+      if (missingCats.length > 0) {
+        const missingNames = missingCats.map(c => c.shortTitle || c.title).join(', ');
+        setError(`Please select a faculty member for ALL 5 award categories before submitting! (Missing ${missingCats.length} of ${totalRequiredCategories}: ${missingNames})`);
+        setActiveCategory(missingCats[0].id);
+        const catCard = document.getElementById('category-voting-card');
+        if (catCard) {
+          catCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        return;
+      }
+    }
+
+    if (!hasFullVotes && !hasStory) {
+      setError('Please select faculty members for all 5 award categories above.');
       return;
     }
 
@@ -200,7 +216,7 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
 
     try {
       // 1. Submit Ballot in one atomic batch
-      if (hasVotes) {
+      if (hasFullVotes) {
         const ballotResult = await api.submitBallot(cleanRoll, selectedVotes);
         if (!ballotResult.success) {
           throw new Error(ballotResult.error || 'Failed to submit secret ballot.');
@@ -271,13 +287,19 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium leading-relaxed">
           {successData 
             ? 'Your confidential faculty award votes and anonymous memories have been securely recorded!'
-            : 'Cast your confidential votes across 5 superlative categories. Remember: Each student can vote strictly ONCE.'}
+            : 'Please cast your vote in ALL 5 award categories. If two or more faculty receive equal top votes, all of them will be crowned as Joint Winners!'}
         </p>
 
-        {/* Anti-Duplication Rule Notice Banner */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-          <span>Strict Rule: 1 Student = 1 Secret Ballot (Duplicate Votes Blocked)</span>
+        {/* Rules Notice Banners */}
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-sm">
+            <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>Rule 1: Vote ALL 5 Categories (100% Mandatory)</span>
+          </div>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-300 dark:border-purple-500/25 text-purple-800 dark:text-purple-300 text-xs font-bold shadow-sm">
+            <Trophy className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+            <span>Rule 2: Equal Votes = All Tied Faculty Are Winners!</span>
+          </div>
         </div>
       </div>
 
@@ -418,36 +440,80 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
             </div>
           ) : (
             /* Category Voting Grid */
-            <div className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 bg-white dark:bg-slate-950">
+            <div id="category-voting-card" className="glass-card-glow rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 bg-white dark:bg-slate-950">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center font-black text-xs">
                       2
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Select Faculty for 5 Award Superlatives</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <span>Select Faculty for 5 Award Superlatives</span>
+                      <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                        All 5 Required
+                      </span>
+                    </h3>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-10">Choose 1 faculty member per award title. Ballots cannot be modified once cast.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-10">
+                    Vote 1 faculty member per award title. If votes tie, all tied faculty will be crowned joint winners!
+                  </p>
                 </div>
 
-                <span className="text-xs text-amber-700 dark:text-amber-400 font-bold px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/20 self-start sm:self-auto">
-                  Categories Voted: {votedCategoriesCount} / {categories.length}
-                </span>
+                <div className="flex flex-col items-end gap-1.5 self-start sm:self-auto">
+                  <span className={`text-xs font-bold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 ${
+                    votedCategoriesCount === (categories.length || 5)
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                      : 'bg-amber-400/10 border-amber-400/20 text-amber-700 dark:text-amber-400'
+                  }`}>
+                    {votedCategoriesCount === (categories.length || 5) ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>All 5 Categories Completed!</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        <span>Categories Voted: {votedCategoriesCount} / {categories.length || 5}</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Live Category Completion Progress Bar */}
+              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Ballot Completion Progress</span>
+                  </span>
+                  <span className="font-mono text-purple-700 dark:text-purple-300">
+                    {Math.round((votedCategoriesCount / (categories.length || 5)) * 100)}% ({votedCategoriesCount}/5)
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-amber-400 transition-all duration-500"
+                    style={{ width: `${Math.min(100, (votedCategoriesCount / (categories.length || 5)) * 100)}%` }}
+                  />
+                </div>
               </div>
 
               {/* Category Tabs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
                 {categories.map(cat => {
                   const isSelected = activeCategory === cat.id;
-                  const hasVoted = !!selectedVotes[cat.id];
+                  const votedTeacherId = selectedVotes[cat.id];
+                  const hasVoted = Boolean(votedTeacherId);
+                  const votedTeacher = hasVoted ? teachers.find(t => t.id === votedTeacherId) : null;
 
                   return (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setActiveCategory(cat.id)}
-                      className={`p-3 rounded-2xl text-left border transition-all flex flex-col justify-between touch-press ${
+                      className={`p-3 rounded-2xl text-left border transition-all flex flex-col justify-between touch-press relative ${
                         isSelected
                           ? 'bg-gradient-to-br from-purple-100 via-pink-50 to-amber-50 dark:from-purple-600/30 dark:via-pink-600/20 dark:to-amber-500/20 border-purple-400 dark:border-amber-400 shadow-md scale-[1.02]'
                           : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
@@ -457,9 +523,13 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                         <div className="p-1 rounded-md bg-white dark:bg-slate-950/60 shadow-sm">
                           {categoryIcons[cat.id] || <Trophy className="w-3.5 h-3.5" />}
                         </div>
-                        {hasVoted && (
+                        {hasVoted ? (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5">
-                            <Check className="w-3 h-3" /> Selected
+                            <Check className="w-3 h-3" /> Voted
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25">
+                            Vote Required
                           </span>
                         )}
                       </div>
@@ -468,28 +538,60 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                         <h4 className={`text-xs font-bold ${isSelected ? 'text-purple-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                           {cat.title}
                         </h4>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                          {cat.desc}
-                        </p>
+                        {hasVoted && votedTeacher ? (
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate mt-0.5">
+                            ✓ {votedTeacher.name}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                            {cat.desc}
+                          </p>
+                        )}
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Active Category Banner */}
+              {/* Active Category Banner & Jump to Next Unvoted Helper */}
               {currentCategoryObj && (
-                <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 flex items-center justify-between text-xs">
+                <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="p-2 bg-amber-400/20 text-amber-700 dark:text-amber-300 rounded-lg">
                       {categoryIcons[currentCategoryObj.id] || <Trophy className="w-4 h-4" />}
                     </div>
                     <div>
-                      <div className="text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase">Active Award Category</div>
+                      <div className="text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase flex items-center gap-1.5">
+                        <span>Active Award Category</span>
+                        {selectedVotes[currentCategoryObj.id] ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ (Selection Recorded)</span>
+                        ) : (
+                          <span className="text-amber-600 dark:text-amber-400 font-bold">(Select a Faculty Member Below)</span>
+                        )}
+                      </div>
                       <div className="text-sm font-bold text-slate-900 dark:text-white">{currentCategoryObj.title}</div>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">1 vote allowed per category</span>
+
+                  {/* Next Unvoted Category Shortcut */}
+                  {(() => {
+                    const nextMissing = categories.find(c => !selectedVotes[c.id]);
+                    if (nextMissing && nextMissing.id !== activeCategory) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => setActiveCategory(nextMissing.id)}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all touch-press shrink-0"
+                        >
+                          <span>Jump to Next: {nextMissing.shortTitle || nextMissing.title}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      );
+                    }
+                    return (
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">1 vote allowed per category</span>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -623,13 +725,14 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
               disabled={
                 loading || 
                 !rollValidation.isValid || 
-                (alreadyVoted && !storyText.trim()) ||
-                (!alreadyVoted && votedCategoriesCount === 0 && !storyText.trim())
+                (alreadyVoted && !storyText.trim())
               }
               className={`w-full py-4 sm:py-5 px-8 rounded-2xl font-black text-base sm:text-lg shadow-2xl transition-all flex items-center justify-center gap-3 touch-press ${
-                !rollValidation.isValid || (alreadyVoted && !storyText.trim()) || (!alreadyVoted && votedCategoriesCount === 0 && !storyText.trim())
+                !rollValidation.isValid || (alreadyVoted && !storyText.trim())
                   ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-white/10'
-                  : 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-pink-500 text-white shadow-purple-500/30 hover:scale-[1.01]'
+                  : votedCategoriesCount < (categories.length || 5) && !alreadyVoted && !storyText.trim()
+                    ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-amber-500/25 hover:scale-[1.01]'
+                    : 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-pink-500 text-white shadow-purple-500/30 hover:scale-[1.01]'
               }`}
             >
               {alreadyVoted ? (
@@ -651,15 +754,20 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                     <Lock className="w-5 h-5" />
                     <span>Enter 10-Digit Roll ({cleanRoll.length}/10)</span>
                   </>
-                ) : votedCategoriesCount === 0 && !storyText.trim() ? (
+                ) : votedCategoriesCount < (categories.length || 5) ? (
                   <>
-                    <HelpCircle className="w-5 h-5 text-amber-300" />
-                    <span>Select Faculty Category Above to Vote</span>
+                    <HelpCircle className="w-5 h-5 text-amber-200" />
+                    <span>
+                      {loading 
+                        ? 'Processing...' 
+                        : `Vote All 5 Categories (${votedCategoriesCount}/5 Selected - Click to Complete)`}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-amber-200" />
                   </>
                 ) : (
                   <>
                     <Send className="w-5 h-5" />
-                    <span>{loading ? 'Submitting Ballot...' : `Submit Secret Ballot (${votedCategoriesCount} Categories)`}</span>
+                    <span>{loading ? 'Submitting Ballot...' : 'Submit Secret Ballot (All 5 Categories Selected)'}</span>
                     <Sparkles className="w-5 h-5 text-amber-300" />
                   </>
                 )
@@ -706,9 +814,13 @@ export const VotingSection = ({ initialRollNumber = '', setActiveTab }) => {
                 <span className="text-pink-600 dark:text-pink-400 font-bold">100% Anonymous (About {successData.storyTeacher})</span>
               </div>
             )}
-            <div className="flex justify-between">
+            <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
               <span className="text-slate-600 dark:text-slate-400 font-bold">Voting Status</span>
               <span className="text-emerald-700 dark:text-emerald-400 font-bold">✓ Sealed (Single-Vote Applied)</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-amber-700 dark:text-amber-400 font-semibold bg-amber-500/10 p-2 rounded-xl">
+              <span>⚡ Tie Winner Policy:</span>
+              <span>Equal Votes = All Tied Faculty Crowned Champions</span>
             </div>
           </div>
 

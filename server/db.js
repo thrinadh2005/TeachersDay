@@ -233,9 +233,22 @@ class Database {
       }
     }
 
+    const requiredCategoryIds = votingCategories.map(c => c.id);
+    const missingCategories = requiredCategoryIds.filter(catId => !votes[catId]);
+    if (missingCategories.length > 0) {
+      const missingTitles = missingCategories.map(cid => {
+        const c = votingCategories.find(cat => cat.id === cid);
+        return c ? (c.shortTitle || c.title) : cid;
+      }).join(', ');
+      return { 
+        success: false, 
+        error: `Please vote in all 5 award categories before submitting! Missing: ${missingTitles}` 
+      };
+    }
+
     const voteEntries = Object.entries(votes).filter(([catId, teacherId]) => Boolean(teacherId));
     if (voteEntries.length === 0) {
-      return { success: false, error: 'Please select at least one faculty award category.' };
+      return { success: false, error: 'Please select faculty for all 5 award categories.' };
     }
 
     // Process and record each category vote securely and anonymously
@@ -676,14 +689,31 @@ class Database {
 
     const categoryWinners = {};
     votingCategories.forEach(cat => {
-      const topInCat = [...this.data.teachers].sort((a, b) => {
-        const vA = (a.categoryVotes && a.categoryVotes[cat.id]) || 0;
-        const vB = (b.categoryVotes && b.categoryVotes[cat.id]) || 0;
-        return vB - vA;
+      let maxVotes = 0;
+      this.data.teachers.forEach(t => {
+        const v = (t.categoryVotes && t.categoryVotes[cat.id]) || 0;
+        if (v > maxVotes) maxVotes = v;
       });
+
+      const topFacultyList = maxVotes > 0 
+        ? this.data.teachers
+            .filter(t => (t.categoryVotes?.[cat.id] || 0) === maxVotes)
+            .map(t => ({
+              id: t.id,
+              name: t.name,
+              votes: maxVotes,
+              designation: t.designation,
+              degree: t.degree,
+              avatar: t.avatar
+            }))
+        : [];
+
       categoryWinners[cat.id] = {
         categoryTitle: cat.title,
-        topFaculty: topInCat[0] ? { name: topInCat[0].name, votes: topInCat[0].categoryVotes?.[cat.id] || 0, designation: topInCat[0].designation } : null
+        topFaculty: topFacultyList[0] || null,
+        topFacultyList,
+        isTie: topFacultyList.length > 1,
+        votes: maxVotes
       };
     });
 

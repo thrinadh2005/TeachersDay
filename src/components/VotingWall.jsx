@@ -74,14 +74,24 @@ export const VotingWall = ({ setActiveTab }) => {
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
 
-  const getCategoryLeader = (catId) => {
-    if (!teachers || teachers.length === 0) return null;
-    const sorted = [...teachers].sort((a, b) => {
-      const vA = (a.categoryVotes && a.categoryVotes[catId]) || 0;
-      const vB = (b.categoryVotes && b.categoryVotes[catId]) || 0;
-      return vB - vA;
+  const getCategoryWinners = (catId) => {
+    if (!teachers || teachers.length === 0) return { winners: [], maxVotes: 0, isTie: false };
+    let maxVotes = 0;
+    teachers.forEach(t => {
+      const v = (t.categoryVotes && t.categoryVotes[catId]) || 0;
+      if (v > maxVotes) maxVotes = v;
     });
-    return sorted[0];
+
+    if (maxVotes === 0) {
+      return { winners: [], maxVotes: 0, isTie: false };
+    }
+
+    const winners = teachers.filter(t => ((t.categoryVotes && t.categoryVotes[catId]) || 0) === maxVotes);
+    return {
+      winners,
+      maxVotes,
+      isTie: winners.length > 1
+    };
   };
 
   const filteredTeachers = teachers.filter(t => {
@@ -94,6 +104,25 @@ export const VotingWall = ({ setActiveTab }) => {
     const vA = (a.categoryVotes && a.categoryVotes[activeCategory]) || 0;
     const vB = (b.categoryVotes && b.categoryVotes[activeCategory]) || 0;
     return vB - vA;
+  });
+
+  // Calculate competition ranking with tie handling
+  let currentRank = 1;
+  const rankedTeachers = sortedByCategory.map((t, idx) => {
+    const catVotes = (t.categoryVotes && t.categoryVotes[activeCategory]) || 0;
+    if (idx > 0) {
+      const prevVotes = (sortedByCategory[idx - 1].categoryVotes && sortedByCategory[idx - 1].categoryVotes[activeCategory]) || 0;
+      if (catVotes < prevVotes) {
+        currentRank = idx + 1;
+      }
+    }
+    const isTied = sortedByCategory.some((other, oIdx) => oIdx !== idx && ((other.categoryVotes && other.categoryVotes[activeCategory]) || 0) === catVotes && catVotes > 0);
+    return {
+      ...t,
+      rank: currentRank,
+      catVotes,
+      isTied
+    };
   });
 
   return (
@@ -119,6 +148,12 @@ export const VotingWall = ({ setActiveTab }) => {
             ? 'The secret ballot votes from CSE 2nd, 3rd & 4th year students (Sections A-D) are officially revealed!'
             : 'All votes cast during student registrations are held in strict confidence. Official winners across 5 award categories will be announced live on stage!'}
         </p>
+
+        {/* Tie Rule Explainer Banner */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-sm">
+          <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span>Official Rule: If two or more faculty receive equal top votes, all of them will be crowned as Joint Winners!</span>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -143,7 +178,7 @@ export const VotingWall = ({ setActiveTab }) => {
             </h2>
 
             <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto leading-relaxed mb-6 font-medium">
-              Every vote cast by CSE 2nd & 3rd Year students is held under strict confidential secret ballot. The grand winners will be crowned live on stage during the Teachers' Day Celebration ceremony!
+              Every vote cast by CSE 2nd & 3rd Year students across all 5 superlative categories is held under strict confidential secret ballot. The grand winners (including joint winners on ties) will be crowned live on stage!
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -157,12 +192,12 @@ export const VotingWall = ({ setActiveTab }) => {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10">
                 <Crown className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                <span>5 Grand Award Superlatives</span>
+                <span>5 Grand Award Superlatives (Ties Shared)</span>
               </div>
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Haven't cast your secret vote yet?</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Haven't cast your secret vote across all 5 categories?</span>
               <button
                 onClick={() => {
                   if (setActiveTab) setActiveTab('vote-faculty');
@@ -170,7 +205,7 @@ export const VotingWall = ({ setActiveTab }) => {
                 }}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/25 transition-all hover:scale-105 touch-press"
               >
-                <span>Vote for Faculty (Secret Ballot)</span>
+                <span>Vote All 5 Categories (Secret Ballot)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -180,7 +215,7 @@ export const VotingWall = ({ setActiveTab }) => {
           <div>
             <div className="text-center mb-6">
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">The 5 Superlative Award Titles</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Categories competing for student honors</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">All 5 categories must be voted • Ties result in joint winners</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -260,22 +295,115 @@ export const VotingWall = ({ setActiveTab }) => {
           
           {/* Winners Podium Section */}
           <div>
-            <div className="text-center mb-8">
-              <span className="text-xs font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                🎉 Official Award Winners
+            <div className="text-center mb-8 space-y-2">
+              <span className="text-xs font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
+                🎉 Official Award Winners & Joint Champions
               </span>
-              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-display mt-2">
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-display">
                 2026 CSE Faculty Award Champions
               </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                Official rule applied: Whenever two or more faculty receive equal highest votes, all of them are crowned Joint Winners!
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {categories.map((cat, idx) => {
-                const winner = getCategoryLeader(cat.id);
-                if (!winner) return null;
+                const { winners, maxVotes, isTie } = getCategoryWinners(cat.id);
 
-                const votes = winner.categoryVotes?.[cat.id] || 0;
+                if (winners.length === 0 || maxVotes === 0) {
+                  return (
+                    <div
+                      key={cat.id}
+                      className="glass-card rounded-3xl p-6 border border-slate-200 dark:border-white/10 relative flex flex-col justify-between space-y-4 text-center bg-white dark:bg-slate-950"
+                    >
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-xs font-black uppercase tracking-wider">
+                          Award #{idx + 1}
+                        </span>
+                        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10">
+                          {categoryIcons[cat.id] || <Trophy className="w-4 h-4" />}
+                        </div>
+                      </div>
+                      <div className="py-8 space-y-2">
+                        <div className="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wide">
+                          {cat.title}
+                        </div>
+                        <p className="text-xs text-slate-400">No votes recorded yet</p>
+                      </div>
+                    </div>
+                  );
+                }
 
+                // Multiple Tied Winners (Joint Champions)
+                if (isTie) {
+                  return (
+                    <div
+                      key={cat.id}
+                      className="glass-card-glow rounded-3xl p-6 border-2 border-amber-400 shadow-2xl relative flex flex-col justify-between space-y-4 hover:scale-[1.02] transition-transform text-center bg-gradient-to-b from-amber-500/10 via-purple-500/5 to-white dark:to-slate-950"
+                    >
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <span className="px-3 py-1 rounded-full bg-amber-400 text-slate-950 border border-amber-500 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+                          <Crown className="w-3.5 h-3.5 text-slate-950" /> ⚡ Joint Winners ({winners.length} Tied)
+                        </span>
+                        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10">
+                          {categoryIcons[cat.id] || <Trophy className="w-4 h-4" />}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="text-xs text-amber-700 dark:text-amber-400 font-black uppercase tracking-wide">
+                          {cat.title}
+                        </div>
+
+                        {/* Co-Champions Announcement Banner */}
+                        <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-[11px] font-bold">
+                          🎉 Tie Detected: All {winners.length} faculty are crowned Co-Winners!
+                        </div>
+
+                        {/* Tied Winners List / Avatars */}
+                        <div className={`grid ${winners.length === 2 ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'} gap-3 pt-1`}>
+                          {winners.map(w => (
+                            <div key={w.id} className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-amber-400/40 shadow-sm flex flex-col items-center space-y-2">
+                              <div className="relative">
+                                <img
+                                  src={w.avatar}
+                                  alt={w.name}
+                                  className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
+                                  onError={(e) => { e.target.src = '/faculty/Dr_A_V_Ramana.jpg'; }}
+                                />
+                                <span className="absolute -bottom-1 -right-1 bg-amber-400 text-slate-950 p-1 rounded-full text-[10px] shadow">
+                                  👑
+                                </span>
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-black text-slate-900 dark:text-white line-clamp-1">
+                                  {w.name}
+                                </h4>
+                                <p className="text-[10px] text-purple-700 dark:text-purple-300 font-semibold line-clamp-1">
+                                  {w.designation}
+                                </p>
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400">
+                                  {w.degree}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/30 flex items-center justify-between text-xs">
+                        <span className="text-slate-700 dark:text-slate-300 font-bold">Equal Winning Votes:</span>
+                        <span className="font-mono font-black text-amber-700 dark:text-amber-400 text-sm">
+                          {maxVotes} Votes Each
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Single Winner Card
+                const winner = winners[0];
                 return (
                   <div
                     key={cat.id}
@@ -318,7 +446,7 @@ export const VotingWall = ({ setActiveTab }) => {
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 flex items-center justify-between text-xs">
                       <span className="text-slate-600 dark:text-slate-400 font-bold">Total Category Votes:</span>
                       <span className="font-mono font-black text-amber-700 dark:text-amber-400 text-sm">
-                        {votes} {votes === 1 ? 'Vote' : 'Votes'}
+                        {maxVotes} {maxVotes === 1 ? 'Vote' : 'Votes'}
                       </span>
                     </div>
                   </div>
@@ -333,7 +461,7 @@ export const VotingWall = ({ setActiveTab }) => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Full Category Standings</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Select an award category to view all faculty standings</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Select an award category to view all faculty standings (Ties share equal rank)</p>
               </div>
 
               <div className="w-full sm:w-64 relative">
@@ -380,22 +508,55 @@ export const VotingWall = ({ setActiveTab }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                  {sortedByCategory.map((t, idx) => {
-                    const catVotes = (t.categoryVotes && t.categoryVotes[activeCategory]) || 0;
+                  {rankedTeachers.map((t) => {
+                    const isTopRank = t.rank === 1 && t.catVotes > 0;
 
                     return (
-                      <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                      <tr 
+                        key={t.id} 
+                        className={`transition-colors ${
+                          isTopRank 
+                            ? 'bg-amber-500/10 dark:bg-amber-500/15 font-semibold' 
+                            : 'hover:bg-slate-50 dark:hover:bg-white/5'
+                        }`}
+                      >
                         <td className="p-3.5 font-bold font-mono text-slate-900 dark:text-white">
-                          {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
+                          {t.rank === 1 && t.catVotes > 0 ? (
+                            <span className="px-2 py-0.5 rounded-lg bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/30">
+                              🥇 #1 {t.isTied ? '(Tie)' : ''}
+                            </span>
+                          ) : t.rank === 2 && t.catVotes > 0 ? (
+                            <span className="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                              🥈 #2 {t.isTied ? '(Tie)' : ''}
+                            </span>
+                          ) : t.rank === 3 && t.catVotes > 0 ? (
+                            <span className="px-2 py-0.5 rounded-lg bg-amber-700/20 text-amber-900 dark:text-amber-400">
+                              🥉 #3 {t.isTied ? '(Tie)' : ''}
+                            </span>
+                          ) : (
+                            <span>#{t.rank} {t.isTied && t.catVotes > 0 ? '(Tie)' : ''}</span>
+                          )}
                         </td>
                         <td className="p-3.5">
                           <div className="flex items-center gap-3">
-                            <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-white/15" />
-                            <span className="font-bold text-slate-900 dark:text-white">{t.name}</span>
+                            <img 
+                              src={t.avatar} 
+                              alt={t.name} 
+                              className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-white/15" 
+                              onError={(e) => { e.target.src = '/faculty/Dr_A_V_Ramana.jpg'; }}
+                            />
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 dark:text-white">{t.name}</span>
+                              {isTopRank && (
+                                <span className="text-[10px] font-black px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 shadow-sm">
+                                  👑 {t.isTied ? 'Joint Winner' : 'Winner'}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="p-3.5 text-slate-500 dark:text-slate-400">{t.designation}</td>
-                        <td className="p-3.5 text-right font-mono font-black text-amber-700 dark:text-amber-400 text-sm">{catVotes}</td>
+                        <td className="p-3.5 text-right font-mono font-black text-amber-700 dark:text-amber-400 text-sm">{t.catVotes}</td>
                       </tr>
                     );
                   })}

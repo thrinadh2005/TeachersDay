@@ -824,25 +824,47 @@ export const AdminDashboard = () => {
           {/* Category Winners Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {categories.map(cat => {
-              const topInCat = [...teacherResults].sort((a, b) => {
-                const vA = (a.categoryVotes && a.categoryVotes[cat.id]) || 0;
-                const vB = (b.categoryVotes && b.categoryVotes[cat.id]) || 0;
-                return vB - vA;
-              })[0];
+              let maxVotes = 0;
+              teacherResults.forEach(t => {
+                const v = (t.categoryVotes && t.categoryVotes[cat.id]) || 0;
+                if (v > maxVotes) maxVotes = v;
+              });
 
-              const leaderVotes = topInCat?.categoryVotes?.[cat.id] || 0;
+              const topFaculty = maxVotes > 0 
+                ? teacherResults.filter(t => (t.categoryVotes?.[cat.id] || 0) === maxVotes)
+                : [];
+
+              const isTie = topFaculty.length > 1;
 
               return (
-                <div key={cat.id} className="p-4 rounded-2xl glass-card border border-amber-400/30 space-y-2">
-                  <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider block truncate">
-                    {cat.title}
-                  </span>
+                <div 
+                  key={cat.id} 
+                  className={`p-4 rounded-2xl glass-card space-y-2 border transition-all ${
+                    isTie 
+                      ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/30 to-slate-900 shadow-md' 
+                      : 'border-amber-400/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider truncate">
+                      {cat.title}
+                    </span>
+                    {isTie && (
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300 border border-purple-500/40 shrink-0">
+                        ⚡ {topFaculty.length} Joint
+                      </span>
+                    )}
+                  </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white truncate">
-                      {topInCat && leaderVotes > 0 ? topInCat.name : 'Voting in progress'}
+                    <h4 className="text-sm font-bold text-white truncate" title={topFaculty.map(f => f.name).join(' & ')}>
+                      {topFaculty.length > 0
+                        ? (isTie ? `⚡ Joint: ${topFaculty.map(f => f.name).join(' & ')}` : topFaculty[0].name)
+                        : 'Voting in progress'}
                     </h4>
-                    <p className="text-[11px] text-slate-400 truncate">
-                      {topInCat && leaderVotes > 0 ? `${leaderVotes} Votes • ${topInCat.designation}` : '0 votes recorded yet'}
+                    <p className="text-[11px] text-slate-400 truncate" title={topFaculty.length > 0 ? (isTie ? `${maxVotes} Votes Each: ${topFaculty.map(f => f.name).join(', ')}` : `${maxVotes} Votes • ${topFaculty[0].designation}`) : ''}>
+                      {topFaculty.length > 0 
+                        ? (isTie ? `${maxVotes} Votes Each • Joint Winners` : `${maxVotes} Votes • ${topFaculty[0].designation}`)
+                        : '0 votes recorded yet'}
                     </p>
                   </div>
                 </div>
