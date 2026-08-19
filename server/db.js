@@ -631,6 +631,54 @@ class Database {
     return { success: true, submission: sub };
   }
 
+  updateSubmission(submissionId, updates = {}) {
+    const sub = this.data.submissions.find(s => s.id === submissionId || s.ticketNumber === submissionId);
+    if (!sub) return { success: false, error: 'Submission record not found.' };
+
+    const oldRoll = sub.rollNumber;
+    if (updates.name !== undefined) sub.name = String(updates.name).trim();
+    if (updates.rollNumber !== undefined) {
+      sub.rollNumber = String(updates.rollNumber).trim().toUpperCase().replace(/\s+/g, '');
+    }
+    if (updates.year !== undefined) sub.year = updates.year;
+    if (updates.section !== undefined) sub.section = updates.section;
+    if (updates.phone !== undefined) sub.phone = String(updates.phone).trim();
+    if (updates.email !== undefined) sub.email = String(updates.email).trim();
+    if (updates.interestedInSpeaking !== undefined) sub.interestedInSpeaking = updates.interestedInSpeaking;
+    if (updates.speechTeacher !== undefined) sub.speechTeacher = String(updates.speechTeacher || '').trim();
+    if (updates.speechTopic !== undefined) sub.speechTopic = String(updates.speechTopic || '').trim();
+    if (updates.favoriteTeacher !== undefined) sub.favoriteTeacher = String(updates.favoriteTeacher || '').trim();
+
+    if (updates.payment) {
+      if (!sub.payment) sub.payment = { amount: 50, currency: 'INR', status: 'verified' };
+      if (updates.payment.status !== undefined) sub.payment.status = updates.payment.status;
+      if (updates.payment.amount !== undefined) sub.payment.amount = Number(updates.payment.amount) || 50;
+      if (updates.payment.transactionId !== undefined) sub.payment.transactionId = updates.payment.transactionId;
+      if (updates.payment.vpa !== undefined) sub.payment.vpa = updates.payment.vpa;
+      if (updates.payment.paymentMethod !== undefined) sub.payment.paymentMethod = updates.payment.paymentMethod;
+    }
+
+    // Re-key voter lock if roll number changed
+    if (oldRoll && sub.rollNumber && oldRoll !== sub.rollNumber && this.data.voters[oldRoll]) {
+      this.data.voters[sub.rollNumber] = { ...this.data.voters[oldRoll], roll: sub.rollNumber };
+      delete this.data.voters[oldRoll];
+    }
+
+    this.save();
+
+    this.getMongoDb().then(mongoDb => {
+      if (mongoDb) {
+        mongoDb.collection('submissions').updateOne(
+          { id: sub.id },
+          { $set: sub },
+          { upsert: false }
+        ).catch(console.error);
+      }
+    });
+
+    return { success: true, submission: sub };
+  }
+
   deleteSubmission(submissionId) {
     const index = this.data.submissions.findIndex(s => s.id === submissionId || s.ticketNumber === submissionId);
     if (index === -1) {

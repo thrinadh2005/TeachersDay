@@ -166,6 +166,26 @@ export const AdminDashboard = () => {
   const [showAddTeacher, setShowAddTeacher] = useState(false);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  // Edit Student Submission state
+  const [editingSubmission, setEditingSubmission] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    rollNumber: '',
+    year: '2nd Year',
+    section: 'CSE 2A',
+    phone: '',
+    email: '',
+    paymentStatus: 'verified',
+    amount: 50,
+    transactionId: '',
+    vpa: '',
+    interestedInSpeaking: 'No',
+    speechTeacher: '',
+    speechTopic: ''
+  });
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const [teacherFormData, setTeacherFormData] = useState({
     name: '',
     degree: 'M.Tech.',
@@ -537,6 +557,67 @@ export const AdminDashboard = () => {
       avatar: t.avatar || '/faculty/Dr_A_V_Ramana.jpg'
     });
     setShowAddTeacher(true);
+  };
+
+  const handleStartEdit = (sub) => {
+    setEditingSubmission(sub);
+    setEditFormData({
+      name: sub.name || '',
+      rollNumber: sub.rollNumber || '',
+      year: sub.year || (sub.section && sub.section.includes('2') ? '2nd Year' : '3rd Year'),
+      section: sub.section || 'CSE 2A',
+      phone: sub.phone || '',
+      email: sub.email || '',
+      paymentStatus: sub.payment?.status || 'verified',
+      amount: sub.payment?.amount || 50,
+      transactionId: sub.payment?.transactionId || '',
+      vpa: sub.payment?.vpa || '',
+      interestedInSpeaking: sub.interestedInSpeaking || 'No',
+      speechTeacher: sub.speechTeacher || '',
+      speechTopic: sub.speechTopic || ''
+    });
+  };
+
+  const handleSaveEditSubmission = async (e) => {
+    if (e) e.preventDefault();
+    if (!editingSubmission) return;
+
+    setIsSavingEdit(true);
+    try {
+      const payload = {
+        name: editFormData.name,
+        rollNumber: editFormData.rollNumber,
+        year: editFormData.year,
+        section: editFormData.section,
+        phone: editFormData.phone,
+        email: editFormData.email,
+        interestedInSpeaking: editFormData.interestedInSpeaking,
+        speechTeacher: editFormData.speechTeacher,
+        speechTopic: editFormData.speechTopic,
+        payment: {
+          status: editFormData.paymentStatus,
+          amount: Number(editFormData.amount) || 50,
+          transactionId: editFormData.transactionId,
+          vpa: editFormData.vpa
+        }
+      };
+
+      const res = await api.updateSubmission(adminPin, editingSubmission.id, payload);
+      if (res.success) {
+        setNotification({ type: 'success', message: `Updated student ${editFormData.name} (${editFormData.rollNumber}) successfully!` });
+        setEditingSubmission(null);
+        if (selectedStudent && selectedStudent.id === editingSubmission.id) {
+          setSelectedStudent(res.submission || { ...selectedStudent, ...payload });
+        }
+        loadData(adminPin);
+      } else {
+        setNotification({ type: 'error', message: res.error || 'Failed to update student' });
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message || 'Error updating student record' });
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -1511,6 +1592,15 @@ export const AdminDashboard = () => {
                         <td className="p-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5 flex-wrap">
                             <button
+                              onClick={() => handleStartEdit(sub)}
+                              className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-amber-500/30"
+                              title="Edit Student Name, JNTU Roll No, Section, & Payment details"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
                               onClick={() => setViewingPass(sub)}
                               className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
                               title="View & Print Official Acknowledgement Slip"
@@ -2138,12 +2228,25 @@ export const AdminDashboard = () => {
 
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
               <button
+                onClick={() => {
+                  const studentToEdit = selectedStudent;
+                  setSelectedStudent(null);
+                  handleStartEdit(studentToEdit);
+                }}
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                title="Edit Student Details"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>Edit Student</span>
+              </button>
+
+              <button
                 onClick={() => setViewingPass(selectedStudent)}
                 className="w-full sm:flex-1 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 title="View & Print Official Acknowledgement Slip"
               >
                 <FileText className="w-4 h-4" />
-                <span>Open Acknowledgement Slip</span>
+                <span>Open Slip</span>
               </button>
 
               <button
@@ -2152,7 +2255,7 @@ export const AdminDashboard = () => {
                 title="Permanently Delete This Registration"
               >
                 <Trash2 className="w-4 h-4" />
-                <span>Delete Registration</span>
+                <span>Delete</span>
               </button>
 
               <button
@@ -2163,6 +2266,266 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* EDIT STUDENT DETAILS MODAL */}
+      {editingSubmission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-amber-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white font-display">Edit Student & Payee Details</h3>
+                  <p className="text-xs text-slate-400 font-mono">
+                    Pass: {editingSubmission.ticketNumber || editingSubmission.acknowledgementNumber}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingSubmission(null)}
+                className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditSubmission} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Student Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    placeholder="Enter real student name"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-medium focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* JNTU Roll Number */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    JNTU Roll Number *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={10}
+                    value={editFormData.rollNumber}
+                    onChange={(e) => setEditFormData({ ...editFormData, rollNumber: e.target.value.toUpperCase().replace(/\s+/g, '') })}
+                    placeholder="e.g. 24341A0502 or 25341A05P9"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* Year */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Academic Year *
+                  </label>
+                  <select
+                    value={editFormData.year}
+                    onChange={(e) => {
+                      const newYear = e.target.value;
+                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : 'CSE 3A';
+                      setEditFormData({ ...editFormData, year: newYear, section: defaultSec });
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="2nd Year">2nd Year (2024-2028 Batch)</option>
+                    <option value="3rd Year">3rd Year (2023-2027 Batch)</option>
+                  </select>
+                </div>
+
+                {/* Section */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Section *
+                  </label>
+                  <select
+                    value={editFormData.section}
+                    onChange={(e) => setEditFormData({ ...editFormData, section: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold focus:outline-none focus:border-amber-400"
+                  >
+                    {editFormData.year?.includes('2') ? (
+                      <>
+                        <option value="CSE 2A">CSE 2A</option>
+                        <option value="CSE 2B">CSE 2B</option>
+                        <option value="CSE 2C">CSE 2C</option>
+                        <option value="CSE 2D">CSE 2D</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CSE 3A">CSE 3A</option>
+                        <option value="CSE 3B">CSE 3B</option>
+                        <option value="CSE 3C">CSE 3C</option>
+                        <option value="CSE 3D">CSE 3D</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Phone / WhatsApp Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={editFormData.phone}
+                    onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                    placeholder="e.g. +91 9876543210"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    placeholder="e.g. student@gmail.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* Payment Status */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payment Status
+                  </label>
+                  <select
+                    value={editFormData.paymentStatus}
+                    onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400 font-bold"
+                  >
+                    <option value="verified">Verified (₹50+ Paid)</option>
+                    <option value="pending">Pending Verification</option>
+                  </select>
+                </div>
+
+                {/* Payment Amount */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Amount Paid (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="50"
+                    value={editFormData.amount}
+                    onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* Transaction ID */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Gateway TXN / UTR ID
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.transactionId}
+                    onChange={(e) => setEditFormData({ ...editFormData, transactionId: e.target.value })}
+                    placeholder="e.g. pay_TRTFvTYSbcwVCS"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                {/* VPA */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payer VPA / UPI ID
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.vpa}
+                    onChange={(e) => setEditFormData({ ...editFormData, vpa: e.target.value })}
+                    placeholder="e.g. student@ybl"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Stage Speaker options */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5 text-amber-400" />
+                    Interested in Speaking on Stage?
+                  </span>
+                  <select
+                    value={editFormData.interestedInSpeaking}
+                    onChange={(e) => setEditFormData({ ...editFormData, interestedInSpeaking: e.target.value })}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 text-white text-xs font-bold"
+                  >
+                    <option value="No">No (Attendee)</option>
+                    <option value="Yes">Yes (Stage Speaker)</option>
+                  </select>
+                </div>
+
+                {editFormData.interestedInSpeaking === 'Yes' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Speech Dedicated To Professor
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.speechTeacher}
+                        onChange={(e) => setEditFormData({ ...editFormData, speechTeacher: e.target.value })}
+                        placeholder="Faculty name"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Speech Topic / Key Thoughts
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.speechTopic}
+                        onChange={(e) => setEditFormData({ ...editFormData, speechTopic: e.target.value })}
+                        placeholder="e.g. Words of gratitude"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingSubmission(null)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingEdit}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center gap-1.5 disabled:opacity-50 touch-press"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingEdit ? 'Saving Changes...' : 'Save & Update Details'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

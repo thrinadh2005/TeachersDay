@@ -967,6 +967,36 @@ app.delete('/api/admin/teachers/:id', checkAdminAuth, (req, res) => {
   }
 });
 
+// PUT /api/admin/submissions/:id - Edit and update student submission details
+app.put('/api/admin/submissions/:id', checkAdminAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const result = db.updateSubmission(sanitizeString(id, 50), updates);
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/submissions/:id/update - Alternative POST endpoint for editing
+app.post('/api/admin/submissions/:id/update', checkAdminAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const result = db.updateSubmission(sanitizeString(id, 50), updates);
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // DELETE /api/admin/submissions/:id - Delete a student registration submission
 app.delete('/api/admin/submissions/:id', checkAdminAuth, (req, res) => {
   try {
