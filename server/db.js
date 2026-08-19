@@ -549,9 +549,10 @@ class Database {
         status: payload.paymentStatus || 'verified',
         transactionId: payload.transactionId || `TXN_CSE_${Date.now()}`,
         paymentMethod: payload.paymentMethod || 'UPI_DIRECT',
-        paidAt: new Date().toISOString()
+        vpa: payload.vpa || payload.payment?.vpa || '',
+        paidAt: payload.paidAt || payload.payment?.paidAt || new Date().toISOString()
       },
-      createdAt: new Date().toISOString()
+      createdAt: payload.createdAt || new Date().toISOString()
     };
 
     this.data.submissions.unshift(newSubmission);

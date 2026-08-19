@@ -1418,11 +1418,11 @@ export const AdminDashboard = () => {
               <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
                 <tr>
                   <th className="p-3.5">Receipt / Pass ID</th>
-                  <th className="p-3.5">Student</th>
+                  <th className="p-3.5">Student / Payee</th>
                   <th className="p-3.5">Year & Section</th>
+                  <th className="p-3.5">Payment & Payee Details</th>
                   <th className="p-3.5">Stage Speaker?</th>
-                  <th className="p-3.5">Payment</th>
-                  <th className="p-3.5 text-right">Action</th>
+                  <th className="p-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -1435,80 +1435,107 @@ export const AdminDashboard = () => {
                 ) : (
                   filteredSubmissions.map((sub) => {
                     const isVerified = sub.payment?.status === 'verified';
+                    const paidDate = sub.payment?.paidAt || sub.createdAt;
                     return (
                       <tr key={sub.id} className="hover:bg-white/5 transition-colors">
                         <td className="p-3.5 font-mono font-bold text-amber-300">
-                          {sub.ticketNumber}
+                          <div>{sub.ticketNumber || sub.acknowledgementNumber || sub.id}</div>
+                          {sub.acknowledgementNumber && sub.acknowledgementNumber !== sub.ticketNumber && (
+                            <div className="text-[10px] text-slate-500 font-mono mt-0.5">{sub.acknowledgementNumber}</div>
+                          )}
                         </td>
                         <td className="p-3.5">
-                          <div className="font-bold text-white">{sub.name}</div>
-                          <div className="text-[11px] text-purple-300 font-mono">{sub.rollNumber}</div>
+                          <div className="font-bold text-white text-sm">{sub.name}</div>
+                          <div className="text-[11px] text-purple-300 font-mono font-bold mt-0.5">{sub.rollNumber}</div>
+                          <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400 font-mono flex-wrap">
+                            {sub.phone && <span>📱 {sub.phone}</span>}
+                            {sub.email && <span className="truncate max-w-[140px]" title={sub.email}>✉️ {sub.email}</span>}
+                          </div>
                         </td>
                         <td className="p-3.5">
                           <div className="font-semibold text-white">{sub.year}</div>
-                          <div className="text-[11px] text-amber-400">{sub.section}</div>
+                          <div className="text-[11px] text-amber-400 font-bold">{sub.section}</div>
+                          <div className="text-[10px] text-slate-500">CSE Dept</div>
+                        </td>
+                        <td className="p-3.5">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${isVerified
+                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                }`}>
+                                {isVerified ? `✓ ₹${sub.payment?.amount || 50} Paid` : '⏳ Pending'}
+                              </span>
+                              <span className="text-[10px] font-mono text-slate-400">
+                                {sub.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 UPI Direct' : '💳 Razorpay Gateway'}
+                              </span>
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-300">
+                              <span className="text-slate-500">TXN / UTR: </span>
+                              <span className="text-amber-300 font-bold select-all">{sub.payment?.transactionId || 'N/A'}</span>
+                            </div>
+                            {sub.payment?.vpa && (
+                              <div className="text-[10px] font-mono text-emerald-300">
+                                <span className="text-slate-500">VPA: </span>
+                                <span>{sub.payment.vpa}</span>
+                              </div>
+                            )}
+                            {paidDate && (
+                              <div className="text-[10px] text-slate-400 font-mono">
+                                📅 {new Date(paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date(paidDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="p-3.5">
                           {sub.interestedInSpeaking === 'Yes' ? (
-                            <span className="inline-flex items-center gap-1 text-amber-300 font-bold text-xs">
-                              <Mic className="w-3.5 h-3.5" /> Yes ({sub.speechTeacher})
-                            </span>
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 text-amber-300 font-bold text-xs">
+                                <Mic className="w-3.5 h-3.5" /> Stage Speaker
+                              </span>
+                              {sub.speechTeacher && (
+                                <div className="text-[11px] text-slate-300">
+                                  Prof: <span className="text-amber-400">{sub.speechTeacher}</span>
+                                </div>
+                              )}
+                              {sub.speechTopic && (
+                                <div className="text-[10px] text-slate-400 italic truncate max-w-[150px]" title={sub.speechTopic}>
+                                  "{sub.speechTopic}"
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <span className="text-slate-500">Attendee</span>
                           )}
                         </td>
-                        <td className="p-3.5">
-                          <div className="space-y-1">
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${isVerified
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                              }`}>
-                              {isVerified ? `✓ ₹${sub.payment?.amount || 50} Paid` : '⏳ Pending'}
-                            </span>
-                            <div className="text-[10px] font-mono text-slate-400">
-                              {sub.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 UPI: ' : '💳 RZP: '}
-                              <span className="text-amber-300 font-bold select-all">{sub.payment?.transactionId || 'N/A'}</span>
-                            </div>
+                        <td className="p-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => setViewingPass(sub)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
+                              title="View & Print Official Acknowledgement Slip"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <span>Slip</span>
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedStudent(sub)}
+                              className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
+                              title="View Full Registration Details"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Details</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteSubmission(sub.id, sub.name, sub.ticketNumber)}
+                              className="p-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 transition-all"
+                              title="Delete Submission"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        </td>
-                        <td className="p-3.5 text-right flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setViewingPass(sub)}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
-                            title="View & Print Official Acknowledgement Slip"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>Slip</span>
-                          </button>
-
-                          <button
-                            onClick={() => setSelectedStudent(sub)}
-                            className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
-                            title="View Full Registration Details"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Details</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleTogglePayment(sub.id, sub.payment?.status)}
-                            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all border ${isVerified
-                                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-white/10'
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500/40'
-                              }`}
-                            title={isVerified ? 'Mark as Pending' : `Verify ₹${sub.payment?.amount || 50} Payment`}
-                          >
-                            {isVerified ? 'Mark Pending' : `Verify ₹${sub.payment?.amount || 50}`}
-                          </button>
-
-                          <button
-                            onClick={() => handleDeleteSubmission(sub.id, sub.name, sub.ticketNumber)}
-                            className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-rose-500/30"
-                            title="Delete Student Registration"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Delete</span>
-                          </button>
                         </td>
                       </tr>
                     );
