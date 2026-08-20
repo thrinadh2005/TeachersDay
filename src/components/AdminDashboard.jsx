@@ -160,7 +160,7 @@ export const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [yearFilter, setYearFilter] = useState('ALL');
   const [sectionFilter, setSectionFilter] = useState('ALL');
-  const [showSectionBreakdown, setShowSectionBreakdown] = useState(true);
+  const [showSectionBreakdown, setShowSectionBreakdown] = useState(false);
 
   // Add / Edit teacher form
   const [showAddTeacher, setShowAddTeacher] = useState(false);
@@ -820,65 +820,65 @@ export const AdminDashboard = () => {
   );
 
   return (
-    <section className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fadeIn">
+    <section className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 space-y-3 sm:space-y-4 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
+        <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
-              CSE Department 2nd & 3rd Year (Sections 2A–2D, 3A–3D)
+            <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase">
+              CSE Dept 2nd & 3rd Year (2A–2D, 3A–3D)
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white font-display">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
             CSE Teachers' Day 2026 Control Center
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap w-full xl:w-auto justify-start xl:justify-end">
+        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-start sm:justify-end">
           {/* Toggle Public Reveal Switch */}
           <button
             onClick={handleToggleReveal}
-            className={`inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold transition-all shadow-md touch-press ${isRevealed
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm touch-press ${isRevealed
                 ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             title="Toggle public disclosure of voting results"
           >
-            {isRevealed ? <Eye className="w-4 h-4 text-slate-950" /> : <EyeOff className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
-            <span>{isRevealed ? 'Public Results: REVEALED' : 'Public Results: HIDDEN (Secret)'}</span>
+            {isRevealed ? <Eye className="w-3.5 h-3.5 text-slate-950" /> : <EyeOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
+            <span>{isRevealed ? 'Results: REVEALED' : 'Results: HIDDEN'}</span>
           </button>
 
           <button
             onClick={() => loadData(adminPin)}
-            className="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
             title="Refresh Data"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
 
           <button
             type="button"
             onClick={() => handleOpenAddModal()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 transition-all touch-press border border-purple-400/30"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-md shadow-purple-600/30 transition-all touch-press border border-purple-400/30"
             title="Register a student who paid directly and generate pass"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
             <span>➕ Add Student (Direct Pay)</span>
           </button>
 
           <a
             href={api.getExportCsvUrl(adminPin)}
             download
-            className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all touch-press"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition-all touch-press"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
           </a>
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300 text-slate-600 dark:text-slate-400 text-xs font-semibold transition-colors border border-slate-200 dark:border-white/10"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300 text-slate-600 dark:text-slate-400 text-xs font-semibold transition-colors border border-slate-200 dark:border-white/10"
           >
             Logout
           </button>
@@ -886,68 +886,52 @@ export const AdminDashboard = () => {
       </div>
 
       {notification && (
-        <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-md ${notification.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-400 dark:border-rose-500/30'
+        <div className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between shadow-md ${notification.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-400 dark:border-rose-500/30'
           }`}>
           <span>{notification.message}</span>
           <button onClick={() => setNotification(null)} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">✕</button>
         </div>
       )}
 
-      {/* KPI METRICS */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* COMPACT KPI METRICS STRIP */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
 
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">CSE Registrations</span>
-            <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+        <div className="glass-card px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Registrations</div>
+            <div className="text-xl font-black text-slate-900 dark:text-white font-display leading-tight">{overview?.totalSubmissions || 0}</div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
-            {overview?.totalSubmissions || 0}
-          </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">2nd, 3rd & 4th Years (A-D)</span>
+          <Users className="w-5 h-5 text-purple-500 shrink-0" />
         </div>
 
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">Stage Speakers</span>
-            <Mic className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        <div className="glass-card px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-bold uppercase text-amber-500">Speakers</div>
+            <div className="text-xl font-black text-amber-500 font-display leading-tight">{overview?.speakersCount || registeredSpeakers.length}</div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-display">
-            {overview?.speakersCount || registeredSpeakers.length}
-          </div>
-          <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">Registered on stage</span>
+          <Mic className="w-5 h-5 text-amber-500 shrink-0" />
         </div>
 
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">Funds Raised (₹)</span>
-            <Coins className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <div className="glass-card px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-bold uppercase text-emerald-500">Funds Raised</div>
+            <div className="text-xl font-black text-emerald-500 font-display leading-tight">₹{overview?.totalFundsCollected || 0}</div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
-            ₹{overview?.totalFundsCollected || 0}
-          </div>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
-            {overview?.verifiedPayments || 0} Verified Contributions
-          </span>
+          <Coins className="w-5 h-5 text-emerald-500 shrink-0" />
         </div>
 
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase">Secret Ballot Votes</span>
-            <Vote className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+        <div className="glass-card px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-bold uppercase text-pink-500">Secret Votes</div>
+            <div className="text-xl font-black text-pink-500 font-display leading-tight">{overview?.totalVotes || 0}</div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400 font-display">
-            {overview?.totalVotes || 0}
-          </div>
-          <span className="text-[11px] text-pink-700 dark:text-pink-300 font-medium">
-            {overview?.totalVoters ?? 0} Students cast ballots
-          </span>
+          <Vote className="w-5 h-5 text-pink-500 shrink-0" />
         </div>
 
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-white/10 pb-1.5 overflow-x-auto scrollbar-none">
 
         <button
           onClick={() => setActiveTab('votes')}
@@ -1018,21 +1002,18 @@ export const AdminDashboard = () => {
 
       {/* TAB: SECRET BALLOT CATEGORY VOTING RESULTS */}
       {activeTab === 'votes' && (
-        <div className="space-y-6">
+        <div className="space-y-3">
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-400" />
+              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-400" />
                 <span>Confidential Voting Results & Category Breakdown</span>
               </h3>
-              <p className="text-xs text-slate-400">
-                These tallies are strictly confidential to the committee unless you click <span className="text-amber-400 font-bold">"Reveal Public Results"</span>.
-              </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${isRevealed
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${isRevealed
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                   : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
                 }`}>
@@ -1042,7 +1023,7 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Category Winners Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             {categories.map(cat => {
               let maxVotes = 0;
               teacherResults.forEach(t => {
@@ -1059,32 +1040,30 @@ export const AdminDashboard = () => {
               return (
                 <div 
                   key={cat.id} 
-                  className={`p-4 rounded-2xl glass-card space-y-2 border transition-all ${
+                  className={`p-2.5 rounded-xl glass-card space-y-1 border transition-all ${
                     isTie 
-                      ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/30 to-slate-900 shadow-md' 
+                      ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/30 to-slate-900 shadow-sm' 
                       : 'border-amber-400/30'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider truncate">
+                    <span className="text-[9px] font-bold uppercase text-amber-400 tracking-wider truncate">
                       {cat.title}
                     </span>
                     {isTie && (
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300 border border-purple-500/40 shrink-0">
-                        ⚡ {topFaculty.length} Joint
+                      <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-purple-500/30 text-purple-300 border border-purple-500/40 shrink-0">
+                        ⚡ Joint
                       </span>
                     )}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white truncate" title={topFaculty.map(f => f.name).join(' & ')}>
+                    <h4 className="text-xs font-bold text-white truncate" title={topFaculty.map(f => f.name).join(' & ')}>
                       {topFaculty.length > 0
                         ? (isTie ? `⚡ Joint: ${topFaculty.map(f => f.name).join(' & ')}` : topFaculty[0].name)
-                        : 'Voting in progress'}
+                        : 'No votes'}
                     </h4>
-                    <p className="text-[11px] text-slate-400 truncate" title={topFaculty.length > 0 ? (isTie ? `${maxVotes} Votes Each: ${topFaculty.map(f => f.name).join(', ')}` : `${maxVotes} Votes • ${topFaculty[0].designation}`) : ''}>
-                      {topFaculty.length > 0 
-                        ? (isTie ? `${maxVotes} Votes Each • Joint Winners` : `${maxVotes} Votes • ${topFaculty[0].designation}`)
-                        : '0 votes recorded yet'}
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {topFaculty.length > 0 ? `${maxVotes} Votes` : '0 votes yet'}
                     </p>
                   </div>
                 </div>
@@ -1092,77 +1071,59 @@ export const AdminDashboard = () => {
             })}
           </div>
 
-          {/* Admin Ballot & Voter Management Controls */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-slate-950 border border-purple-500/30 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/30">
-                <Vote className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                  <span>Secret Ballot Administration</span>
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">Admin Only</span>
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Total Votes Recorded: <strong className="text-amber-400">{overview?.totalVotes || 0}</strong> • Total Active Voters: <strong className="text-purple-300">{overview?.totalVoters ?? 0}</strong>
-                </p>
-              </div>
+          {/* Admin Ballot Controls & Search Bar */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 items-center">
+            {/* Search Faculty Results */}
+            <div className="lg:col-span-4 relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search faculty votes..."
+                value={teacherSearch}
+                onChange={(e) => setTeacherSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              {/* Clear Single Voter Lock Form */}
-              <form onSubmit={handleResetSingleVoter} className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Clear Single Voter Lock Form & Reset Button */}
+            <div className="lg:col-span-8 flex flex-wrap sm:flex-nowrap items-center justify-start lg:justify-end gap-2">
+              <form onSubmit={handleResetSingleVoter} className="flex items-center gap-1.5 w-full sm:w-auto">
                 <input
                   type="text"
                   maxLength={10}
-                  placeholder="Roll No. (e.g. 24341A0501)"
+                  placeholder="Unlock Roll (e.g. 24341A0501)"
                   value={singleRollToReset}
                   onChange={(e) => setSingleRollToReset(e.target.value.toUpperCase())}
-                  className="px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400 w-full sm:w-48"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400 w-full sm:w-48"
                 />
                 <button
                   type="submit"
                   disabled={loading || !singleRollToReset.trim()}
-                  className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold whitespace-nowrap shadow transition-all disabled:opacity-50 touch-press flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold whitespace-nowrap shadow-sm transition-all disabled:opacity-50 touch-press flex items-center gap-1 shrink-0"
                   title="Unlock this student roll number so they can vote again"
                 >
-                  <Unlock className="w-3.5 h-3.5" />
-                  <span>Unlock Roll</span>
+                  <Unlock className="w-3 h-3" />
+                  <span>Unlock</span>
                 </button>
               </form>
 
-              <div className="hidden sm:block h-6 w-px bg-white/10" />
-
-              {/* Reset All Votes & Voters */}
               <button
                 type="button"
                 onClick={handleResetAllVotes}
                 disabled={isResettingVotes || loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all touch-press disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all touch-press disabled:opacity-50 shrink-0"
                 title="Reset all faculty votes and clear all voter lock records to ZERO"
               >
-                <RotateCcw className={`w-3.5 h-3.5 ${isResettingVotes ? 'animate-spin' : ''}`} />
-                <span>Reset All Votes to ZERO</span>
+                <RotateCcw className={`w-3 h-3 ${isResettingVotes ? 'animate-spin' : ''}`} />
+                <span>Reset Votes</span>
               </button>
             </div>
           </div>
 
-          {/* Search Faculty Results */}
-          <div className="max-w-md relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search faculty votes..."
-              value={teacherSearch}
-              onChange={(e) => setTeacherSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
-            />
-          </div>
-
-          {/* Category Vote Breakdown Table */}
-          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
+          {/* Category Vote Breakdown Table with Internal Scroll */}
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-290px)] min-h-[300px] shadow-lg w-full">
+            <table className="min-w-full text-left text-xs text-slate-300">
+              <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10 shadow-sm backdrop-blur-md">
                 <tr>
                   <th className="p-3.5">Faculty Member</th>
                   <th className="p-3.5 text-center">🏆 Inspiring Mentor</th>
@@ -1364,64 +1325,61 @@ export const AdminDashboard = () => {
 
       {/* TAB: ALL SUBMISSIONS & PAYMENTS */}
       {activeTab === 'submissions' && (
-        <div className="space-y-5">
+        <div className="space-y-3">
 
-          {/* Section-Wise Status & Payment Matrix */}
-          <div className="glass-card p-4 sm:p-5 rounded-3xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-xl shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                  <Layers className="w-5 h-5" />
+          {/* Section-Wise Status & Payment Matrix Strip */}
+          <div className="glass-card p-3 sm:p-3.5 rounded-2xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-xl shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 shrink-0">
+                  <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white font-display flex items-center gap-2">
-                    <span>Section-Wise Status & Payments</span>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <h3 className="text-xs sm:text-sm font-black text-white font-display flex items-center gap-1.5">
+                    <span>Section-Wise Breakdown</span>
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                       8 Sections
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-400">
-                    Live registration, verified payment count, funds raised, and 1-click section CSV downloads
-                  </p>
                 </div>
               </div>
 
-              {/* Global CSV Download Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Global CSV Download & Toggle Buttons */}
+              <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => handleOpenAddModal()}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-purple-500/30 hover:scale-[1.02] active:scale-95 border border-purple-400/40"
+                  className="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all touch-press"
                   title="Add / Register a student manually with full details & generate pass"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Add Student Pass</span>
+                  <span>Add Student</span>
                 </button>
 
                 <a
                   href={api.getExportCsvUrl(adminPin, {})}
                   download
-                  className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95"
+                  className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
                   title="Download complete registered students & payment list"
                 >
                   <Download className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Master CSV (All)</span>
+                  <span>Master CSV</span>
                 </a>
 
                 <a
                   href={api.getExportCsvUrl(adminPin, { summary: true })}
                   download
-                  className="px-3.5 py-2 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95"
+                  className="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center gap-1 transition-all"
                   title="Download executive section-wise summary numbers"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Section Summary CSV</span>
+                  <span>Summary CSV</span>
                 </a>
 
                 <button
                   type="button"
                   onClick={() => setShowSectionBreakdown(!showSectionBreakdown)}
-                  className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 font-bold text-xs transition-all"
+                  className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 font-bold text-xs transition-all"
                 >
                   {showSectionBreakdown ? 'Hide Matrix' : 'Show Matrix'}
                 </button>
@@ -1429,7 +1387,7 @@ export const AdminDashboard = () => {
             </div>
 
             {showSectionBreakdown && (
-              <div className="space-y-4 pt-1">
+              <div className="space-y-3 pt-1 border-t border-white/10">
                 {['2nd Year', '3rd Year'].map((year) => {
                   const isYear2 = year.includes('2');
                   const sectionsList = isYear2 
@@ -1440,18 +1398,18 @@ export const AdminDashboard = () => {
                   const yearFunds = yearSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
                   
                   return (
-                    <div key={year} className="space-y-2">
+                    <div key={year} className="space-y-1.5">
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <GraduationCap className="w-4 h-4" />
+                        <span className="text-[11px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                          <GraduationCap className="w-3.5 h-3.5" />
                           {year} CSE
                         </span>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          Total in {year}: <strong className="text-white">{yearSubmissions.length} Students</strong> • <strong className="text-emerald-400">₹{yearFunds} Collected</strong>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          Total in {year}: <strong className="text-white">{yearSubmissions.length} Students</strong> • <strong className="text-emerald-400">₹{yearFunds}</strong>
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-2">
                         {sectionsList.map((sec) => {
                           const matching = submissions.filter(s => isStudentInSection(s, sec));
                           const verified = matching.filter(s => s.payment?.status === 'verified');
@@ -1462,20 +1420,20 @@ export const AdminDashboard = () => {
                           return (
                             <div
                               key={sec}
-                              className={`p-3.5 rounded-2xl border transition-all relative group flex flex-col justify-between ${
+                              className={`p-2.5 rounded-xl border transition-all relative group flex flex-col justify-between ${
                                 isCurrentFilter
-                                  ? 'bg-purple-950/70 border-purple-400 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400'
+                                  ? 'bg-purple-950/70 border-purple-400 shadow-sm ring-1 ring-purple-400'
                                   : matching.length > 0
                                   ? 'bg-slate-900/80 hover:bg-slate-900 border-white/10 hover:border-purple-400/40'
                                   : 'bg-slate-950/40 border-white/5 opacity-75 hover:opacity-100'
                               }`}
                             >
                               <div>
-                                <div className="flex items-center justify-between mb-1.5">
+                                <div className="flex items-center justify-between mb-1">
                                   <span className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
                                     {sec}
                                   </span>
-                                  <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                                  <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded ${
                                     matching.length > 0 
                                       ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
                                       : 'bg-slate-800 text-slate-500'
@@ -1484,27 +1442,27 @@ export const AdminDashboard = () => {
                                   </span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-1 text-[11px] mb-2 font-mono">
-                                  <div className="bg-slate-950/60 p-1.5 rounded-lg border border-white/5">
-                                    <span className="text-slate-400 text-[10px] block">Verified:</span>
+                                <div className="grid grid-cols-2 gap-1 text-[10px] mb-1.5 font-mono">
+                                  <div className="bg-slate-950/60 p-1 rounded border border-white/5">
+                                    <span className="text-slate-400 text-[9px] block">Verified:</span>
                                     <span className="font-bold text-emerald-400">✓ {verified.length} (₹{funds})</span>
                                   </div>
-                                  <div className="bg-slate-950/60 p-1.5 rounded-lg border border-white/5">
-                                    <span className="text-slate-400 text-[10px] block">Speakers:</span>
+                                  <div className="bg-slate-950/60 p-1 rounded border border-white/5">
+                                    <span className="text-slate-400 text-[9px] block">Speakers:</span>
                                     <span className="font-bold text-amber-300">🎤 {speakers}</span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Action buttons inside card */}
-                              <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pt-2 border-t border-white/5">
+                              <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setYearFilter(year);
                                     setSectionFilter(sec);
                                   }}
-                                  className={`flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all text-center ${
+                                  className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all text-center ${
                                     isCurrentFilter
                                       ? 'bg-purple-600 text-white'
                                       : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white'
@@ -1516,20 +1474,20 @@ export const AdminDashboard = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenAddModal(year, sec)}
-                                  className="py-1.5 px-2.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[10px] font-bold flex items-center gap-1 shrink-0"
+                                  className="py-1 px-2 rounded bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
                                   title={`Add new student to ${sec}`}
                                 >
-                                  <Plus className="w-3 h-3" />
+                                  <Plus className="w-2.5 h-2.5" />
                                   <span>Add</span>
                                 </button>
 
                                 <a
                                   href={api.getExportCsvUrl(adminPin, { year, section: sec })}
                                   download
-                                  className="py-1.5 px-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[10px] font-bold flex items-center gap-1 shrink-0"
+                                  className="py-1 px-2 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
                                   title={`Download CSV for ${year} ${sec}`}
                                 >
-                                  <Download className="w-3 h-3" />
+                                  <Download className="w-2.5 h-2.5" />
                                   <span>CSV</span>
                                 </a>
                               </div>
@@ -1544,70 +1502,23 @@ export const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Filters Bar & Summary Strip */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="text-xs text-slate-400 font-mono">
-                Showing <strong className="text-white">{filteredSubmissions.length}</strong> matching students • Verified Total: <strong className="text-emerald-400">₹{filteredSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0)}</strong>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => handleOpenAddModal()}
-                className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition-all"
-                title="Add New Student Registration"
-              >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span>Add Student</span>
-              </button>
-
-              {(yearFilter !== 'ALL' || sectionFilter !== 'ALL' || statusFilter !== 'ALL' || searchTerm) && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setYearFilter('ALL');
-                      setSectionFilter('ALL');
-                      setStatusFilter('ALL');
-                      setSearchTerm('');
-                    }}
-                    className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline"
-                  >
-                    Clear Filters
-                  </button>
-                  
-                  <a
-                    href={api.getExportCsvUrl(adminPin, { year: yearFilter, section: sectionFilter, status: statusFilter })}
-                    download
-                    className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1"
-                  >
-                    <Download className="w-3 h-3" />
-                    <span>Download Filtered CSV ({filteredSubmissions.length})</span>
-                  </a>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Filters Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          {/* Compact Filters & Toolbar */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 items-center">
+            <div className="relative lg:col-span-2">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search student or roll..."
+                placeholder="Search student or roll number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
             >
               <option value="ALL">All Years (2nd & 3rd Year)</option>
               <option value="2nd Year">2nd Year (Sections 2A–2D)</option>
@@ -1617,7 +1528,7 @@ export const AdminDashboard = () => {
             <select
               value={sectionFilter}
               onChange={(e) => setSectionFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
             >
               <option value="ALL">All Sections (8 Sections)</option>
               <optgroup label="2nd Year Sections">
@@ -1634,21 +1545,39 @@ export const AdminDashboard = () => {
               </optgroup>
             </select>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
-            >
-              <option value="ALL">All Payment Status</option>
-              <option value="verified">Verified (₹50+ Paid)</option>
-              <option value="pending">Pending</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="flex-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+              >
+                <option value="ALL">All Status</option>
+                <option value="verified">Verified (₹50+)</option>
+                <option value="pending">Pending</option>
+              </select>
+
+              {(yearFilter !== 'ALL' || sectionFilter !== 'ALL' || statusFilter !== 'ALL' || searchTerm) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setYearFilter('ALL');
+                    setSectionFilter('ALL');
+                    setStatusFilter('ALL');
+                    setSearchTerm('');
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold shrink-0 hover:bg-amber-500/30"
+                  title="Clear Filters"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Table */}
-          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto shadow-xl w-full">
+          {/* Table with Bounded Sticky Internal Scrolling */}
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-270px)] min-h-[350px] shadow-xl w-full">
             <table className="min-w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
+              <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10 shadow-sm backdrop-blur-md">
                 <tr>
                   <th className="p-3.5">Receipt / Pass ID</th>
                   <th className="p-3.5">Student / Payee</th>
