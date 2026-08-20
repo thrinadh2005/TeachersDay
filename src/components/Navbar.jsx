@@ -90,7 +90,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     <>
       {/* TOP DESKTOP & MOBILE HEADER */}
       <header className="sticky top-0 z-50 glass-nav transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             
             {/* Logo & Title with Secret Double-Click / Double-Tap for Admin */}

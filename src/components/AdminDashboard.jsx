@@ -820,26 +820,26 @@ export const AdminDashboard = () => {
   );
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
+    <section className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
-        <div>
+      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-bold uppercase">
               CSE Department 2nd & 3rd Year (Sections 2A–2D, 3A–3D)
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display mt-1">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white font-display">
             CSE Teachers' Day 2026 Control Center
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap w-full xl:w-auto justify-start xl:justify-end">
           {/* Toggle Public Reveal Switch */}
           <button
             onClick={handleToggleReveal}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md touch-press ${isRevealed
+            className={`inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold transition-all shadow-md touch-press ${isRevealed
                 ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
@@ -851,7 +851,7 @@ export const AdminDashboard = () => {
 
           <button
             onClick={() => loadData(adminPin)}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
+            className="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 transition-colors shadow-sm"
             title="Refresh Data"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -860,7 +860,7 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => handleOpenAddModal()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 transition-all touch-press border border-purple-400/30"
+            className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 transition-all touch-press border border-purple-400/30"
             title="Register a student who paid directly and generate pass"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
@@ -870,7 +870,7 @@ export const AdminDashboard = () => {
           <a
             href={api.getExportCsvUrl(adminPin)}
             download
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all touch-press"
+            className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all touch-press"
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
@@ -878,7 +878,7 @@ export const AdminDashboard = () => {
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300 text-slate-600 dark:text-slate-400 text-xs font-semibold transition-colors border border-slate-200 dark:border-white/10"
+            className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300 text-slate-600 dark:text-slate-400 text-xs font-semibold transition-colors border border-slate-200 dark:border-white/10"
           >
             Logout
           </button>
@@ -894,9 +894,9 @@ export const AdminDashboard = () => {
       )}
 
       {/* KPI METRICS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">CSE Registrations</span>
             <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -907,7 +907,7 @@ export const AdminDashboard = () => {
           <span className="text-[11px] text-slate-500 dark:text-slate-400">2nd, 3rd & 4th Years (A-D)</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Stage Speakers</span>
             <Mic className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -918,7 +918,7 @@ export const AdminDashboard = () => {
           <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">Registered on stage</span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Funds Raised (₹)</span>
             <Coins className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -931,7 +931,7 @@ export const AdminDashboard = () => {
           </span>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase">Secret Ballot Votes</span>
             <Vote className="w-4 h-4 text-pink-600 dark:text-pink-400" />
@@ -947,7 +947,7 @@ export const AdminDashboard = () => {
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2 overflow-x-auto scrollbar-none">
 
         <button
           onClick={() => setActiveTab('votes')}
@@ -1441,7 +1441,7 @@ export const AdminDashboard = () => {
                   
                   return (
                     <div key={year} className="space-y-2">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                           <GraduationCap className="w-4 h-4" />
                           {year} CSE
@@ -1451,7 +1451,7 @@ export const AdminDashboard = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3">
                         {sectionsList.map((sec) => {
                           const matching = submissions.filter(s => isStudentInSection(s, sec));
                           const verified = matching.filter(s => s.payment?.status === 'verified');
@@ -1462,7 +1462,7 @@ export const AdminDashboard = () => {
                           return (
                             <div
                               key={sec}
-                              className={`p-3 rounded-2xl border transition-all relative group flex flex-col justify-between ${
+                              className={`p-3.5 rounded-2xl border transition-all relative group flex flex-col justify-between ${
                                 isCurrentFilter
                                   ? 'bg-purple-950/70 border-purple-400 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400'
                                   : matching.length > 0
@@ -1497,14 +1497,14 @@ export const AdminDashboard = () => {
                               </div>
 
                               {/* Action buttons inside card */}
-                              <div className="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                              <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pt-2 border-t border-white/5">
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setYearFilter(year);
                                     setSectionFilter(sec);
                                   }}
-                                  className={`flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${
+                                  className={`flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all text-center ${
                                     isCurrentFilter
                                       ? 'bg-purple-600 text-white'
                                       : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white'
@@ -1516,7 +1516,7 @@ export const AdminDashboard = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenAddModal(year, sec)}
-                                  className="p-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[10px] font-bold flex items-center gap-0.5 px-2"
+                                  className="py-1.5 px-2.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[10px] font-bold flex items-center gap-1 shrink-0"
                                   title={`Add new student to ${sec}`}
                                 >
                                   <Plus className="w-3 h-3" />
@@ -1526,7 +1526,7 @@ export const AdminDashboard = () => {
                                 <a
                                   href={api.getExportCsvUrl(adminPin, { year, section: sec })}
                                   download
-                                  className="p-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[10px] font-bold flex items-center gap-1 px-2"
+                                  className="py-1.5 px-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[10px] font-bold flex items-center gap-1 shrink-0"
                                   title={`Download CSV for ${year} ${sec}`}
                                 >
                                   <Download className="w-3 h-3" />
@@ -1556,10 +1556,10 @@ export const AdminDashboard = () => {
               <button
                 type="button"
                 onClick={() => handleOpenAddModal()}
-                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-purple-600/30 transition-all"
+                className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition-all"
                 title="Add New Student Registration"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Add Student</span>
               </button>
 
@@ -1592,8 +1592,8 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Filters Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div className="relative sm:col-span-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="relative">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
@@ -1646,8 +1646,8 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Table */}
-          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto shadow-xl w-full">
+            <table className="min-w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10">
                 <tr>
                   <th className="p-3.5">Receipt / Pass ID</th>

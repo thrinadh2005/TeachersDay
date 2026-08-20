@@ -11,7 +11,7 @@ import { fireFestiveConfetti } from '../utils/confetti';
 export const Footer = ({ setActiveTab }) => {
   return (
     <footer className="relative mt-8 sm:mt-16 border-t border-slate-200 dark:border-white/10 glass-nav text-slate-600 dark:text-slate-400 text-xs bg-white dark:bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         
         {/* DESKTOP RICH 4-COLUMN FOOTER */}
         <div className="hidden md:grid md:grid-cols-4 gap-8 mb-8">
