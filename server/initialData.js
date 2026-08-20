@@ -1,33 +1,33 @@
 export const votingCategories = [
-  { 
-    id: 'inspiring', 
-    title: '🏆 Most Inspiring Mentor', 
+  {
+    id: 'inspiring',
+    title: '🏆 Most Inspiring Mentor',
     shortTitle: 'Inspiring Mentor',
-    desc: 'Faculty who motivates, guides, and leads students to achieve their best.' 
+    desc: 'Faculty who motivates, guides, and leads students to achieve their best.'
   },
-  { 
-    id: 'explainer', 
-    title: '💡 Best Concept Explainer', 
+  {
+    id: 'explainer',
+    title: '💡 Best Concept Explainer',
     shortTitle: 'Concept Master',
-    desc: 'Faculty who makes even the toughest CSE algorithms & subjects simple and engaging.' 
+    desc: 'Faculty who makes even the toughest CSE algorithms & subjects simple and engaging.'
   },
-  { 
-    id: 'friendly', 
-    title: '😊 Most Friendly & Approachable', 
+  {
+    id: 'friendly',
+    title: '😊 Most Friendly & Approachable',
     shortTitle: 'Most Approachable',
-    desc: 'Faculty who is always patient, supportive, and accessible to every student.' 
+    desc: 'Faculty who is always patient, supportive, and accessible to every student.'
   },
-  { 
-    id: 'techGuru', 
-    title: '💻 Tech Guru & Coding Wizard', 
+  {
+    id: 'techGuru',
+    title: '💻 Tech Guru & Coding Wizard',
     shortTitle: 'Tech Guru',
-    desc: 'Faculty with exceptional practical coding knowledge and innovative lab mentorship.' 
+    desc: 'Faculty with exceptional practical coding knowledge and innovative lab mentorship.'
   },
-  { 
-    id: 'starFaculty', 
-    title: '🌟 All-Rounder Star Faculty', 
+  {
+    id: 'starFaculty',
+    title: '🌟 All-Rounder Star Faculty',
     shortTitle: 'All-Rounder Star',
-    desc: 'Outstanding all-round dedication, passion for teaching, and student admiration.' 
+    desc: 'Outstanding all-round dedication, passion for teaching, and student admiration.'
   }
 ];
 
