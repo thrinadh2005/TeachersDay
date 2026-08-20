@@ -167,6 +167,28 @@ export const AdminDashboard = () => {
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
+  // Add Student Submission state
+  const [showAddSubmission, setShowAddSubmission] = useState(false);
+  const [isSavingAdd, setIsSavingAdd] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: '',
+    rollNumber: '',
+    year: '2nd Year',
+    section: 'CSE 2A',
+    phone: '',
+    email: '',
+    paymentStatus: 'verified',
+    amount: 50,
+    paymentMethod: 'UPI_DIRECT',
+    transactionId: '',
+    vpa: '',
+    interestedInSpeaking: 'No',
+    speechTeacher: '',
+    speechTopic: '',
+    favoriteTeacher: '',
+    anecdote: ''
+  });
+
   // Edit Student Submission state
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [editFormData, setEditFormData] = useState({
@@ -178,11 +200,14 @@ export const AdminDashboard = () => {
     email: '',
     paymentStatus: 'verified',
     amount: 50,
+    paymentMethod: 'UPI_DIRECT',
     transactionId: '',
     vpa: '',
     interestedInSpeaking: 'No',
     speechTeacher: '',
-    speechTopic: ''
+    speechTopic: '',
+    favoriteTeacher: '',
+    anecdote: ''
   });
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
@@ -559,6 +584,83 @@ export const AdminDashboard = () => {
     setShowAddTeacher(true);
   };
 
+  const handleOpenAddModal = (defaultYear = null, defaultSec = null) => {
+    const initialYear = defaultYear || (yearFilter !== 'ALL' ? yearFilter : '2nd Year');
+    const initialSec = defaultSec || (sectionFilter !== 'ALL' ? sectionFilter : (initialYear.includes('2') ? 'CSE 2A' : 'CSE 3A'));
+    const defaultTxn = `TXN_${Date.now().toString().slice(-8)}`;
+    setAddFormData({
+      name: '',
+      rollNumber: '',
+      year: initialYear,
+      section: initialSec,
+      phone: '',
+      email: '',
+      paymentStatus: 'verified',
+      amount: 50,
+      paymentMethod: 'UPI_DIRECT',
+      transactionId: defaultTxn,
+      vpa: '',
+      interestedInSpeaking: 'No',
+      speechTeacher: '',
+      speechTopic: '',
+      favoriteTeacher: '',
+      anecdote: ''
+    });
+    setShowAddSubmission(true);
+  };
+
+  const handleSaveAddSubmission = async (e) => {
+    if (e) e.preventDefault();
+    const clean = cleanJntuRoll(addFormData.rollNumber);
+    if (!clean) {
+      setNotification({ type: 'error', message: 'Please enter a valid 10-digit JNTU Roll Number (e.g. 24341A0502).' });
+      return;
+    }
+    if (!addFormData.name.trim()) {
+      setNotification({ type: 'error', message: 'Student name is required.' });
+      return;
+    }
+
+    setIsSavingAdd(true);
+    try {
+      const payload = {
+        name: addFormData.name.trim(),
+        rollNumber: clean,
+        year: addFormData.year,
+        section: addFormData.section,
+        phone: addFormData.phone.trim(),
+        email: addFormData.email.trim(),
+        paymentStatus: addFormData.paymentStatus,
+        amount: Number(addFormData.amount) || 50,
+        paymentAmount: Number(addFormData.amount) || 50,
+        paymentMethod: addFormData.paymentMethod || 'UPI_DIRECT',
+        transactionId: addFormData.transactionId.trim() || `MANUAL_${Date.now()}`,
+        vpa: addFormData.vpa.trim(),
+        interestedInSpeaking: addFormData.interestedInSpeaking,
+        speechTeacher: addFormData.speechTeacher.trim(),
+        speechTopic: addFormData.speechTopic.trim(),
+        favoriteTeacher: addFormData.favoriteTeacher.trim(),
+        anecdote: addFormData.anecdote.trim()
+      };
+
+      const res = await api.addSubmission(adminPin, payload);
+      if (res.success) {
+        setNotification({ 
+          type: 'success', 
+          message: `🎉 Successfully registered student ${payload.name} (${payload.rollNumber}) with Pass ${res.submission?.ticketNumber || ''}!` 
+        });
+        setShowAddSubmission(false);
+        loadData(adminPin);
+      } else {
+        setNotification({ type: 'error', message: res.error || 'Failed to add student registration' });
+      }
+    } catch (err) {
+      setNotification({ type: 'error', message: err.message || 'Error adding student record' });
+    } finally {
+      setIsSavingAdd(false);
+    }
+  };
+
   const handleStartEdit = (sub) => {
     setEditingSubmission(sub);
     setEditFormData({
@@ -570,11 +672,14 @@ export const AdminDashboard = () => {
       email: sub.email || '',
       paymentStatus: sub.payment?.status || 'verified',
       amount: sub.payment?.amount || 50,
+      paymentMethod: sub.payment?.paymentMethod || 'UPI_DIRECT',
       transactionId: sub.payment?.transactionId || '',
       vpa: sub.payment?.vpa || '',
       interestedInSpeaking: sub.interestedInSpeaking || 'No',
       speechTeacher: sub.speechTeacher || '',
-      speechTopic: sub.speechTopic || ''
+      speechTopic: sub.speechTopic || '',
+      favoriteTeacher: sub.favoriteTeacher || '',
+      anecdote: sub.anecdote || ''
     });
   };
 
@@ -594,9 +699,12 @@ export const AdminDashboard = () => {
         interestedInSpeaking: editFormData.interestedInSpeaking,
         speechTeacher: editFormData.speechTeacher,
         speechTopic: editFormData.speechTopic,
+        favoriteTeacher: editFormData.favoriteTeacher,
+        anecdote: editFormData.anecdote,
         payment: {
           status: editFormData.paymentStatus,
           amount: Number(editFormData.amount) || 50,
+          paymentMethod: editFormData.paymentMethod || 'UPI_DIRECT',
           transactionId: editFormData.transactionId,
           vpa: editFormData.vpa
         }
@@ -1270,6 +1378,16 @@ export const AdminDashboard = () => {
 
               {/* Global CSV Download Action Buttons */}
               <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenAddModal()}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-purple-500/30 hover:scale-[1.02] active:scale-95 border border-purple-400/40"
+                  title="Add / Register a student manually with full details & generate pass"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Add Student Pass</span>
+                </button>
+
                 <a
                   href={api.getExportCsvUrl(adminPin, {})}
                   download
@@ -1385,6 +1503,16 @@ export const AdminDashboard = () => {
                                   {isCurrentFilter ? 'Selected' : 'Filter Table'}
                                 </button>
 
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAddModal(year, sec)}
+                                  className="p-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[10px] font-bold flex items-center gap-0.5 px-2"
+                                  title={`Add new student to ${sec}`}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  <span>Add</span>
+                                </button>
+
                                 <a
                                   href={api.getExportCsvUrl(adminPin, { year, section: sec })}
                                   download
@@ -1408,35 +1536,49 @@ export const AdminDashboard = () => {
 
           {/* Filters Bar & Summary Strip */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div className="text-xs text-slate-400 font-mono">
-              Showing <strong className="text-white">{filteredSubmissions.length}</strong> matching students • Verified Total: <strong className="text-emerald-400">₹{filteredSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0)}</strong>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="text-xs text-slate-400 font-mono">
+                Showing <strong className="text-white">{filteredSubmissions.length}</strong> matching students • Verified Total: <strong className="text-emerald-400">₹{filteredSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0)}</strong>
+              </div>
             </div>
 
-            {(yearFilter !== 'ALL' || sectionFilter !== 'ALL' || statusFilter !== 'ALL' || searchTerm) && (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setYearFilter('ALL');
-                    setSectionFilter('ALL');
-                    setStatusFilter('ALL');
-                    setSearchTerm('');
-                  }}
-                  className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline"
-                >
-                  Clear Filters
-                </button>
-                
-                <a
-                  href={api.getExportCsvUrl(adminPin, { year: yearFilter, section: sectionFilter, status: statusFilter })}
-                  download
-                  className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>Download Filtered CSV ({filteredSubmissions.length})</span>
-                </a>
-              </div>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleOpenAddModal()}
+                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-purple-600/30 transition-all"
+                title="Add New Student Registration"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Student</span>
+              </button>
+
+              {(yearFilter !== 'ALL' || sectionFilter !== 'ALL' || statusFilter !== 'ALL' || searchTerm) && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setYearFilter('ALL');
+                      setSectionFilter('ALL');
+                      setStatusFilter('ALL');
+                      setSearchTerm('');
+                    }}
+                    className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline"
+                  >
+                    Clear Filters
+                  </button>
+                  
+                  <a
+                    href={api.getExportCsvUrl(adminPin, { year: yearFilter, section: sectionFilter, status: statusFilter })}
+                    download
+                    className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download Filtered CSV ({filteredSubmissions.length})</span>
+                  </a>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Filters Inputs */}
@@ -1510,7 +1652,15 @@ export const AdminDashboard = () => {
                 {filteredSubmissions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-500">
-                      No student contributions found matching this filter.
+                      <div>No student contributions found matching this filter.</div>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAddModal()}
+                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/30"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Register / Add Student</span>
+                      </button>
                     </td>
                   </tr>
                 ) : (
@@ -2270,10 +2420,341 @@ export const AdminDashboard = () => {
         </div>
       )}
 
+      {/* ADD STUDENT REGISTRATION MODAL */}
+      {showAddSubmission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-purple-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center">
+                  <Plus className="w-5 h-5 stroke-[3]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white font-display">Add Student & Issue Pass</h3>
+                  <p className="text-xs text-slate-400">
+                    Manually register a CSE student, record their payment, and generate an official acknowledgement slip.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddSubmission(false)}
+                className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Live Pass ID Preview Banner */}
+            <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <Ticket className="w-4 h-4 text-purple-400 shrink-0" />
+                <span className="text-slate-300">
+                  Target Pass Format: <strong className="text-amber-300 font-mono">TD26-{addFormData.section ? addFormData.section.replace(/[^A-Za-z0-9]/g, '').slice(-2) : '2A'}-XXXX</strong>
+                </span>
+              </div>
+              <div className="text-[11px] text-purple-300 font-mono font-bold">
+                Auto-generates QR & Acknowledgement Slip
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveAddSubmission} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Student Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={addFormData.name}
+                    onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                    placeholder="e.g. Chowdari Tekshita"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-medium focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* JNTU Roll Number */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    JNTU Roll Number * (10 Digits)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={10}
+                    value={addFormData.rollNumber}
+                    onChange={(e) => setAddFormData({ ...addFormData, rollNumber: e.target.value.toUpperCase().replace(/\s+/g, '') })}
+                    placeholder="e.g. 25341A05P9 or 24341A0502"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-purple-400 uppercase"
+                  />
+                </div>
+
+                {/* Academic Year */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Academic Year *
+                  </label>
+                  <select
+                    value={addFormData.year}
+                    onChange={(e) => {
+                      const newYear = e.target.value;
+                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : 'CSE 3A';
+                      setAddFormData({ ...addFormData, year: newYear, section: defaultSec });
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
+                  >
+                    <option value="2nd Year">2nd Year (2024-2028 Batch)</option>
+                    <option value="3rd Year">3rd Year (2023-2027 Batch)</option>
+                  </select>
+                </div>
+
+                {/* Section */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Section *
+                  </label>
+                  <select
+                    value={addFormData.section}
+                    onChange={(e) => setAddFormData({ ...addFormData, section: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold focus:outline-none focus:border-purple-400"
+                  >
+                    {addFormData.year?.includes('2') ? (
+                      <>
+                        <option value="CSE 2A">CSE 2A</option>
+                        <option value="CSE 2B">CSE 2B</option>
+                        <option value="CSE 2C">CSE 2C</option>
+                        <option value="CSE 2D">CSE 2D</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CSE 3A">CSE 3A</option>
+                        <option value="CSE 3B">CSE 3B</option>
+                        <option value="CSE 3C">CSE 3C</option>
+                        <option value="CSE 3D">CSE 3D</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Phone / WhatsApp Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={addFormData.phone}
+                    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                    placeholder="e.g. +91 9876543210"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={addFormData.email}
+                    onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
+                    placeholder="e.g. student@gmrit.edu.in"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* Payment Status */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payment Status *
+                  </label>
+                  <select
+                    value={addFormData.paymentStatus}
+                    onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 text-xs focus:outline-none focus:border-purple-400 font-bold"
+                  >
+                    <option value="verified">✓ Verified (₹50+ Paid)</option>
+                    <option value="pending">⏳ Pending Verification</option>
+                  </select>
+                </div>
+
+                {/* Payment Amount */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Contribution Amount (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    min="50"
+                    required
+                    value={addFormData.amount}
+                    onChange={(e) => setAddFormData({ ...addFormData, amount: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* Payment Method */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payment Method
+                  </label>
+                  <select
+                    value={addFormData.paymentMethod}
+                    onChange={(e) => setAddFormData({ ...addFormData, paymentMethod: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
+                  >
+                    <option value="UPI_DIRECT">📱 UPI Direct (GPay / PhonePe / Paytm)</option>
+                    <option value="RAZORPAY">💳 Razorpay Gateway</option>
+                    <option value="CASH">💵 Cash / Offline Collection</option>
+                    <option value="ADMIN_ENTRY">🎟️ Admin Special Pass</option>
+                  </select>
+                </div>
+
+                {/* Transaction ID / UTR */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-300">
+                      Gateway TXN / UTR ID
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setAddFormData({ ...addFormData, transactionId: `TXN_${Date.now().toString().slice(-8)}` })}
+                      className="text-[10px] text-purple-400 hover:text-purple-300 font-bold"
+                    >
+                      🔄 Auto-Gen
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={addFormData.transactionId}
+                    onChange={(e) => setAddFormData({ ...addFormData, transactionId: e.target.value })}
+                    placeholder="e.g. 831303402797 or pay_TR..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* VPA / UPI ID */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payer UPI ID / VPA (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={addFormData.vpa}
+                    onChange={(e) => setAddFormData({ ...addFormData, vpa: e.target.value })}
+                    placeholder="e.g. student@oksbi"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                {/* Favorite Teacher */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Favorite CSE Teacher (Optional)
+                  </label>
+                  <select
+                    value={addFormData.favoriteTeacher}
+                    onChange={(e) => setAddFormData({ ...addFormData, favoriteTeacher: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                  >
+                    <option value="">-- Select Faculty or None --</option>
+                    {teachers.map(t => (
+                      <option key={t.id} value={t.name}>{t.name} ({t.designation})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Stage Speaker options */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5 text-amber-400" />
+                    Interested in Speaking on Stage?
+                  </span>
+                  <select
+                    value={addFormData.interestedInSpeaking}
+                    onChange={(e) => setAddFormData({ ...addFormData, interestedInSpeaking: e.target.value })}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 text-white text-xs font-bold"
+                  >
+                    <option value="No">No (Attendee)</option>
+                    <option value="Yes">Yes (Stage Speaker)</option>
+                  </select>
+                </div>
+
+                {addFormData.interestedInSpeaking === 'Yes' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Speech Dedicated To Professor
+                      </label>
+                      <input
+                        type="text"
+                        value={addFormData.speechTeacher}
+                        onChange={(e) => setAddFormData({ ...addFormData, speechTeacher: e.target.value })}
+                        placeholder="e.g. Dr. A.V. Ramana"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Speech Topic / Key Thoughts
+                      </label>
+                      <input
+                        type="text"
+                        value={addFormData.speechTopic}
+                        onChange={(e) => setAddFormData({ ...addFormData, speechTopic: e.target.value })}
+                        placeholder="e.g. Impact on our coding journey"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Classroom Memory / Anecdote */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  Classroom Memory / Tribute Story (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={addFormData.anecdote}
+                  onChange={(e) => setAddFormData({ ...addFormData, anecdote: e.target.value })}
+                  placeholder="Share a short classroom memory or story about faculty..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 resize-none"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowAddSubmission(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingAdd}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-purple-500/25 transition-all flex items-center gap-1.5 disabled:opacity-50 touch-press border border-purple-400/30"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span>{isSavingAdd ? 'Registering Student...' : 'Register & Issue Pass'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* EDIT STUDENT DETAILS MODAL */}
       {editingSubmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-amber-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-amber-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
@@ -2323,7 +2804,7 @@ export const AdminDashboard = () => {
                     value={editFormData.rollNumber}
                     onChange={(e) => setEditFormData({ ...editFormData, rollNumber: e.target.value.toUpperCase().replace(/\s+/g, '') })}
                     placeholder="e.g. 24341A0502 or 25341A05P9"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-amber-400 uppercase"
                   />
                 </div>
 
@@ -2431,6 +2912,23 @@ export const AdminDashboard = () => {
                   />
                 </div>
 
+                {/* Payment Method */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Payment Method
+                  </label>
+                  <select
+                    value={editFormData.paymentMethod}
+                    onChange={(e) => setEditFormData({ ...editFormData, paymentMethod: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400 font-medium"
+                  >
+                    <option value="UPI_DIRECT">📱 UPI Direct (GPay / PhonePe / Paytm)</option>
+                    <option value="RAZORPAY">💳 Razorpay Gateway</option>
+                    <option value="CASH">💵 Cash / Offline Collection</option>
+                    <option value="ADMIN_ENTRY">🎟️ Admin Special Pass</option>
+                  </select>
+                </div>
+
                 {/* Transaction ID */}
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1.5">
@@ -2440,7 +2938,7 @@ export const AdminDashboard = () => {
                     type="text"
                     value={editFormData.transactionId}
                     onChange={(e) => setEditFormData({ ...editFormData, transactionId: e.target.value })}
-                    placeholder="e.g. pay_TRTFvTYSbcwVCS"
+                    placeholder="e.g. 831303402797 or pay_TRTFvTYSbcwVCS"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -2457,6 +2955,23 @@ export const AdminDashboard = () => {
                     placeholder="e.g. student@ybl"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
                   />
+                </div>
+
+                {/* Favorite Teacher */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Favorite CSE Teacher
+                  </label>
+                  <select
+                    value={editFormData.favoriteTeacher}
+                    onChange={(e) => setEditFormData({ ...editFormData, favoriteTeacher: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="">-- Select Faculty or None --</option>
+                    {teachers.map(t => (
+                      <option key={t.id} value={t.name}>{t.name} ({t.designation})</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

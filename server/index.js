@@ -967,6 +967,93 @@ app.delete('/api/admin/teachers/:id', checkAdminAuth, (req, res) => {
   }
 });
 
+// POST /api/admin/submissions - Create and add a new student submission manually by Admin
+app.post('/api/admin/submissions', checkAdminAuth, (req, res) => {
+  try {
+    const {
+      name,
+      rollNumber,
+      year,
+      section,
+      email,
+      phone,
+      interestedInSpeaking,
+      speechTeacher,
+      speechTopic,
+      favoriteTeacher,
+      anecdote,
+      paymentStatus,
+      paymentAmount,
+      amount,
+      paymentMethod,
+      transactionId,
+      vpa
+    } = req.body;
+
+    const rollValidation = validateJntuRollBackend(rollNumber);
+    if (!rollValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        error: rollValidation.error
+      });
+    }
+
+    const sanitizedRoll = rollValidation.clean;
+    const sanitizedSection = sanitizeString(section, 30) || 'CSE 2A';
+    const sanitizedName = sanitizeString(name, 80) || `Student (${sanitizedRoll})`;
+    const sanitizedYear = sanitizeString(year, 20) || (sanitizedSection.includes('2') ? '2nd Year' : sanitizedSection.includes('3') ? '3rd Year' : 'CSE');
+    const sanitizedEmail = sanitizeString(email, 100);
+    const sanitizedPhone = sanitizeString(phone, 25);
+    const sanitizedSpeaking = interestedInSpeaking === 'Yes' || interestedInSpeaking === true ? 'Yes' : 'No';
+    const sanitizedSpeechTeacher = sanitizeString(speechTeacher, 80);
+    const sanitizedSpeechTopic = sanitizeString(speechTopic, 400);
+    const sanitizedFavoriteTeacher = sanitizeString(favoriteTeacher, 80);
+    const sanitizedAnecdote = sanitizeString(anecdote, 600);
+    const sanitizedMethod = sanitizeString(paymentMethod, 30) || 'ADMIN_ENTRY';
+    const sanitizedTxn = sanitizeString(transactionId, 80) || `ADMIN_${Date.now()}`;
+    const sanitizedStatus = paymentStatus === 'pending' ? 'pending' : 'verified';
+    const finalAmount = Math.max(50, Math.floor(Number(paymentAmount) || Number(amount) || 50));
+    const sanitizedVpa = sanitizeString(vpa, 80);
+
+    const result = db.addSubmission({
+      name: sanitizedName,
+      rollNumber: sanitizedRoll,
+      department: "Computer Science & Engineering (CSE)",
+      year: sanitizedYear,
+      section: sanitizedSection,
+      email: sanitizedEmail,
+      phone: sanitizedPhone,
+      interestedInSpeaking: sanitizedSpeaking,
+      speechTeacher: sanitizedSpeechTeacher,
+      speechTopic: sanitizedSpeechTopic,
+      favoriteTeacher: sanitizedFavoriteTeacher,
+      anecdote: sanitizedAnecdote,
+      amount: finalAmount,
+      paymentAmount: finalAmount,
+      paymentStatus: sanitizedStatus,
+      paymentMethod: sanitizedMethod,
+      transactionId: sanitizedTxn,
+      vpa: sanitizedVpa
+    });
+
+    if (result.error || result.isDuplicate) {
+      return res.status(400).json({
+        success: false,
+        error: result.error || 'Student is already registered.'
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Student ${sanitizedName} (${sanitizedRoll}) added successfully!`,
+      submission: result.submission,
+      anecdote: result.anecdote
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // PUT /api/admin/submissions/:id - Edit and update student submission details
 app.put('/api/admin/submissions/:id', checkAdminAuth, (req, res) => {
   try {

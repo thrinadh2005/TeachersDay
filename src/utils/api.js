@@ -219,6 +219,20 @@ export const api = {
     return data;
   },
 
+  async addSubmission(pin, submissionData) {
+    const res = await fetch(`${API_BASE}/admin/submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': pin
+      },
+      body: JSON.stringify(submissionData)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add student submission');
+    return data;
+  },
+
   async updateSubmission(pin, submissionId, updates) {
     const res = await fetch(`${API_BASE}/admin/submissions/${encodeURIComponent(submissionId)}`, {
       method: 'PUT',
