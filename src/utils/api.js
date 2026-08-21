@@ -393,6 +393,7 @@ export const api = {
     if (filters.section && filters.section !== 'ALL') params.append('section', filters.section);
     if (filters.status && filters.status !== 'ALL') params.append('status', filters.status);
     if (filters.summary) params.append('summary', 'true');
+    if (filters.yearSummary) params.append('yearSummary', 'true');
     return `${API_BASE}/admin/export-csv?${params.toString()}`;
   }
 };

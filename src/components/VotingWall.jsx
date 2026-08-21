@@ -178,7 +178,7 @@ export const VotingWall = ({ setActiveTab }) => {
             </h2>
 
             <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto leading-relaxed mb-6 font-medium">
-              Every vote cast by CSE 2nd & 3rd Year students across all 5 superlative categories is held under strict confidential secret ballot. The grand winners (including joint winners on ties) will be crowned live on stage!
+              Every vote cast by CSE 2nd, 3rd & 4th Year students across all 5 superlative categories is held under strict confidential secret ballot. The grand winners (including joint winners on ties) will be crowned live on stage!
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -247,7 +247,7 @@ export const VotingWall = ({ setActiveTab }) => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">{teachers.length || 39} Nominated Faculty Members</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">33 CSE Department Professors + 6 Allied Department Professors teaching 2nd & 3rd Year CSE</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">33 CSE Department Professors + 6 Allied Department Professors teaching 2nd, 3rd & 4th Year CSE</p>
               </div>
 
               <div className="w-full sm:w-64 relative">

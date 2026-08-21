@@ -115,7 +115,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 hidden xs:block">
-                  CSE 2nd & 3rd Year (Sections 2A-2D, 3A-3D)
+                  CSE 2nd, 3rd & 4th Year (Sections 2A-2D, 3A-3D, 4A-4D)
                 </p>
               </div>
             </div>

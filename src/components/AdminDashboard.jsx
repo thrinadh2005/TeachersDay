@@ -107,6 +107,9 @@ export const isStudentInYear = (student, targetYear) => {
   if (targetYear.includes('3')) {
     return sYear.includes('3') || sSec.includes('3') || sSec.includes('3A') || sSec.includes('3B') || sSec.includes('3C') || sSec.includes('3D');
   }
+  if (targetYear.includes('4')) {
+    return sYear.includes('4') || sSec.includes('4') || sSec.includes('4A') || sSec.includes('4B') || sSec.includes('4C') || sSec.includes('4D');
+  }
   return false;
 };
 
@@ -116,12 +119,14 @@ export const isStudentInSection = (student, targetSec) => {
   const rawSec = String(student.section || '').toUpperCase().trim();
   const rawYear = String(student.year || '').toUpperCase().trim();
   const targetLetter = String(targetSec).slice(-1).toUpperCase();
-  const targetYearNum = String(targetSec).includes('2') ? '2' : String(targetSec).includes('3') ? '3' : '';
+  const targetYearNum = String(targetSec).includes('2') ? '2' : String(targetSec).includes('3') ? '3' : String(targetSec).includes('4') ? '4' : '';
 
   const isYearMatch = targetYearNum === '2'
     ? (rawYear.includes('2') || rawSec.includes('2'))
     : targetYearNum === '3'
     ? (rawYear.includes('3') || rawSec.includes('3'))
+    : targetYearNum === '4'
+    ? (rawYear.includes('4') || rawSec.includes('4'))
     : true;
 
   if (!isYearMatch) return false;
@@ -586,7 +591,7 @@ export const AdminDashboard = () => {
 
   const handleOpenAddModal = (defaultYear = null, defaultSec = null) => {
     const initialYear = defaultYear || (yearFilter !== 'ALL' ? yearFilter : '2nd Year');
-    const initialSec = defaultSec || (sectionFilter !== 'ALL' ? sectionFilter : (initialYear.includes('2') ? 'CSE 2A' : 'CSE 3A'));
+    const initialSec = defaultSec || (sectionFilter !== 'ALL' ? sectionFilter : (initialYear.includes('2') ? 'CSE 2A' : (initialYear.includes('3') ? 'CSE 3A' : 'CSE 4A')));
     const defaultTxn = `TXN_${Date.now().toString().slice(-8)}`;
     setAddFormData({
       name: '',
@@ -666,7 +671,7 @@ export const AdminDashboard = () => {
     setEditFormData({
       name: sub.name || '',
       rollNumber: sub.rollNumber || '',
-      year: sub.year || (sub.section && sub.section.includes('2') ? '2nd Year' : '3rd Year'),
+      year: sub.year || (sub.section && sub.section.includes('2') ? '2nd Year' : (sub.section && sub.section.includes('3') ? '3rd Year' : '4th Year')),
       section: sub.section || 'CSE 2A',
       phone: sub.phone || '',
       email: sub.email || '',
@@ -769,19 +774,6 @@ export const AdminDashboard = () => {
             >
               {loading ? 'Authenticating...' : 'Unlock Management Portal'}
             </button>
-
-            <div className="pt-1 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setPinInput('2026');
-                  handleLogin(null, '2026');
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-bold transition-all"
-              >
-                <span>🔑 Quick Unlock (PIN: 2026)</span>
-              </button>
-            </div>
           </form>
         </div>
       </div>
@@ -827,7 +819,7 @@ export const AdminDashboard = () => {
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase">
-              CSE Dept 2nd & 3rd Year (2A–2D, 3A–3D)
+              CSE Dept 2nd, 3rd & 4th Year (2A–2D, 3A–3D, 4A–4D)
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
@@ -1006,16 +998,16 @@ export const AdminDashboard = () => {
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                 <span>Confidential Voting Results & Category Breakdown</span>
               </h3>
             </div>
 
             <div className="flex items-center gap-2">
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${isRevealed
-                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                  : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                  : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'
                 }`}>
                 {isRevealed ? '✓ Publicly Disclosed' : '🔒 Confidential / Secret Ballot'}
               </span>
@@ -1040,29 +1032,29 @@ export const AdminDashboard = () => {
               return (
                 <div 
                   key={cat.id} 
-                  className={`p-2.5 rounded-xl glass-card space-y-1 border transition-all ${
+                  className={`p-2.5 rounded-xl glass-card space-y-1 border transition-all bg-white dark:bg-slate-950 ${
                     isTie 
-                      ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/30 to-slate-900 shadow-sm' 
-                      : 'border-amber-400/30'
+                      ? 'border-purple-500/50 bg-gradient-to-b from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-900 shadow-sm' 
+                      : 'border-amber-400/30 dark:border-amber-400/20'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-[9px] font-bold uppercase text-amber-400 tracking-wider truncate">
+                    <span className="text-[9px] font-bold uppercase text-amber-700 dark:text-amber-400 tracking-wider truncate">
                       {cat.title}
                     </span>
                     {isTie && (
-                      <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-purple-500/30 text-purple-300 border border-purple-500/40 shrink-0">
+                      <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/40 shrink-0">
                         ⚡ Joint
                       </span>
                     )}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white truncate" title={topFaculty.map(f => f.name).join(' & ')}>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate" title={topFaculty.map(f => f.name).join(' & ')}>
                       {topFaculty.length > 0
                         ? (isTie ? `⚡ Joint: ${topFaculty.map(f => f.name).join(' & ')}` : topFaculty[0].name)
                         : 'No votes'}
                     </h4>
-                    <p className="text-[10px] text-slate-400 truncate">
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 truncate font-medium">
                       {topFaculty.length > 0 ? `${maxVotes} Votes` : '0 votes yet'}
                     </p>
                   </div>
@@ -1081,7 +1073,7 @@ export const AdminDashboard = () => {
                 placeholder="Search faculty votes..."
                 value={teacherSearch}
                 onChange={(e) => setTeacherSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
               />
             </div>
 
@@ -1094,7 +1086,7 @@ export const AdminDashboard = () => {
                   placeholder="Unlock Roll (e.g. 24341A0501)"
                   value={singleRollToReset}
                   onChange={(e) => setSingleRollToReset(e.target.value.toUpperCase())}
-                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400 w-full sm:w-48"
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-mono text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-400 w-full sm:w-48"
                 />
                 <button
                   type="submit"
@@ -1111,7 +1103,7 @@ export const AdminDashboard = () => {
                 type="button"
                 onClick={handleResetAllVotes}
                 disabled={isResettingVotes || loading}
-                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all touch-press disabled:opacity-50 shrink-0"
+                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all touch-press disabled:opacity-50 shrink-0"
                 title="Reset all faculty votes and clear all voter lock records to ZERO"
               >
                 <RotateCcw className={`w-3 h-3 ${isResettingVotes ? 'animate-spin' : ''}`} />
@@ -1121,9 +1113,9 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Category Vote Breakdown Table with Internal Scroll */}
-          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-290px)] min-h-[300px] shadow-lg w-full">
-            <table className="min-w-full text-left text-xs text-slate-300">
-              <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10 shadow-sm backdrop-blur-md">
+          <div className="glass-card rounded-2xl border border-slate-200 dark:border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-290px)] min-h-[300px] shadow-lg w-full bg-white dark:bg-slate-950">
+            <table className="min-w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase font-bold border-b border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <tr>
                   <th className="p-3.5">Faculty Member</th>
                   <th className="p-3.5 text-center">🏆 Inspiring Mentor</th>
@@ -1131,31 +1123,31 @@ export const AdminDashboard = () => {
                   <th className="p-3.5 text-center">😊 Friendly & Approachable</th>
                   <th className="p-3.5 text-center">💻 Tech Guru</th>
                   <th className="p-3.5 text-center">🌟 Star Faculty</th>
-                  <th className="p-3.5 text-right font-black text-amber-400">Total Votes</th>
+                  <th className="p-3.5 text-right font-black text-amber-600 dark:text-amber-400">Total Votes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                 {filteredTeachers.map((t) => {
                   const catV = t.categoryVotes || { inspiring: 0, explainer: 0, friendly: 0, techGuru: 0, starFaculty: 0 };
                   const total = t.totalVotes || 0;
 
                   return (
-                    <tr key={t.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                       <td className="p-3.5">
                         <div className="flex items-center gap-3">
-                          <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-lg object-cover border border-white/15" />
+                          <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-lg object-cover border border-slate-200 dark:border-white/15" />
                           <div>
-                            <div className="font-bold text-white">{t.name}</div>
-                            <div className="text-[11px] text-slate-400">{t.designation}</div>
+                            <div className="font-bold text-slate-900 dark:text-white">{t.name}</div>
+                            <div className="text-[11px] text-slate-600 dark:text-slate-400">{t.designation}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-3.5 text-center font-mono font-bold text-amber-300">{catV.inspiring || 0}</td>
-                      <td className="p-3.5 text-center font-mono font-bold text-yellow-300">{catV.explainer || 0}</td>
-                      <td className="p-3.5 text-center font-mono font-bold text-emerald-300">{catV.friendly || 0}</td>
-                      <td className="p-3.5 text-center font-mono font-bold text-cyan-300">{catV.techGuru || 0}</td>
-                      <td className="p-3.5 text-center font-mono font-bold text-pink-300">{catV.starFaculty || 0}</td>
-                      <td className="p-3.5 text-right font-mono font-black text-base text-amber-400">{total}</td>
+                      <td className="p-3.5 text-center font-mono font-bold text-amber-700 dark:text-amber-300">{catV.inspiring || 0}</td>
+                      <td className="p-3.5 text-center font-mono font-bold text-amber-600 dark:text-yellow-300">{catV.explainer || 0}</td>
+                      <td className="p-3.5 text-center font-mono font-bold text-emerald-700 dark:text-emerald-300">{catV.friendly || 0}</td>
+                      <td className="p-3.5 text-center font-mono font-bold text-cyan-700 dark:text-cyan-300">{catV.techGuru || 0}</td>
+                      <td className="p-3.5 text-center font-mono font-bold text-purple-700 dark:text-pink-300">{catV.starFaculty || 0}</td>
+                      <td className="p-3.5 text-right font-mono font-black text-base text-amber-700 dark:text-amber-400">{total}</td>
                     </tr>
                   );
                 })}
@@ -1171,50 +1163,50 @@ export const AdminDashboard = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Mic className="w-5 h-5 text-amber-400" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Mic className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                 <span>Students Who Want to Speak / Share Words on Stage</span>
               </h3>
-              <p className="text-xs text-slate-400">Speakers from 2nd, 3rd, and 4th Years (Sections A-D)</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Speakers from 2nd, 3rd, and 4th Years (Sections A-D)</p>
             </div>
-            <span className="text-xs font-bold text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+            <span className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30">
               Total Speakers: {registeredSpeakers.length}
             </span>
           </div>
 
           {registeredSpeakers.length === 0 ? (
-            <div className="p-8 text-center glass-card rounded-2xl text-xs text-slate-400">
+            <div className="p-8 text-center glass-card rounded-2xl text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-950">
               No students have registered to speak on stage yet.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {registeredSpeakers.map((sp) => (
-                <div key={sp.id} className="glass-card rounded-2xl p-5 border border-amber-500/30 space-y-3">
+                <div key={sp.id} className="glass-card rounded-2xl p-5 border border-amber-500/30 space-y-3 bg-white dark:bg-slate-950">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="text-base font-bold text-white">{sp.name}</h4>
-                      <span className="text-xs text-purple-300 font-mono">{sp.rollNumber} • {sp.year} • {sp.section}</span>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white">{sp.name}</h4>
+                      <span className="text-xs text-purple-700 dark:text-purple-300 font-mono font-bold">{sp.rollNumber} • {sp.year} • {sp.section}</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
                       {sp.ticketNumber}
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950/80 border border-white/5 space-y-1 text-xs">
-                    <div className="text-slate-400">
-                      Speaking About: <span className="text-amber-400 font-bold">{sp.speechTeacher || sp.favoriteTeacher}</span>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/5 space-y-1 text-xs">
+                    <div className="text-slate-600 dark:text-slate-400">
+                      Speaking About: <span className="text-amber-700 dark:text-amber-400 font-bold">{sp.speechTeacher || sp.favoriteTeacher}</span>
                     </div>
-                    <div className="text-slate-300 italic">
+                    <div className="text-slate-700 dark:text-slate-300 italic">
                       "{sp.speechTopic || 'Tribute & gratitude speech'}"
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-white/5">
-                    <span className="font-semibold text-emerald-400">✓ ₹{sp.payment?.amount || 50} Verified</span>
+                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-white/5">
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">✓ ₹{sp.payment?.amount || 50} Verified</span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setSelectedStudent(sp)}
-                        className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
                         title="View Full Pass Details"
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -1222,7 +1214,7 @@ export const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={() => handleDeleteSubmission(sp.id, sp.name, sp.ticketNumber)}
-                        className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-rose-500/30"
+                        className="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-rose-500/30"
                         title="Delete Speaker Registration"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1241,12 +1233,12 @@ export const AdminDashboard = () => {
       {activeTab === 'moderation' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white">Student Anecdotes & Fun Wall Queue</h3>
-            <span className="text-xs text-slate-400">Total: {anecdotes.length}</span>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Student Anecdotes & Fun Wall Queue</h3>
+            <span className="text-xs text-slate-600 dark:text-slate-400">Total: {anecdotes.length}</span>
           </div>
 
           {anecdotes.length === 0 ? (
-            <div className="p-8 text-center glass-card rounded-2xl text-xs text-slate-400">
+            <div className="p-8 text-center glass-card rounded-2xl text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-950">
               No anecdotes submitted yet.
             </div>
           ) : (
@@ -1254,30 +1246,30 @@ export const AdminDashboard = () => {
               {anecdotes.map((item) => (
                 <div
                   key={item.id}
-                  className="glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between"
+                  className="glass-card rounded-2xl p-5 border border-slate-200 dark:border-white/10 flex flex-col justify-between bg-white dark:bg-slate-950"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="text-xs font-bold text-amber-400">{item.teacherName}</span>
-                        <p className="text-[11px] text-slate-400">By {item.studentName} (CSE {item.year}, {item.section})</p>
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{item.teacherName}</span>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">By {item.studentName} (CSE {item.year}, {item.section})</p>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.status === 'approved'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
                           : item.status === 'rejected'
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30'
+                            : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
                         }`}>
                         {item.status}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-200 bg-slate-950/60 p-3 rounded-xl border border-white/5 italic my-3">
+                    <p className="text-xs text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-950/60 p-3 rounded-xl border border-slate-200 dark:border-white/5 italic my-3">
                       "{item.anecdote}"
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
                     {item.status !== 'approved' && (
                       <button
                         onClick={() => handleModerate(item.id, 'approved')}
@@ -1291,7 +1283,7 @@ export const AdminDashboard = () => {
                     {item.status !== 'rejected' && (
                       <button
                         onClick={() => handleModerate(item.id, 'rejected')}
-                        className="flex-1 py-1.5 px-3 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                        className="flex-1 py-1.5 px-3 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-rose-500/30"
                       >
                         <XCircle className="w-3.5 h-3.5" />
                         <span>Reject</span>
@@ -1301,7 +1293,7 @@ export const AdminDashboard = () => {
                     {item.status !== 'pending' && (
                       <button
                         onClick={() => handleModerate(item.id, 'pending')}
-                        className="py-1.5 px-3 bg-slate-800 text-slate-400 rounded-lg text-xs font-semibold"
+                        className="py-1.5 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg text-xs font-semibold"
                       >
                         Reset
                       </button>
@@ -1309,7 +1301,7 @@ export const AdminDashboard = () => {
 
                     <button
                       onClick={() => handleDeleteAnecdote(item.id, item.teacherName)}
-                      className="py-1.5 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 border border-rose-500/30"
+                      className="py-1.5 px-2.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 border border-rose-500/30"
                       title="Permanently Delete Memory"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1328,17 +1320,17 @@ export const AdminDashboard = () => {
         <div className="space-y-3">
 
           {/* Section-Wise Status & Payment Matrix Strip */}
-          <div className="glass-card p-3 sm:p-3.5 rounded-2xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-xl shadow-md space-y-3">
+          <div className="glass-card p-3 sm:p-3.5 rounded-2xl border border-purple-500/20 bg-slate-50/80 dark:bg-slate-950/60 backdrop-blur-xl shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-700 dark:text-purple-300 shrink-0">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-black text-white font-display flex items-center gap-1.5">
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white font-display flex items-center gap-1.5">
                     <span>Section-Wise Breakdown</span>
-                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                      8 Sections
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                      12 Sections
                     </span>
                   </h3>
                 </div>
@@ -1359,7 +1351,7 @@ export const AdminDashboard = () => {
                 <a
                   href={api.getExportCsvUrl(adminPin, {})}
                   download
-                  className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+                  className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
                   title="Download complete registered students & payment list"
                 >
                   <Download className="w-3.5 h-3.5 stroke-[3]" />
@@ -1367,19 +1359,29 @@ export const AdminDashboard = () => {
                 </a>
 
                 <a
+                  href={api.getExportCsvUrl(adminPin, { yearSummary: true })}
+                  download
+                  className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1 transition-all shadow-sm"
+                  title="Download consolidated year-wise summary (2nd Year 25-29, 3rd Year 24-28, 4th Year 23-27)"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Year Summary CSV</span>
+                </a>
+
+                <a
                   href={api.getExportCsvUrl(adminPin, { summary: true })}
                   download
-                  className="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center gap-1 transition-all"
-                  title="Download executive section-wise summary numbers"
+                  className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center gap-1 transition-all"
+                  title="Download executive section-wise summary numbers (12 Sections)"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Summary CSV</span>
+                  <span>Section Summary CSV</span>
                 </a>
 
                 <button
                   type="button"
                   onClick={() => setShowSectionBreakdown(!showSectionBreakdown)}
-                  className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 font-bold text-xs transition-all"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 font-bold text-xs transition-all"
                 >
                   {showSectionBreakdown ? 'Hide Matrix' : 'Show Matrix'}
                 </button>
@@ -1387,26 +1389,47 @@ export const AdminDashboard = () => {
             </div>
 
             {showSectionBreakdown && (
-              <div className="space-y-3 pt-1 border-t border-white/10">
-                {['2nd Year', '3rd Year'].map((year) => {
+              <div className="space-y-3 pt-1 border-t border-slate-200 dark:border-white/10">
+                {['2nd Year', '3rd Year', '4th Year'].map((year) => {
                   const isYear2 = year.includes('2');
+                  const isYear3 = year.includes('3');
+                  const batchLabel = isYear2 ? '2025-2029 Batch (25-29)' : isYear3 ? '2024-2028 Batch (24-28)' : '2023-2027 Batch (23-27)';
                   const sectionsList = isYear2 
                     ? ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] 
-                    : ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'];
+                    : isYear3
+                    ? ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D']
+                    : ['CSE 4A', 'CSE 4B', 'CSE 4C', 'CSE 4D'];
 
                   const yearSubmissions = submissions.filter(s => isStudentInYear(s, year));
                   const yearFunds = yearSubmissions.filter(s => s.payment?.status === 'verified').reduce((sum, s) => sum + (s.payment?.amount || 50), 0);
+                  const yearSpeakers = yearSubmissions.filter(s => s.interestedInSpeaking === 'Yes').length;
                   
                   return (
                     <div key={year} className="space-y-1.5">
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span className="text-[11px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                          <GraduationCap className="w-3.5 h-3.5" />
-                          {year} CSE
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          Total in {year}: <strong className="text-white">{yearSubmissions.length} Students</strong> • <strong className="text-emerald-400">₹{yearFunds}</strong>
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            {year} CSE
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-bold">
+                            {batchLabel}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
+                            Total in {year}: <strong className="text-slate-900 dark:text-white">{yearSubmissions.length} Students</strong> • <strong className="text-emerald-700 dark:text-emerald-400">₹{yearFunds}</strong> • <strong className="text-amber-700 dark:text-amber-300">{yearSpeakers} Speakers</strong>
+                          </span>
+                          <a
+                            href={api.getExportCsvUrl(adminPin, { year })}
+                            download
+                            className="py-0.5 px-2 rounded bg-amber-500/15 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[9px] font-bold flex items-center gap-1 transition-all"
+                            title={`Download all student contributors for ${year}`}
+                          >
+                            <Download className="w-2.5 h-2.5" />
+                            <span>Download {year} CSV</span>
+                          </a>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-2">
@@ -1422,40 +1445,40 @@ export const AdminDashboard = () => {
                               key={sec}
                               className={`p-2.5 rounded-xl border transition-all relative group flex flex-col justify-between ${
                                 isCurrentFilter
-                                  ? 'bg-purple-950/70 border-purple-400 shadow-sm ring-1 ring-purple-400'
+                                  ? 'bg-purple-100 dark:bg-purple-950/70 border-purple-500 dark:border-purple-400 shadow-sm ring-1 ring-purple-400'
                                   : matching.length > 0
-                                  ? 'bg-slate-900/80 hover:bg-slate-900 border-white/10 hover:border-purple-400/40'
-                                  : 'bg-slate-950/40 border-white/5 opacity-75 hover:opacity-100'
+                                  ? 'bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-purple-400/40'
+                                  : 'bg-white/60 dark:bg-slate-950/40 border-slate-200/60 dark:border-white/5 opacity-80 hover:opacity-100'
                               }`}
                             >
                               <div>
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                                  <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
                                     {sec}
                                   </span>
                                   <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded ${
                                     matching.length > 0 
-                                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                                      : 'bg-slate-800 text-slate-500'
+                                      ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30' 
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                                   }`}>
                                     {matching.length} Students
                                   </span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-1 text-[10px] mb-1.5 font-mono">
-                                  <div className="bg-slate-950/60 p-1 rounded border border-white/5">
-                                    <span className="text-slate-400 text-[9px] block">Verified:</span>
-                                    <span className="font-bold text-emerald-400">✓ {verified.length} (₹{funds})</span>
+                                  <div className="bg-slate-50 dark:bg-slate-950/60 p-1 rounded border border-slate-200 dark:border-white/5">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[9px] block">Verified:</span>
+                                    <span className="font-bold text-emerald-700 dark:text-emerald-400">✓ {verified.length} (₹{funds})</span>
                                   </div>
-                                  <div className="bg-slate-950/60 p-1 rounded border border-white/5">
-                                    <span className="text-slate-400 text-[9px] block">Speakers:</span>
-                                    <span className="font-bold text-amber-300">🎤 {speakers}</span>
+                                  <div className="bg-slate-50 dark:bg-slate-950/60 p-1 rounded border border-slate-200 dark:border-white/5">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[9px] block">Speakers:</span>
+                                    <span className="font-bold text-amber-700 dark:text-amber-300">🎤 {speakers}</span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Action buttons inside card */}
-                              <div className="flex items-center gap-1 pt-1 border-t border-white/5">
+                              <div className="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-white/5">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -1465,7 +1488,7 @@ export const AdminDashboard = () => {
                                   className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all text-center ${
                                     isCurrentFilter
                                       ? 'bg-purple-600 text-white'
-                                      : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white'
+                                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                                   }`}
                                 >
                                   {isCurrentFilter ? 'Selected' : 'Filter Table'}
@@ -1474,7 +1497,7 @@ export const AdminDashboard = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenAddModal(year, sec)}
-                                  className="py-1 px-2 rounded bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
+                                  className="py-1 px-2 rounded bg-purple-500/15 hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border border-purple-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
                                   title={`Add new student to ${sec}`}
                                 >
                                   <Plus className="w-2.5 h-2.5" />
@@ -1484,7 +1507,7 @@ export const AdminDashboard = () => {
                                 <a
                                   href={api.getExportCsvUrl(adminPin, { year, section: sec })}
                                   download
-                                  className="py-1 px-2 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
+                                  className="py-1 px-2 rounded bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition-all text-[9px] font-bold flex items-center gap-0.5 shrink-0"
                                   title={`Download CSV for ${year} ${sec}`}
                                 >
                                   <Download className="w-2.5 h-2.5" />
@@ -1511,26 +1534,27 @@ export const AdminDashboard = () => {
                 placeholder="Search student or roll number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none"
             >
-              <option value="ALL">All Years (2nd & 3rd Year)</option>
-              <option value="2nd Year">2nd Year (Sections 2A–2D)</option>
-              <option value="3rd Year">3rd Year (Sections 3A–3D)</option>
+              <option value="ALL">All Years (2nd, 3rd & 4th Year)</option>
+              <option value="2nd Year">2nd Year (2025-2029 Batch • 2A–2D)</option>
+              <option value="3rd Year">3rd Year (2024-2028 Batch • 3A–3D)</option>
+              <option value="4th Year">4th Year (2023-2027 Batch • 4A–4D)</option>
             </select>
 
             <select
               value={sectionFilter}
               onChange={(e) => setSectionFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none"
             >
-              <option value="ALL">All Sections (8 Sections)</option>
+              <option value="ALL">All Sections (12 Sections)</option>
               <optgroup label="2nd Year Sections">
                 <option value="CSE 2A">CSE 2A</option>
                 <option value="CSE 2B">CSE 2B</option>
@@ -1543,13 +1567,19 @@ export const AdminDashboard = () => {
                 <option value="CSE 3C">CSE 3C</option>
                 <option value="CSE 3D">CSE 3D</option>
               </optgroup>
+              <optgroup label="4th Year Sections">
+                <option value="CSE 4A">CSE 4A</option>
+                <option value="CSE 4B">CSE 4B</option>
+                <option value="CSE 4C">CSE 4C</option>
+                <option value="CSE 4D">CSE 4D</option>
+              </optgroup>
             </select>
 
             <div className="flex items-center gap-1.5">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none"
+                className="flex-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none"
               >
                 <option value="ALL">All Status</option>
                 <option value="verified">Verified (₹50+)</option>
@@ -1565,7 +1595,7 @@ export const AdminDashboard = () => {
                     setStatusFilter('ALL');
                     setSearchTerm('');
                   }}
-                  className="px-2 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold shrink-0 hover:bg-amber-500/30"
+                  className="px-2 py-1.5 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-bold shrink-0 hover:bg-amber-500/30"
                   title="Clear Filters"
                 >
                   Clear
@@ -1575,9 +1605,9 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Table with Bounded Sticky Internal Scrolling */}
-          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-270px)] min-h-[350px] shadow-xl w-full">
-            <table className="min-w-full text-left text-xs text-slate-300">
-              <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 uppercase font-bold border-b border-white/10 shadow-sm backdrop-blur-md">
+          <div className="glass-card rounded-2xl border border-slate-200 dark:border-white/10 overflow-x-auto overflow-y-auto max-h-[calc(100vh-270px)] min-h-[350px] shadow-xl w-full bg-white dark:bg-slate-950">
+            <table className="min-w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase font-bold border-b border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <tr>
                   <th className="p-3.5">Receipt / Pass ID</th>
                   <th className="p-3.5">Student / Payee</th>
@@ -1587,7 +1617,7 @@ export const AdminDashboard = () => {
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                 {filteredSubmissions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-500">
@@ -1607,51 +1637,51 @@ export const AdminDashboard = () => {
                     const isVerified = sub.payment?.status === 'verified';
                     const paidDate = sub.payment?.paidAt || sub.createdAt;
                     return (
-                      <tr key={sub.id} className="hover:bg-white/5 transition-colors">
-                        <td className="p-3.5 font-mono font-bold text-amber-300">
+                      <tr key={sub.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <td className="p-3.5 font-mono font-bold text-amber-700 dark:text-amber-300">
                           <div>{sub.ticketNumber || sub.acknowledgementNumber || sub.id}</div>
                           {sub.acknowledgementNumber && sub.acknowledgementNumber !== sub.ticketNumber && (
-                            <div className="text-[10px] text-slate-500 font-mono mt-0.5">{sub.acknowledgementNumber}</div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{sub.acknowledgementNumber}</div>
                           )}
                         </td>
                         <td className="p-3.5">
-                          <div className="font-bold text-white text-sm">{sub.name}</div>
-                          <div className="text-[11px] text-purple-300 font-mono font-bold mt-0.5">{sub.rollNumber}</div>
-                          <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400 font-mono flex-wrap">
+                          <div className="font-bold text-slate-900 dark:text-white text-sm">{sub.name}</div>
+                          <div className="text-[11px] text-purple-700 dark:text-purple-300 font-mono font-bold mt-0.5">{sub.rollNumber}</div>
+                          <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-600 dark:text-slate-400 font-mono flex-wrap">
                             {sub.phone && <span>📱 {sub.phone}</span>}
                             {sub.email && <span className="truncate max-w-[140px]" title={sub.email}>✉️ {sub.email}</span>}
                           </div>
                         </td>
                         <td className="p-3.5">
-                          <div className="font-semibold text-white">{sub.year}</div>
-                          <div className="text-[11px] text-amber-400 font-bold">{sub.section}</div>
-                          <div className="text-[10px] text-slate-500">CSE Dept</div>
+                          <div className="font-semibold text-slate-900 dark:text-white">{sub.year}</div>
+                          <div className="text-[11px] text-amber-700 dark:text-amber-400 font-bold">{sub.section}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">CSE Dept</div>
                         </td>
                         <td className="p-3.5">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${isVerified
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
                                 }`}>
                                 {isVerified ? `✓ ₹${sub.payment?.amount || 50} Paid` : '⏳ Pending'}
                               </span>
-                              <span className="text-[10px] font-mono text-slate-400">
+                              <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400">
                                 {sub.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 UPI Direct' : '💳 Razorpay Gateway'}
                               </span>
                             </div>
-                            <div className="text-[10px] font-mono text-slate-300">
-                              <span className="text-slate-500">TXN / UTR: </span>
-                              <span className="text-amber-300 font-bold select-all">{sub.payment?.transactionId || 'N/A'}</span>
+                            <div className="text-[10px] font-mono text-slate-700 dark:text-slate-300">
+                              <span className="text-slate-500 dark:text-slate-400">TXN / UTR: </span>
+                              <span className="text-amber-700 dark:text-amber-300 font-bold select-all">{sub.payment?.transactionId || 'N/A'}</span>
                             </div>
                             {sub.payment?.vpa && (
-                              <div className="text-[10px] font-mono text-emerald-300">
-                                <span className="text-slate-500">VPA: </span>
+                              <div className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300">
+                                <span className="text-slate-500 dark:text-slate-400">VPA: </span>
                                 <span>{sub.payment.vpa}</span>
                               </div>
                             )}
                             {paidDate && (
-                              <div className="text-[10px] text-slate-400 font-mono">
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                 📅 {new Date(paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date(paidDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             )}
@@ -1660,29 +1690,29 @@ export const AdminDashboard = () => {
                         <td className="p-3.5">
                           {sub.interestedInSpeaking === 'Yes' ? (
                             <div className="space-y-0.5">
-                              <span className="inline-flex items-center gap-1 text-amber-300 font-bold text-xs">
+                              <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 font-bold text-xs">
                                 <Mic className="w-3.5 h-3.5" /> Stage Speaker
                               </span>
                               {sub.speechTeacher && (
-                                <div className="text-[11px] text-slate-300">
-                                  Prof: <span className="text-amber-400">{sub.speechTeacher}</span>
+                                <div className="text-[11px] text-slate-700 dark:text-slate-300">
+                                  Prof: <span className="text-amber-700 dark:text-amber-400 font-bold">{sub.speechTeacher}</span>
                                 </div>
                               )}
                               {sub.speechTopic && (
-                                <div className="text-[10px] text-slate-400 italic truncate max-w-[150px]" title={sub.speechTopic}>
+                                <div className="text-[10px] text-slate-600 dark:text-slate-400 italic truncate max-w-[150px]" title={sub.speechTopic}>
                                   "{sub.speechTopic}"
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <span className="text-slate-500">Attendee</span>
+                            <span className="text-slate-500 dark:text-slate-400">Attendee</span>
                           )}
                         </td>
                         <td className="p-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5 flex-wrap">
                             <button
                               onClick={() => handleStartEdit(sub)}
-                              className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-amber-500/30"
+                              className="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-amber-500/30"
                               title="Edit Student Name, JNTU Roll No, Section, & Payment details"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -1691,7 +1721,7 @@ export const AdminDashboard = () => {
 
                             <button
                               onClick={() => setViewingPass(sub)}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-emerald-500/30"
                               title="View & Print Official Acknowledgement Slip"
                             >
                               <FileText className="w-3.5 h-3.5" />
@@ -1700,7 +1730,7 @@ export const AdminDashboard = () => {
 
                             <button
                               onClick={() => setSelectedStudent(sub)}
-                              className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
+                              className="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 font-bold text-[11px] flex items-center gap-1 transition-colors border border-purple-500/30"
                               title="View Full Registration Details"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1709,7 +1739,7 @@ export const AdminDashboard = () => {
 
                             <button
                               onClick={() => handleDeleteSubmission(sub.id, sub.name, sub.ticketNumber)}
-                              className="p-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 transition-all"
+                              className="p-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 border border-rose-500/30 transition-all"
                               title="Delete Submission"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1732,11 +1762,11 @@ export const AdminDashboard = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-amber-400" />
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                 <span>CSE Faculty Roster Management</span>
               </h3>
-              <p className="text-xs text-slate-400">Total Present Faculty: {teachers.length}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Total Present Faculty: {teachers.length}</p>
             </div>
 
             <button
@@ -1760,58 +1790,58 @@ export const AdminDashboard = () => {
 
           {/* Form */}
           {showAddTeacher && (
-            <div className="glass-card-glow rounded-3xl p-6 border border-amber-500/40 shadow-2xl animate-fadeIn">
-              <h4 className="text-base font-bold text-white mb-4">
+            <div className="glass-card-glow rounded-3xl p-6 border border-amber-500/40 shadow-2xl animate-fadeIn bg-white dark:bg-slate-950">
+              <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">
                 {editingTeacherId ? 'Edit Faculty Details' : 'Add New Faculty to Roster'}
               </h4>
 
               <form onSubmit={handleSaveTeacher} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">Faculty Full Name *</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Faculty Full Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Dr. Rajesh Kulkarni"
                       value={teacherFormData.name}
                       onChange={(e) => setTeacherFormData({ ...teacherFormData, name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">Degree / Qualification</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Degree / Qualification</label>
                     <input
                       type="text"
                       placeholder="e.g. M.Tech., Ph.D."
                       value={teacherFormData.degree}
                       onChange={(e) => setTeacherFormData({ ...teacherFormData, degree: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">Designation *</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Designation *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Associate Professor"
                       value={teacherFormData.designation}
                       onChange={(e) => setTeacherFormData({ ...teacherFormData, designation: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                     />
                   </div>
                 </div>
 
                 {/* Faculty Photo / Avatar Management Section */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-3">
                     <div>
-                      <label className="block text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <Camera className="w-4 h-4 text-amber-400" />
+                      <label className="block text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <Camera className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Faculty Member Photo / Avatar</span>
                       </label>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400">
                         Upload custom photo, pick from 40+ department faculty presets, or enter an image web URL.
                       </p>
                     </div>
@@ -1820,7 +1850,7 @@ export const AdminDashboard = () => {
                     <button
                       type="button"
                       onClick={() => setTeacherFormData({ ...teacherFormData, avatar: '/faculty/Dr_A_V_Ramana.jpg' })}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-400 hover:text-white border border-white/10 transition-colors self-start sm:self-auto"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-white/10 transition-colors self-start sm:self-auto"
                     >
                       <RotateCcw className="w-3 h-3" />
                       <span>Reset Photo</span>
@@ -1830,12 +1860,12 @@ export const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
                     
                     {/* Left Column: Live Avatar Preview Card */}
-                    <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-900/90 border border-white/10 text-center space-y-2.5">
+                    <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 text-center space-y-2.5">
                       <div className="relative group">
                         <img
                           src={teacherFormData.avatar || '/faculty/Dr_A_V_Ramana.jpg'}
                           alt="Faculty Preview"
-                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xl shadow-amber-500/20 bg-slate-950 transition-all"
+                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xl shadow-amber-500/20 bg-slate-100 dark:bg-slate-950 transition-all"
                           onError={(e) => {
                             e.target.src = '/faculty/Dr_A_V_Ramana.jpg';
                           }}
@@ -1849,18 +1879,18 @@ export const AdminDashboard = () => {
                       </div>
 
                       <div className="w-full">
-                        <div className="text-xs font-bold text-white truncate">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {teacherFormData.name || 'Faculty Full Name'}
                         </div>
-                        <div className="text-[10px] text-purple-300 truncate">
+                        <div className="text-[10px] text-purple-700 dark:text-purple-300 truncate">
                           {teacherFormData.designation || 'Designation'}
                         </div>
                         <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                           teacherFormData.avatar?.startsWith('data:image/')
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                             : teacherFormData.avatar?.startsWith('http')
-                              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
-                              : 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                              ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border-cyan-500/30'
+                              : 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30'
                         }`}>
                           {teacherFormData.avatar?.startsWith('data:image/')
                             ? '✨ Uploaded Custom Photo'
@@ -1874,14 +1904,14 @@ export const AdminDashboard = () => {
                     {/* Right Column: Image Input Mode Tabs */}
                     <div className="md:col-span-8 space-y-3">
                       {/* Sub-tabs */}
-                      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2">
                         <button
                           type="button"
                           onClick={() => setImageTab('upload')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                             imageTab === 'upload'
                               ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/5'
                           }`}
                         >
                           <UploadCloud className="w-3.5 h-3.5" />
@@ -1894,7 +1924,7 @@ export const AdminDashboard = () => {
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                             imageTab === 'preset'
                               ? 'bg-purple-600 text-white font-bold shadow-md'
-                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/5'
                           }`}
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
@@ -1907,7 +1937,7 @@ export const AdminDashboard = () => {
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                             imageTab === 'url'
                               ? 'bg-cyan-600 text-white font-bold shadow-md'
-                              : 'text-slate-400 hover:text-white bg-slate-900/80 border border-white/5'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/5'
                           }`}
                         >
                           <LinkIcon className="w-3.5 h-3.5" />
@@ -1930,7 +1960,7 @@ export const AdminDashboard = () => {
                             className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                               dragOver
                                 ? 'border-amber-400 bg-amber-400/10 scale-[1.01]'
-                                : 'border-white/20 hover:border-amber-400/60 bg-slate-900/50 hover:bg-slate-900'
+                                : 'border-slate-300 dark:border-white/20 hover:border-amber-400/60 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900'
                             }`}
                           >
                             <input
@@ -1942,13 +1972,13 @@ export const AdminDashboard = () => {
                               }}
                               className="hidden"
                             />
-                            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center mb-2">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center mb-2">
                               <UploadCloud className="w-6 h-6" />
                             </div>
-                            <div className="text-xs font-bold text-white">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">
                               Click to Browse or Drag & Drop Photo Here
                             </div>
-                            <p className="text-[11px] text-slate-400 mt-0.5">
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
                               Supports PNG, JPG, JPEG, WEBP, SVG • Auto-resizes & compresses for high speed
                             </p>
                           </label>
@@ -1965,11 +1995,11 @@ export const AdminDashboard = () => {
                               placeholder="Search department photo by faculty name..."
                               value={presetSearch}
                               onChange={(e) => setPresetSearch(e.target.value)}
-                              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-400"
                             />
                           </div>
 
-                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-52 overflow-y-auto pr-1 p-1 bg-slate-950/60 rounded-xl border border-white/5">
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-52 overflow-y-auto pr-1 p-1 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/5">
                             {filteredPresets.map((preset) => {
                               const isSelected = teacherFormData.avatar === preset.path;
                               return (
@@ -1980,17 +2010,17 @@ export const AdminDashboard = () => {
                                   className={`relative group rounded-xl p-1.5 border transition-all text-left flex flex-col items-center ${
                                     isSelected
                                       ? 'border-amber-400 bg-amber-400/20 ring-2 ring-amber-400 shadow-md'
-                                      : 'border-white/10 hover:border-white/30 bg-slate-900/60 hover:bg-slate-800'
+                                      : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/30 bg-white dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800'
                                   }`}
                                   title={preset.label}
                                 >
                                   <img
                                     src={preset.path}
                                     alt={preset.label}
-                                    className="w-12 h-12 rounded-lg object-cover bg-slate-950"
+                                    className="w-12 h-12 rounded-lg object-cover bg-slate-100 dark:bg-slate-950"
                                     onError={(e) => { e.target.src = '/faculty/Dr_A_V_Ramana.jpg'; }}
                                   />
-                                  <span className="text-[9px] text-slate-300 font-medium truncate w-full text-center mt-1 block">
+                                  <span className="text-[9px] text-slate-700 dark:text-slate-300 font-medium truncate w-full text-center mt-1 block">
                                     {preset.label}
                                   </span>
                                   {isSelected && (
@@ -2008,7 +2038,7 @@ export const AdminDashboard = () => {
                       {/* Tab 3: Web Image URL Link */}
                       {imageTab === 'url' && (
                         <div className="space-y-2">
-                          <label className="block text-xs font-semibold text-slate-300">
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                             Enter Public Image Web URL (HTTPS):
                           </label>
                           <div className="relative">
@@ -2018,10 +2048,10 @@ export const AdminDashboard = () => {
                               placeholder="https://example.com/faculty-photo.jpg"
                               value={teacherFormData.avatar?.startsWith('data:') ? '' : teacherFormData.avatar}
                               onChange={(e) => setTeacherFormData({ ...teacherFormData, avatar: e.target.value.trim() })}
-                              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                             />
                           </div>
-                          <p className="text-[11px] text-slate-400">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400">
                             Paste any direct photo link from college website, Google Drive, LinkedIn, or Cloudinary.
                           </p>
                         </div>
@@ -2042,7 +2072,7 @@ export const AdminDashboard = () => {
                   <button
                     type="button"
                     onClick={() => { setShowAddTeacher(false); setEditingTeacherId(null); }}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -2056,31 +2086,31 @@ export const AdminDashboard = () => {
             {teachers.map((t, idx) => (
               <div
                 key={t.id}
-                className="glass-card rounded-2xl p-4 border border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition-all"
+                className="glass-card rounded-2xl p-4 border border-slate-200 dark:border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition-all bg-white dark:bg-slate-950"
               >
                 <div className="flex items-start gap-3">
                   <img
                     src={t.avatar}
                     alt={t.name}
-                    className="w-14 h-14 rounded-xl object-cover border border-white/15 shrink-0"
+                    className="w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-white/15 shrink-0"
                     onError={(e) => {
                       e.target.src = '/faculty/Dr_A_V_Ramana.jpg';
                     }}
                   />
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold uppercase text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded">
                       #{idx + 1}
                     </span>
-                    <h4 className="text-sm font-bold text-white mt-0.5">{t.name}</h4>
-                    <p className="text-[11px] text-slate-400">{t.designation}</p>
-                    <p className="text-[11px] text-purple-300 font-medium">{t.degree}</p>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{t.name}</h4>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">{t.designation}</p>
+                    <p className="text-[11px] text-purple-700 dark:text-purple-300 font-medium">{t.degree}</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => handleEditClick(t)}
-                    className="p-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 transition-colors"
+                    className="p-1.5 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 border border-purple-500/30 transition-colors"
                     title="Edit Designation"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
@@ -2088,7 +2118,7 @@ export const AdminDashboard = () => {
 
                   <button
                     onClick={() => handleDeleteTeacher(t.id, t.name)}
-                    className="p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition-colors"
+                    className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 border border-rose-500/30 transition-colors"
                     title="Remove Faculty"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -2218,64 +2248,64 @@ export const AdminDashboard = () => {
       {/* STUDENT REGISTRATION DETAILS MODAL */}
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-lg glass-card rounded-3xl border border-purple-500/30 shadow-2xl overflow-hidden animate-scaleUp p-6 space-y-4">
+          <div className="relative w-full max-w-lg glass-card rounded-3xl border border-purple-500/30 shadow-2xl overflow-hidden animate-scaleUp p-6 space-y-4 bg-white dark:bg-slate-950 text-slate-900 dark:text-white">
 
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[10px] uppercase font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                <span className="text-[10px] uppercase font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded">
                   Ticket: {selectedStudent.ticketNumber || selectedStudent.id}
                 </span>
-                <h3 className="text-lg font-bold text-white mt-1">Student Registration Details</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">Student Registration Details</h3>
               </div>
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
               >
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950/80 border border-white/5">
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/5">
                 <div>
-                  <span className="text-slate-400 text-[11px] block">Full Name</span>
-                  <span className="font-bold text-white text-sm">{selectedStudent.name}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Full Name</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{selectedStudent.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px] block">CSE Roll Number</span>
-                  <span className="font-mono font-bold text-amber-400 text-sm">{selectedStudent.rollNumber}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">CSE Roll Number</span>
+                  <span className="font-mono font-bold text-amber-700 dark:text-amber-400 text-sm">{selectedStudent.rollNumber}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px] block">Year & Section</span>
-                  <span className="font-semibold text-slate-200">{selectedStudent.year} • {selectedStudent.section}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Year & Section</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedStudent.year} • {selectedStudent.section}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px] block">Department</span>
-                  <span className="text-slate-200">CSE</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Department</span>
+                  <span className="text-slate-800 dark:text-slate-200">CSE</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px] block">Phone / WhatsApp</span>
-                  <span className="text-slate-200 font-mono">{selectedStudent.phone || 'N/A'}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Phone / WhatsApp</span>
+                  <span className="text-slate-800 dark:text-slate-200 font-mono">{selectedStudent.phone || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px] block">Email</span>
-                  <span className="text-slate-200 font-mono truncate">{selectedStudent.email || 'N/A'}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Email</span>
+                  <span className="text-slate-800 dark:text-slate-200 font-mono truncate">{selectedStudent.email || 'N/A'}</span>
                 </div>
               </div>
 
               {/* Stage Speech details */}
               <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
-                <span className="text-amber-300 font-bold flex items-center gap-1.5">
-                  <Mic className="w-3.5 h-3.5" />
+                <span className="text-amber-700 dark:text-amber-300 font-bold flex items-center gap-1.5">
+                  <Mic className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   Stage Speech Interest: {selectedStudent.interestedInSpeaking || 'No'}
                 </span>
                 {selectedStudent.interestedInSpeaking === 'Yes' && (
                   <>
-                    <div className="text-slate-300">
-                      Faculty To Tell About: <span className="font-bold text-white">{selectedStudent.speechTeacher || 'All CSE Faculty'}</span>
+                    <div className="text-slate-700 dark:text-slate-300">
+                      Faculty To Tell About: <span className="font-bold text-slate-900 dark:text-white">{selectedStudent.speechTeacher || 'All CSE Faculty'}</span>
                     </div>
                     {selectedStudent.speechTopic && (
-                      <div className="text-slate-400 italic">
+                      <div className="text-slate-600 dark:text-slate-400 italic">
                         Topic: "{selectedStudent.speechTopic}"
                       </div>
                     )}
@@ -2286,30 +2316,30 @@ export const AdminDashboard = () => {
               {/* Favorite Teacher & Anecdote */}
               <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Favorite Teacher:</span>
-                  <span className="text-purple-300 font-bold">{selectedStudent.favoriteTeacher || 'Not Selected'}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Favorite Teacher:</span>
+                  <span className="text-purple-700 dark:text-purple-300 font-bold">{selectedStudent.favoriteTeacher || 'Not Selected'}</span>
                 </div>
                 {selectedStudent.anecdote && (
-                  <div className="border-t border-white/5 pt-1.5 text-slate-300 italic">
+                  <div className="border-t border-slate-200 dark:border-white/5 pt-1.5 text-slate-700 dark:text-slate-300 italic">
                     "{selectedStudent.anecdote}"
                   </div>
                 )}
               </div>
 
               {/* Payment Details */}
-              <div className="p-3 rounded-2xl bg-slate-950/90 border border-emerald-500/30 flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-slate-950/90 border border-emerald-500/30 flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-400">Celebration Contribution</div>
-                  <div className="text-emerald-400 font-bold flex items-center gap-1">
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400">Celebration Contribution</div>
+                  <div className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>₹{selectedStudent.payment?.amount || 50} • {selectedStudent.payment?.status === 'verified' ? 'Verified' : 'Pending'}</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                     TXN / UTR: {selectedStudent.payment?.transactionId || 'N/A'} ({selectedStudent.payment?.paymentMethod === 'UPI_DIRECT' ? '📱 Direct UPI' : selectedStudent.payment?.paymentMethod || 'UPI'})
                   </div>
                 </div>
 
-                <div className="text-right text-[10px] text-slate-400">
+                <div className="text-right text-[10px] text-slate-500 dark:text-slate-400">
                   {selectedStudent.createdAt ? new Date(selectedStudent.createdAt).toLocaleString() : ''}
                 </div>
               </div>
@@ -2322,7 +2352,7 @@ export const AdminDashboard = () => {
                   setSelectedStudent(null);
                   handleStartEdit(studentToEdit);
                 }}
-                className="w-full sm:flex-1 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 title="Edit Student Details"
               >
                 <Edit3 className="w-4 h-4" />
@@ -2331,7 +2361,7 @@ export const AdminDashboard = () => {
 
               <button
                 onClick={() => setViewingPass(selectedStudent)}
-                className="w-full sm:flex-1 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 title="View & Print Official Acknowledgement Slip"
               >
                 <FileText className="w-4 h-4" />
@@ -2340,7 +2370,7 @@ export const AdminDashboard = () => {
 
               <button
                 onClick={() => handleDeleteSubmission(selectedStudent.id, selectedStudent.name, selectedStudent.ticketNumber)}
-                className="w-full sm:flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full sm:flex-1 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 title="Permanently Delete This Registration"
               >
                 <Trash2 className="w-4 h-4" />
@@ -2349,7 +2379,7 @@ export const AdminDashboard = () => {
 
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs transition-colors"
               >
                 Close
               </button>
@@ -2362,22 +2392,22 @@ export const AdminDashboard = () => {
       {/* ADD STUDENT REGISTRATION MODAL */}
       {showAddSubmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-purple-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-purple-500/30 shadow-2xl space-y-5 my-8 bg-white dark:bg-slate-950 text-slate-900 dark:text-white">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 flex items-center justify-center">
                   <Plus className="w-5 h-5 stroke-[3]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white font-display">Add Student & Issue Pass</h3>
-                  <p className="text-xs text-slate-400">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white font-display">Add Student & Issue Pass</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     Manually register a CSE student, record their payment, and generate an official acknowledgement slip.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowAddSubmission(false)}
-                className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-bold"
               >
                 ✕
               </button>
@@ -2386,12 +2416,12 @@ export const AdminDashboard = () => {
             {/* Live Pass ID Preview Banner */}
             <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
-                <Ticket className="w-4 h-4 text-purple-400 shrink-0" />
-                <span className="text-slate-300">
-                  Target Pass Format: <strong className="text-amber-300 font-mono">TD26-{addFormData.section ? addFormData.section.replace(/[^A-Za-z0-9]/g, '').slice(-2) : '2A'}-XXXX</strong>
+                <Ticket className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                <span className="text-slate-700 dark:text-slate-300">
+                  Target Pass Format: <strong className="text-amber-700 dark:text-amber-300 font-mono">TD26-{addFormData.section ? addFormData.section.replace(/[^A-Za-z0-9]/g, '').slice(-2) : '2A'}-XXXX</strong>
                 </span>
               </div>
-              <div className="text-[11px] text-purple-300 font-mono font-bold">
+              <div className="text-[11px] text-purple-700 dark:text-purple-300 font-mono font-bold">
                 Auto-generates QR & Acknowledgement Slip
               </div>
             </div>
@@ -2400,7 +2430,7 @@ export const AdminDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Student Full Name *
                   </label>
                   <input
@@ -2409,13 +2439,13 @@ export const AdminDashboard = () => {
                     value={addFormData.name}
                     onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
                     placeholder="e.g. Chowdari Tekshita"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-medium focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-medium focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* JNTU Roll Number */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     JNTU Roll Number * (10 Digits)
                   </label>
                   <input
@@ -2425,38 +2455,39 @@ export const AdminDashboard = () => {
                     value={addFormData.rollNumber}
                     onChange={(e) => setAddFormData({ ...addFormData, rollNumber: e.target.value.toUpperCase().replace(/\s+/g, '') })}
                     placeholder="e.g. 25341A05P9 or 24341A0502"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-purple-400 uppercase"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-amber-700 dark:text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-purple-400 uppercase"
                   />
                 </div>
 
                 {/* Academic Year */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Academic Year *
                   </label>
                   <select
                     value={addFormData.year}
                     onChange={(e) => {
                       const newYear = e.target.value;
-                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : 'CSE 3A';
+                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : (newYear.includes('3') ? 'CSE 3A' : 'CSE 4A');
                       setAddFormData({ ...addFormData, year: newYear, section: defaultSec });
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
                   >
-                    <option value="2nd Year">2nd Year (2024-2028 Batch)</option>
-                    <option value="3rd Year">3rd Year (2023-2027 Batch)</option>
+                    <option value="2nd Year">2nd Year (2025-2029 Batch)</option>
+                    <option value="3rd Year">3rd Year (2024-2028 Batch)</option>
+                    <option value="4th Year">4th Year (2023-2027 Batch)</option>
                   </select>
                 </div>
 
                 {/* Section */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Section *
                   </label>
                   <select
                     value={addFormData.section}
                     onChange={(e) => setAddFormData({ ...addFormData, section: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-purple-400"
                   >
                     {addFormData.year?.includes('2') ? (
                       <>
@@ -2465,12 +2496,19 @@ export const AdminDashboard = () => {
                         <option value="CSE 2C">CSE 2C</option>
                         <option value="CSE 2D">CSE 2D</option>
                       </>
-                    ) : (
+                    ) : addFormData.year?.includes('3') ? (
                       <>
                         <option value="CSE 3A">CSE 3A</option>
                         <option value="CSE 3B">CSE 3B</option>
                         <option value="CSE 3C">CSE 3C</option>
                         <option value="CSE 3D">CSE 3D</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CSE 4A">CSE 4A</option>
+                        <option value="CSE 4B">CSE 4B</option>
+                        <option value="CSE 4C">CSE 4C</option>
+                        <option value="CSE 4D">CSE 4D</option>
                       </>
                     )}
                   </select>
@@ -2478,7 +2516,7 @@ export const AdminDashboard = () => {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Phone / WhatsApp Number
                   </label>
                   <input
@@ -2486,13 +2524,13 @@ export const AdminDashboard = () => {
                     value={addFormData.phone}
                     onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
                     placeholder="e.g. +91 9876543210"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-mono focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -2500,19 +2538,19 @@ export const AdminDashboard = () => {
                     value={addFormData.email}
                     onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
                     placeholder="e.g. student@gmrit.edu.in"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* Payment Status */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Payment Status *
                   </label>
                   <select
                     value={addFormData.paymentStatus}
                     onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 text-xs focus:outline-none focus:border-purple-400 font-bold"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-emerald-600 dark:text-emerald-400 text-xs focus:outline-none focus:border-purple-400 font-bold"
                   >
                     <option value="verified">✓ Verified (₹50+ Paid)</option>
                     <option value="pending">⏳ Pending Verification</option>
@@ -2521,7 +2559,7 @@ export const AdminDashboard = () => {
 
                 {/* Payment Amount */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Contribution Amount (₹) *
                   </label>
                   <input
@@ -2530,19 +2568,19 @@ export const AdminDashboard = () => {
                     required
                     value={addFormData.amount}
                     onChange={(e) => setAddFormData({ ...addFormData, amount: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-emerald-700 dark:text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* Payment Method */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Payment Method
                   </label>
                   <select
                     value={addFormData.paymentMethod}
                     onChange={(e) => setAddFormData({ ...addFormData, paymentMethod: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
                   >
                     <option value="UPI_DIRECT">📱 UPI Direct (GPay / PhonePe / Paytm)</option>
                     <option value="RAZORPAY">💳 Razorpay Gateway</option>
@@ -2554,13 +2592,13 @@ export const AdminDashboard = () => {
                 {/* Transaction ID / UTR */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-bold text-slate-300">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                       Gateway TXN / UTR ID
                     </label>
                     <button
                       type="button"
                       onClick={() => setAddFormData({ ...addFormData, transactionId: `TXN_${Date.now().toString().slice(-8)}` })}
-                      className="text-[10px] text-purple-400 hover:text-purple-300 font-bold"
+                      className="text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-bold"
                     >
                       🔄 Auto-Gen
                     </button>
@@ -2570,13 +2608,13 @@ export const AdminDashboard = () => {
                     value={addFormData.transactionId}
                     onChange={(e) => setAddFormData({ ...addFormData, transactionId: e.target.value })}
                     placeholder="e.g. 831303402797 or pay_TR..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-amber-700 dark:text-amber-300 font-mono text-xs focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* VPA / UPI ID */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Payer UPI ID / VPA (Optional)
                   </label>
                   <input
@@ -2584,19 +2622,19 @@ export const AdminDashboard = () => {
                     value={addFormData.vpa}
                     onChange={(e) => setAddFormData({ ...addFormData, vpa: e.target.value })}
                     placeholder="e.g. student@oksbi"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
                 {/* Favorite Teacher */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Favorite CSE Teacher (Optional)
                   </label>
                   <select
                     value={addFormData.favoriteTeacher}
                     onChange={(e) => setAddFormData({ ...addFormData, favoriteTeacher: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400"
                   >
                     <option value="">-- Select Faculty or None --</option>
                     {teachers.map(t => (
@@ -2607,16 +2645,16 @@ export const AdminDashboard = () => {
               </div>
 
               {/* Stage Speaker options */}
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Mic className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     Interested in Speaking on Stage?
                   </span>
                   <select
                     value={addFormData.interestedInSpeaking}
                     onChange={(e) => setAddFormData({ ...addFormData, interestedInSpeaking: e.target.value })}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 text-white text-xs font-bold"
+                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-bold"
                   >
                     <option value="No">No (Attendee)</option>
                     <option value="Yes">Yes (Stage Speaker)</option>
@@ -2626,7 +2664,7 @@ export const AdminDashboard = () => {
                 {addFormData.interestedInSpeaking === 'Yes' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
                         Speech Dedicated To Professor
                       </label>
                       <input
@@ -2634,11 +2672,11 @@ export const AdminDashboard = () => {
                         value={addFormData.speechTeacher}
                         onChange={(e) => setAddFormData({ ...addFormData, speechTeacher: e.target.value })}
                         placeholder="e.g. Dr. A.V. Ramana"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
                         Speech Topic / Key Thoughts
                       </label>
                       <input
@@ -2646,7 +2684,7 @@ export const AdminDashboard = () => {
                         value={addFormData.speechTopic}
                         onChange={(e) => setAddFormData({ ...addFormData, speechTopic: e.target.value })}
                         placeholder="e.g. Impact on our coding journey"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400"
                       />
                     </div>
                   </div>
@@ -2655,7 +2693,7 @@ export const AdminDashboard = () => {
 
               {/* Classroom Memory / Anecdote */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Classroom Memory / Tribute Story (Optional)
                 </label>
                 <textarea
@@ -2663,16 +2701,16 @@ export const AdminDashboard = () => {
                   value={addFormData.anecdote}
                   onChange={(e) => setAddFormData({ ...addFormData, anecdote: e.target.value })}
                   placeholder="Share a short classroom memory or story about faculty..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 resize-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-400 resize-none"
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowAddSubmission(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -2693,22 +2731,22 @@ export const AdminDashboard = () => {
       {/* EDIT STUDENT DETAILS MODAL */}
       {editingSubmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-amber-500/30 shadow-2xl space-y-5 my-8 bg-slate-950">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="glass-card-glow rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-amber-500/30 shadow-2xl space-y-5 my-8 bg-white dark:bg-slate-950 text-slate-900 dark:text-white">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 flex items-center justify-center">
                   <Edit3 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white font-display">Edit Student & Payee Details</h3>
-                  <p className="text-xs text-slate-400 font-mono">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white font-display">Edit Student & Payee Details</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-mono">
                     Pass: {editingSubmission.ticketNumber || editingSubmission.acknowledgementNumber}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setEditingSubmission(null)}
-                className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-bold"
               >
                 ✕
               </button>
@@ -2718,7 +2756,7 @@ export const AdminDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Student Full Name *
                   </label>
                   <input
@@ -2727,13 +2765,13 @@ export const AdminDashboard = () => {
                     value={editFormData.name}
                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                     placeholder="Enter real student name"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-medium focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-medium focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* JNTU Roll Number */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     JNTU Roll Number *
                   </label>
                   <input
@@ -2743,38 +2781,39 @@ export const AdminDashboard = () => {
                     value={editFormData.rollNumber}
                     onChange={(e) => setEditFormData({ ...editFormData, rollNumber: e.target.value.toUpperCase().replace(/\s+/g, '') })}
                     placeholder="e.g. 24341A0502 or 25341A05P9"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-amber-400 uppercase"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-amber-700 dark:text-amber-300 font-mono text-xs font-bold focus:outline-none focus:border-amber-400 uppercase"
                   />
                 </div>
 
                 {/* Year */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Academic Year *
                   </label>
                   <select
                     value={editFormData.year}
                     onChange={(e) => {
                       const newYear = e.target.value;
-                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : 'CSE 3A';
+                      const defaultSec = newYear.includes('2') ? 'CSE 2A' : (newYear.includes('3') ? 'CSE 3A' : 'CSE 4A');
                       setEditFormData({ ...editFormData, year: newYear, section: defaultSec });
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                   >
-                    <option value="2nd Year">2nd Year (2024-2028 Batch)</option>
-                    <option value="3rd Year">3rd Year (2023-2027 Batch)</option>
+                    <option value="2nd Year">2nd Year (2025-2029 Batch)</option>
+                    <option value="3rd Year">3rd Year (2024-2028 Batch)</option>
+                    <option value="4th Year">4th Year (2023-2027 Batch)</option>
                   </select>
                 </div>
 
                 {/* Section */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Section *
                   </label>
                   <select
                     value={editFormData.section}
                     onChange={(e) => setEditFormData({ ...editFormData, section: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-amber-400"
                   >
                     {editFormData.year?.includes('2') ? (
                       <>
@@ -2783,12 +2822,19 @@ export const AdminDashboard = () => {
                         <option value="CSE 2C">CSE 2C</option>
                         <option value="CSE 2D">CSE 2D</option>
                       </>
-                    ) : (
+                    ) : editFormData.year?.includes('3') ? (
                       <>
                         <option value="CSE 3A">CSE 3A</option>
                         <option value="CSE 3B">CSE 3B</option>
                         <option value="CSE 3C">CSE 3C</option>
                         <option value="CSE 3D">CSE 3D</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CSE 4A">CSE 4A</option>
+                        <option value="CSE 4B">CSE 4B</option>
+                        <option value="CSE 4C">CSE 4C</option>
+                        <option value="CSE 4D">CSE 4D</option>
                       </>
                     )}
                   </select>
@@ -2796,7 +2842,7 @@ export const AdminDashboard = () => {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Phone / WhatsApp Number
                   </label>
                   <input
@@ -2804,62 +2850,63 @@ export const AdminDashboard = () => {
                     value={editFormData.phone}
                     onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
                     placeholder="e.g. +91 9876543210"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={editFormData.email}
                     onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                    placeholder="e.g. student@gmail.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                    placeholder="e.g. student@gmrit.edu.in"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* Payment Status */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                    Payment Status
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Payment Status *
                   </label>
                   <select
                     value={editFormData.paymentStatus}
                     onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400 font-bold"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-emerald-700 dark:text-emerald-400 text-xs focus:outline-none focus:border-amber-400 font-bold"
                   >
-                    <option value="verified">Verified (₹50+ Paid)</option>
-                    <option value="pending">Pending Verification</option>
+                    <option value="verified">✓ Verified (₹50+ Paid)</option>
+                    <option value="pending">⏳ Pending Verification</option>
                   </select>
                 </div>
 
                 {/* Payment Amount */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                    Amount Paid (₹)
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Contribution Amount (₹) *
                   </label>
                   <input
                     type="number"
                     min="50"
+                    required
                     value={editFormData.amount}
                     onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-emerald-700 dark:text-emerald-400 font-mono text-xs font-bold focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* Payment Method */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Payment Method
                   </label>
                   <select
                     value={editFormData.paymentMethod}
                     onChange={(e) => setEditFormData({ ...editFormData, paymentMethod: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400 font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400 font-medium"
                   >
                     <option value="UPI_DIRECT">📱 UPI Direct (GPay / PhonePe / Paytm)</option>
                     <option value="RAZORPAY">💳 Razorpay Gateway</option>
@@ -2870,7 +2917,7 @@ export const AdminDashboard = () => {
 
                 {/* Transaction ID */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Gateway TXN / UTR ID
                   </label>
                   <input
@@ -2878,13 +2925,13 @@ export const AdminDashboard = () => {
                     value={editFormData.transactionId}
                     onChange={(e) => setEditFormData({ ...editFormData, transactionId: e.target.value })}
                     placeholder="e.g. 831303402797 or pay_TRTFvTYSbcwVCS"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-amber-700 dark:text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* VPA */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Payer VPA / UPI ID
                   </label>
                   <input
@@ -2892,19 +2939,19 @@ export const AdminDashboard = () => {
                     value={editFormData.vpa}
                     onChange={(e) => setEditFormData({ ...editFormData, vpa: e.target.value })}
                     placeholder="e.g. student@ybl"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 {/* Favorite Teacher */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Favorite CSE Teacher
                   </label>
                   <select
                     value={editFormData.favoriteTeacher}
                     onChange={(e) => setEditFormData({ ...editFormData, favoriteTeacher: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                   >
                     <option value="">-- Select Faculty or None --</option>
                     {teachers.map(t => (
@@ -2915,16 +2962,16 @@ export const AdminDashboard = () => {
               </div>
 
               {/* Stage Speaker options */}
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Mic className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     Interested in Speaking on Stage?
                   </span>
                   <select
                     value={editFormData.interestedInSpeaking}
                     onChange={(e) => setEditFormData({ ...editFormData, interestedInSpeaking: e.target.value })}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 text-white text-xs font-bold"
+                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs font-bold"
                   >
                     <option value="No">No (Attendee)</option>
                     <option value="Yes">Yes (Stage Speaker)</option>
@@ -2934,7 +2981,7 @@ export const AdminDashboard = () => {
                 {editFormData.interestedInSpeaking === 'Yes' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
                         Speech Dedicated To Professor
                       </label>
                       <input
@@ -2942,11 +2989,11 @@ export const AdminDashboard = () => {
                         value={editFormData.speechTeacher}
                         onChange={(e) => setEditFormData({ ...editFormData, speechTeacher: e.target.value })}
                         placeholder="Faculty name"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
                         Speech Topic / Key Thoughts
                       </label>
                       <input
@@ -2954,7 +3001,7 @@ export const AdminDashboard = () => {
                         value={editFormData.speechTopic}
                         onChange={(e) => setEditFormData({ ...editFormData, speechTopic: e.target.value })}
                         placeholder="e.g. Words of gratitude"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-400"
                       />
                     </div>
                   </div>
@@ -2962,18 +3009,18 @@ export const AdminDashboard = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setEditingSubmission(null)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingEdit}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center gap-1.5 disabled:opacity-50 touch-press"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center gap-1.5 disabled:opacity-50 touch-press"
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSavingEdit ? 'Saving Changes...' : 'Save & Update Details'}</span>

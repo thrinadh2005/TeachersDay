@@ -64,7 +64,7 @@ export const HeroSection = ({ setActiveTab, stats }) => {
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
             <Code className="w-4 h-4 text-amber-500" />
             <span className="text-xs sm:text-sm font-black text-amber-700 dark:text-amber-400 group-hover:text-amber-600 dark:group-hover:text-amber-300">
-              CSE Department • 2nd & 3rd Years (Sections 2A-2D, 3A-3D)
+              CSE Department • 2nd, 3rd & 4th Years (Sections 2A-2D, 3A-3D, 4A-4D)
             </span>
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           </div>
@@ -76,7 +76,7 @@ export const HeroSection = ({ setActiveTab, stats }) => {
             Honouring Our <span className="gradient-text-gold">CSE Teachers</span> & Mentors
           </h1>
           <p className="text-sm sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
-            Exclusively for <span className="text-amber-600 dark:text-amber-400 font-extrabold">CSE 2nd & 3rd Year Students</span>: {hasPaid ? 'Your contribution is paid & verified! View your Celebration Pass or cast your confidential votes below.' : 'Choose an option below to complete your ₹50 payment or cast your confidential faculty votes!'}
+            Exclusively for <span className="text-amber-600 dark:text-amber-400 font-extrabold">CSE 2nd, 3rd & 4th Year Students</span>: {hasPaid ? 'Your contribution is paid & verified! View your Celebration Pass or cast your confidential votes below.' : 'Choose an option below to complete your ₹50 payment or cast your confidential faculty votes!'}
           </p>
         </div>
 
@@ -176,7 +176,7 @@ export const HeroSection = ({ setActiveTab, stats }) => {
               <span>Step 1: Payment & Registration</span>
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              Enter your Roll Number & Section (CSE 2A..2D, CSE 3A..3D), choose optional speech interest, and pay ₹50 to get your instant Official Acknowledgement Receipt.
+              Enter your Roll Number & Section (CSE 2A..2D, CSE 3A..3D, CSE 4A..4D), choose optional speech interest, and pay ₹50 to get your instant Official Acknowledgement Receipt.
             </p>
           </div>
 

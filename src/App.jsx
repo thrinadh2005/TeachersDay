@@ -98,7 +98,7 @@ export default function App() {
           </div>
         )}
 
-        {/* OPTION 1: DEDICATED PAYMENT & CONTRIBUTION (CSE 2nd & 3rd Year) */}
+        {/* OPTION 1: DEDICATED PAYMENT & CONTRIBUTION (CSE 2nd, 3rd & 4th Year) */}
         {activeTab === 'pay' && (
           <div className="animate-fadeIn py-4">
             <PaymentSection 

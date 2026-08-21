@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  GraduationCap, 
-  Sparkles, 
-  Calendar, 
+import {
+  GraduationCap,
+  Sparkles,
+  Calendar,
   ShieldCheck,
   Code
 } from 'lucide-react';
@@ -12,10 +12,10 @@ export const Footer = ({ setActiveTab }) => {
   return (
     <footer className="relative mt-8 sm:mt-16 border-t border-slate-200 dark:border-white/10 glass-nav text-slate-600 dark:text-slate-400 text-xs bg-white dark:bg-slate-950">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-        
+
         {/* DESKTOP RICH 4-COLUMN FOOTER */}
         <div className="hidden md:grid md:grid-cols-4 gap-8 mb-8">
-          
+
           {/* Brand & Purpose */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -29,7 +29,7 @@ export const Footer = ({ setActiveTab }) => {
               </span>
             </div>
             <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed font-medium">
-              Official platform for CSE Department (2nd & 3rd Years, Sections 2A-2D, 3A-3D). Celebrating our faculty with gratitude, awards, and tributes.
+              Official platform for CSE Department (2nd, 3rd & 4th Years, Sections 2A-2D, 3A-3D, 4A-4D). Celebrating our faculty with gratitude, awards, and tributes.
             </p>
             <div className="pt-1">
               <button
@@ -83,7 +83,7 @@ export const Footer = ({ setActiveTab }) => {
           <div className="space-y-2">
             <h4 className="text-slate-900 dark:text-white font-black text-xs sm:text-sm uppercase tracking-wider">CSE Contribution</h4>
             <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed font-medium">
-              Official celebration contribution for all CSE 2nd & 3rd Year students across Sections 2A-2D, 3A-3D for Teachers' Day 2026.
+              Official celebration contribution for all CSE 2nd, 3rd & 4th Year students across Sections 2A-2D, 3A-3D, 4A-4D for Teachers' Day 2026.
             </p>
             <div className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -104,7 +104,7 @@ export const Footer = ({ setActiveTab }) => {
                 <span>GMRIT • CSE Department</span>
               </div>
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[11px] pt-1">
-                <span>CSE 2nd & 3rd Year Coordinators</span>
+                <span>CSE 2nd, 3rd & 4th Year Coordinators</span>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@ export const Footer = ({ setActiveTab }) => {
 
         {/* MOBILE COMPACT SLIM FOOTER */}
         <div className="md:hidden flex flex-col items-center justify-center text-center space-y-2 pb-2">
-          <div 
+          <div
             onDoubleClick={() => {
               fireFestiveConfetti();
               setActiveTab('admin');
@@ -133,7 +133,7 @@ export const Footer = ({ setActiveTab }) => {
           <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             GMRIT • CSE Department (2nd, 3rd & 4th Years)
           </p>
-          <div 
+          <div
             onDoubleClick={() => {
               fireFestiveConfetti();
               setActiveTab('admin');
@@ -147,7 +147,7 @@ export const Footer = ({ setActiveTab }) => {
 
         {/* DESKTOP BOTTOM COPYRIGHT */}
         <div className="hidden md:flex border-t border-slate-200 dark:border-white/10 pt-6 flex-row items-center justify-between gap-4 text-slate-500 text-[11px] font-medium">
-          <div 
+          <div
             onDoubleClick={() => {
               fireFestiveConfetti();
               setActiveTab('admin');

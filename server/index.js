@@ -1146,7 +1146,7 @@ app.post('/api/admin/payment-config', checkAdminAuth, (req, res) => {
 // CSV Export with Section-wise Filtering, Payment Details & Executive Summary
 app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
   try {
-    const { year, section, status, summary } = req.query;
+    const { year, section, status, summary, yearSummary } = req.query;
     let subs = db.getSubmissions();
 
     const isStudentInYear = (student, targetYear) => {
@@ -1159,6 +1159,9 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
       if (targetYear.includes('3')) {
         return sYear.includes('3') || sSec.includes('3') || sSec.includes('3A') || sSec.includes('3B') || sSec.includes('3C') || sSec.includes('3D');
       }
+      if (targetYear.includes('4')) {
+        return sYear.includes('4') || sSec.includes('4') || sSec.includes('4A') || sSec.includes('4B') || sSec.includes('4C') || sSec.includes('4D');
+      }
       return false;
     };
 
@@ -1167,12 +1170,14 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
       const rawSec = (student.section || '').toUpperCase().trim();
       const rawYear = (student.year || '').toUpperCase().trim();
       const targetLetter = targetSec.slice(-1);
-      const targetYearNum = targetSec.includes('2') ? '2' : targetSec.includes('3') ? '3' : '';
+      const targetYearNum = targetSec.includes('2') ? '2' : targetSec.includes('3') ? '3' : targetSec.includes('4') ? '4' : '';
 
       const isYearMatch = targetYearNum === '2'
         ? (rawYear.includes('2') || rawSec.includes('2'))
         : targetYearNum === '3'
         ? (rawYear.includes('3') || rawSec.includes('3'))
+        : targetYearNum === '4'
+        ? (rawYear.includes('4') || rawSec.includes('4'))
         : true;
 
       if (!isYearMatch) return false;
@@ -1186,11 +1191,79 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
              rawSec === `CSE ${targetLetter}`;
     };
 
-    // Section-Wise Executive Summary CSV (8 Sections: CSE 2A-2D, CSE 3A-3D)
+    // 1. Consolidated Year-Wise Summary CSV (2nd Year 2025-29, 3rd Year 2024-28, 4th Year 2023-27)
+    if (yearSummary === 'true') {
+      const yearConfig = [
+        { year: '2nd Year', batch: '2025-2029 Batch (25-29)', sections: 'CSE 2A, 2B, 2C, 2D (4 Sections)' },
+        { year: '3rd Year', batch: '2024-2028 Batch (24-28)', sections: 'CSE 3A, 3B, 3C, 3D (4 Sections)' },
+        { year: '4th Year', batch: '2023-2027 Batch (23-27)', sections: 'CSE 4A, 4B, 4C, 4D (4 Sections)' }
+      ];
+
+      const yearHeaders = [
+        'Academic Year',
+        'Batch Duration',
+        'Sections Covered',
+        'Total Registered Students',
+        'Verified Payments (Paid)',
+        'Pending Payments',
+        'Total Funds Collected (INR)',
+        'Stage Speakers Count'
+      ];
+
+      const yearRows = [];
+      let grandTotalStudents = 0;
+      let grandTotalVerified = 0;
+      let grandTotalFunds = 0;
+      let grandTotalSpeakers = 0;
+
+      yearConfig.forEach(({ year: y, batch, sections }) => {
+        const matching = subs.filter(sub => isStudentInYear(sub, y));
+        const verified = matching.filter(sub => sub.payment?.status === 'verified');
+        const pending = matching.filter(sub => sub.payment?.status !== 'verified');
+        const funds = verified.reduce((acc, sub) => acc + (sub.payment?.amount || 50), 0);
+        const speakers = matching.filter(sub => sub.interestedInSpeaking === 'Yes').length;
+
+        grandTotalStudents += matching.length;
+        grandTotalVerified += verified.length;
+        grandTotalFunds += funds;
+        grandTotalSpeakers += speakers;
+
+        yearRows.push([
+          sanitizeCsvField(y),
+          sanitizeCsvField(batch),
+          sanitizeCsvField(sections),
+          matching.length,
+          verified.length,
+          pending.length,
+          funds,
+          speakers
+        ]);
+      });
+
+      // Add Grand Total Row
+      yearRows.push([
+        '"TOTAL (ALL YEARS)"',
+        '"3 BATCHES (25-29, 24-28, 23-27)"',
+        '"12 SECTIONS (CSE 2A-2D, 3A-3D, 4A-4D)"',
+        grandTotalStudents,
+        grandTotalVerified,
+        grandTotalStudents - grandTotalVerified,
+        grandTotalFunds,
+        grandTotalSpeakers
+      ]);
+
+      const csvContent = [yearHeaders.join(','), ...yearRows.map(r => r.join(','))].join('\n');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="CSE_TeachersDay_2026_YearWise_Summary_${new Date().toISOString().slice(0, 10)}.csv"`);
+      return res.send(csvContent);
+    }
+
+    // 2. Section-Wise Executive Summary CSV (12 Sections: CSE 2A-2D, CSE 3A-3D, CSE 4A-4D)
     if (summary === 'true') {
       const yearSectionConfig = [
-        { year: '2nd Year', sections: ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] },
-        { year: '3rd Year', sections: ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'] }
+        { year: '2nd Year (2025-2029 Batch)', sections: ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'] },
+        { year: '3rd Year (2024-2028 Batch)', sections: ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'] },
+        { year: '4th Year (2023-2027 Batch)', sections: ['CSE 4A', 'CSE 4B', 'CSE 4C', 'CSE 4D'] }
       ];
       
       const summaryHeaders = [
@@ -1237,7 +1310,7 @@ app.get('/api/admin/export-csv', checkAdminAuth, (req, res) => {
       // Add Grand Total Row
       summaryRows.push([
         '"TOTAL"',
-        '"8 SECTIONS (CSE 2A-2D, 3A-3D)"',
+        '"12 SECTIONS (CSE 2A-2D, 3A-3D, 4A-4D)"',
         grandTotalStudents,
         grandTotalVerified,
         grandTotalStudents - grandTotalVerified,

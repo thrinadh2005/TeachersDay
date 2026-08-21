@@ -57,9 +57,10 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     ? (isNaN(currentTypedNumber) || currentTypedNumber < 50 ? 50 : Math.floor(currentTypedNumber))
     : contributionAmount;
 
-  // 2nd & 3rd Year CSE Sections Only
+  // 2nd, 3rd & 4th Year CSE Sections
   const cse2ndYearSections = ['CSE 2A', 'CSE 2B', 'CSE 2C', 'CSE 2D'];
   const cse3rdYearSections = ['CSE 3A', 'CSE 3B', 'CSE 3C', 'CSE 3D'];
+  const cse4thYearSections = ['CSE 4A', 'CSE 4B', 'CSE 4C', 'CSE 4D'];
 
   // Real-time JNTU Roll Validation
   const rollValidation = validateJntuRoll(rollNumber);
@@ -142,7 +143,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     }
 
     if (!selectedSection) {
-      setError('Please select your CSE Section (2nd or 3rd Year).');
+      setError('Please select your CSE Section (2nd, 3rd, or 4th Year).');
       return;
     }
 
@@ -172,7 +173,11 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
     setLoading(true);
     setError(null);
 
-    const yearDerive = selectedSection.includes('2') ? '2nd Year' : '3rd Year';
+    const yearDerive = selectedSection.includes('2') 
+      ? '2nd Year' 
+      : selectedSection.includes('3') 
+      ? '3rd Year' 
+      : '4th Year';
 
     try {
       const payload = {
@@ -262,7 +267,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
       <div className="mb-6 text-center space-y-2.5">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider shadow-sm">
           <GraduationCap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-          <span>CSE Department Exclusive • 2nd & 3rd Years Only</span>
+          <span>CSE Department Exclusive • 2nd, 3rd & 4th Years</span>
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white tracking-tight">
@@ -508,6 +513,29 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
                 ))}
               </div>
             </div>
+
+            {/* 4th Year CSE */}
+            <div className="pt-1">
+              <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+                CSE 4th Year Sections
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {cse4thYearSections.map(sec => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setSelectedSection(sec)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all touch-press ${
+                      selectedSection === sec
+                        ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-md scale-[1.02]'
+                        : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-400'
+                    }`}
+                  >
+                    {sec}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* STEP 3: CONTRIBUTION AMOUNT */}
@@ -654,7 +682,7 @@ export const PaymentSection = ({ onSubmissionCompleted, onProceedToVoting }) => 
           studentData={{
             rollNumber: cleanRoll,
             name: `Student (${cleanRoll})`,
-            year: selectedSection.includes('2') ? '2nd Year' : '3rd Year',
+            year: selectedSection.includes('2') ? '2nd Year' : (selectedSection.includes('3') ? '3rd Year' : '4th Year'),
             section: selectedSection
           }}
           initialAmount={effectiveContributionAmount}

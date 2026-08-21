@@ -482,7 +482,7 @@ export const CelebrationGallery = ({ setActiveTab }) => {
         </h3>
 
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium leading-relaxed">
-          Join all CSE 2nd & 3rd Year students in honoring our mentors. Complete your ₹50 contribution for the celebration pass and cast your confidential faculty votes!
+          Join all CSE 2nd, 3rd & 4th Year students in honoring our mentors. Complete your ₹50 contribution for the celebration pass and cast your confidential faculty votes!
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
