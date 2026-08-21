@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Calendar,
   Clock,
+  MapPin,
   ArrowRight
 } from 'lucide-react';
 import { api } from '../utils/api';
@@ -187,8 +188,8 @@ export const VotingWall = ({ setActiveTab }) => {
                 <span>Ceremony: September 5, 2026</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10">
-                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Venue: CSE Quadrangle Stage</span>
+                <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Venue: CSE Seminar Hall</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10">
                 <Crown className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />

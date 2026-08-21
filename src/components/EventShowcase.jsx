@@ -109,7 +109,7 @@ export const EventShowcase = ({ showcaseData, setActiveTab }) => {
               CSE Celebration Schedule • Sept 5, 2026
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
-              CSE Department Seminar Hall & Main Auditorium • GMR Institute of Technology
+              CSE Seminar Hall • GMR Institute of Technology
             </p>
           </div>
 

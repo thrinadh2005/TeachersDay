@@ -4,7 +4,8 @@ import {
   Sparkles,
   Calendar,
   ShieldCheck,
-  Code
+  Code,
+  MapPin
 } from 'lucide-react';
 import { fireFestiveConfetti } from '../utils/confetti';
 
@@ -98,6 +99,10 @@ export const Footer = ({ setActiveTab }) => {
               <div className="flex items-center gap-2">
                 <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Teachers' Day • September 5, 2026</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span>Venue: CSE Seminar Hall</span>
               </div>
               <div className="flex items-center gap-2">
                 <Code className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />

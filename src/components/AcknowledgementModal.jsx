@@ -194,7 +194,7 @@ export const AcknowledgementModal = ({ submission, onClose }) => {
                 </div>
                 <div className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center justify-center sm:justify-start gap-1.5 font-medium">
                   <MapPin className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                  <span>CSE Quadrangle Stage, GMRIT Campus</span>
+                  <span>CSE Seminar Hall, GMRIT Campus</span>
                 </div>
                 {submission.interestedInSpeaking === 'Yes' && (
                   <div className="text-[11px] text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center sm:justify-start gap-1">
